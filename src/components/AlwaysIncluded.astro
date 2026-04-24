@@ -1,0 +1,182 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.fleet.always;
+---
+
+<section class="ai section-y has-grain" aria-labelledby="ai-heading">
+  <div class="page-x mx-auto max-w-[1100px]">
+    <header class="ai-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="ai-heading" class="h2 text-balance">{s.heading}</h2>
+    </header>
+
+    <ul class="ai-grid mt-10 md:mt-14">
+      {s.items.map((item: { icon: string; title: string; body: string }, i: number) => (
+        <li class="ai-card" data-reveal data-reveal-delay={String((i % 4) + 1)}>
+          <details class="ai-details" open>
+            <summary class="ai-summary">
+              <span class="ai-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <div class="ai-icon" aria-hidden="true">
+                <Icon name={item.icon} size={20} strokeWidth={1.6} />
+              </div>
+              <h3 class="ai-title">{item.title}</h3>
+              <span class="ai-chev" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </summary>
+            <div class="ai-content">
+              <p class="ai-body">{item.body}</p>
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ai { background: var(--color-cream); }
+  .ai-head { max-width: 640px; }
+
+  .ai-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .ai-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+  }
+  @media (min-width: 1024px) {
+    .ai-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  }
+
+  .ai-card {
+    position: relative;
+    padding: 22px 22px 22px;
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    transition: border-color 240ms var(--ease-out), transform 240ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .ai-card:hover {
+      border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    }
+  }
+
+  .ai-details summary::-webkit-details-marker { display: none; }
+  .ai-details summary::marker { content: ''; }
+
+  .ai-summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    grid-template-areas:
+      "num icon chev"
+      "title title title";
+    grid-template-columns: auto 1fr auto;
+    column-gap: 14px;
+    row-gap: 12px;
+    align-items: center;
+  }
+  .ai-summary:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 45%, transparent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  .ai-num {
+    grid-area: num;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: color-mix(in oklab, var(--color-accent) 85%, transparent);
+  }
+  .ai-icon {
+    grid-area: icon;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--color-accent) 10%, var(--color-cream));
+    color: var(--color-accent);
+  }
+  .ai-chev {
+    grid-area: chev;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    color: var(--color-graphite);
+    transition: transform 220ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .ai-chev svg { width: 14px; height: 14px; }
+  .ai-details[open] .ai-chev {
+    transform: rotate(180deg);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .ai-title {
+    grid-area: title;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .ai-title { font-size: 18px; }
+  }
+
+  .ai-content {
+    padding-top: 10px;
+  }
+  .ai-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-graphite);
+  }
+  @media (min-width: 768px) {
+    .ai-body { font-size: 15px; }
+  }
+
+  /* Desktop: statify — content always visible, chevron gone, summary non-interactive */
+  @media (min-width: 768px) {
+    .ai-details > *:not(summary) {
+      display: block !important;
+    }
+    .ai-summary {
+      cursor: default;
+      pointer-events: none;
+      grid-template-areas: "num icon" "title title";
+      grid-template-columns: auto 1fr;
+    }
+    .ai-chev { display: none !important; }
+  }
+</style>

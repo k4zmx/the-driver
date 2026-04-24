@@ -1,0 +1,615 @@
+{
+  "locale": "es",
+  "localeName": "Español",
+  "flag": "🇪🇸",
+  "nav": {
+    "home": "Inicio",
+    "fleet": "Nuestra flota",
+    "routes": "Rutas y tarifas",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "book": "Reservar"
+  },
+  "cta": {
+    "bookNow": "Reservar ahora",
+    "getQuote": "Solicitar presupuesto",
+    "call": "Llamar",
+    "whatsapp": "WhatsApp",
+    "learnMore": "Saber más"
+  },
+  "hero": {
+    "h1": "Tu chófer privado en París.",
+    "sub": "Precios fijos. Se habla inglés. Del aeropuerto a tu hotel, a Disneyland o a Versalles.",
+    "trust": {
+      "rating": "4,5 Google",
+      "childseats": "Sillas infantiles gratuitas",
+      "license": "Licencia VTC",
+      "payment": "Pago a la llegada"
+    },
+    "pickup": {
+      "label": "ORIGEN",
+      "placeholder": "Elige un lugar"
+    },
+    "dropoff": {
+      "label": "DESTINO",
+      "placeholder": "Elige un lugar"
+    },
+    "price": {
+      "from": "DESDE",
+      "empty": "Elige tu trayecto",
+      "unavailable": "Escríbenos para este trayecto"
+    },
+    "cta": "Reservar ahora"
+  },
+  "form": {
+    "eyebrow": "RESERVA",
+    "heading": "Solo unos detalles más.",
+    "subheading": "Confirmación en menos de 1h por email y WhatsApp.",
+    "groups": {
+      "trip": "TU TRAYECTO",
+      "whenWho": "CUÁNDO Y QUIÉNES",
+      "you": "TUS DATOS"
+    },
+    "trip": {
+      "flightNumber": "Número de vuelo",
+      "flightPlaceholder": "p. ej. AF1234",
+      "trainNumber": "Número de tren",
+      "trainPlaceholder": "p. ej. TGV 8345",
+      "pickupAddress": "Dirección de recogida",
+      "pickupAddressPlaceholder": "p. ej. 15 rue de Rivoli, 75001 París",
+      "dropoffAddress": "Dirección u hotel de destino",
+      "dropoffAddressPlaceholder": "p. ej. Hotel de Crillon, 10 place de la Concorde",
+      "typeLabel": "TIPO DE TRAYECTO",
+      "oneWay": "Solo ida",
+      "roundTrip": "Ida y vuelta",
+      "returnDate": "Fecha de vuelta",
+      "returnTime": "Hora de vuelta",
+      "returnNote": "Ahorra un 10 % reservando ida y vuelta."
+    },
+    "when": {
+      "date": "Fecha",
+      "time": "Hora",
+      "passengers": "Pasajeros",
+      "passengersHelp": "Vehículo asignado automáticamente.",
+      "passengersIncrease": "Añadir pasajero",
+      "passengersDecrease": "Quitar pasajero"
+    },
+    "options": {
+      "heading": "Opciones adicionales",
+      "childSeats": "Sillas infantiles (gratis)",
+      "seatCosy": "Portabebés",
+      "seatCosyHint": "0–12 meses · hasta 13 kg",
+      "seatBaby": "Silla de bebé",
+      "seatBabyHint": "1–3 años · 9–18 kg",
+      "seatBooster": "Alzador",
+      "seatBoosterHint": "4–10 años · 15–36 kg",
+      "extraStop": "Necesito una parada en el camino",
+      "extraStopDetails": "Detalles de la parada",
+      "extraStopPlaceholder": "p. ej. parada en Carrefour Bercy",
+      "extraStopNote": "Precio confirmado por WhatsApp si hay parada adicional."
+    },
+    "you": {
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "phone": "Teléfono",
+      "countryCode": "Código país",
+      "email": "Email"
+    },
+    "summary": {
+      "heading": "RESUMEN",
+      "route": "Trayecto",
+      "vehicle": "Vehículo",
+      "passengers": "Pasajeros",
+      "type": "Tipo",
+      "total": "TOTAL"
+    },
+    "submit": {
+      "cta": "Confirmar mi reserva",
+      "reassurance": "Sin depósito. Confirmación en menos de 1h."
+    },
+    "success": {
+      "title": "Reserva enviada.",
+      "body": "Revisa tu correo (y el spam) en la próxima hora. También te contactaremos por WhatsApp al {phone}."
+    },
+    "whatsapp": {
+      "prompt": "¿Prefieres WhatsApp?",
+      "cta": "Pedir un presupuesto rápido"
+    }
+  },
+  "whyUs": {
+    "eyebrow": "POR QUÉ NOSOTROS",
+    "heading": "Sin sorpresas. Esa es toda la idea.",
+    "subheading": "Lo que hacemos diferente para los viajeros.",
+    "cards": {
+      "fixedPrice": {
+        "title": "Precios fijos, sin sobresaltos.",
+        "body": "Tu tarifa queda cerrada al reservar. Tráfico, peajes, desvíos — todo incluido."
+      },
+      "greet": {
+        "title": "Te esperamos a la salida.",
+        "body": "Tu chófer te recibe en la terminal con un cartel con tu nombre. Seguimos tu vuelo — los retrasos no te cuestan nada."
+      },
+      "contact": {
+        "title": "Un contacto directo.",
+        "body": "Recibes el WhatsApp de tu chófer antes del trayecto. Pregúntale lo que quieras, cambia lo que haga falta."
+      },
+      "children": {
+        "title": "Los niños viajan gratis.",
+        "body": "Portabebés, silla de bebé, alzador — a petición, sin coste adicional."
+      }
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "CÓMO FUNCIONA",
+    "heading": "Reserva en 2 minutos. Viaja tranquilo.",
+    "steps": [
+      { "title": "Elige tu trayecto.", "body": "Selecciona origen y destino. El precio aparece al instante." },
+      { "title": "Rellena los detalles.", "body": "Fecha, hora, número de pasajeros, número de vuelo. Ya está." },
+      { "title": "Recibe la confirmación.", "body": "En menos de 1 hora por email y WhatsApp, con los datos de tu chófer." },
+      { "title": "Sube y relájate.", "body": "Cartel con tu nombre en el aeropuerto. Pago en efectivo o tarjeta a la llegada." }
+    ]
+  },
+  "destinations": {
+    "eyebrow": "NUESTRAS RUTAS",
+    "heading": "Los caminos que nos sabemos de memoria.",
+    "subheading": "Un precio de partida claro para cada destino.",
+    "fromPrefix": "Desde",
+    "cards": {
+      "parisHotels": "Hoteles de París",
+      "disneyland": "Disneyland Paris",
+      "versailles": "Palacio de Versalles",
+      "trainStations": "Estaciones de París",
+      "betweenAirports": "Entre aeropuertos",
+      "hourly": "París por horas",
+      "hourlyPrice": "50€ / hora"
+    },
+    "otherPrompt": "¿Otro destino?",
+    "otherCta": "Escríbenos por WhatsApp"
+  },
+  "fleet": {
+    "eyebrow": "NUESTRA FLOTA",
+    "heading": "Dos coches. Todos los viajes.",
+    "subheading": "Elige según tu grupo. Si sois más, lo adaptamos automáticamente.",
+    "berline": {
+      "label": "BERLINA",
+      "model": "Tesla Model Y",
+      "capacity": "1–3 pasajeros",
+      "luggage": "3 maletas",
+      "features": [
+        "Interior impecable",
+        "Cargadores USB",
+        "Aire acondicionado",
+        "Agua de cortesía"
+      ],
+      "price": "Desde 60€"
+    },
+    "van": {
+      "label": "FURGONETA",
+      "model": "Mercedes Vito · Renault Trafic",
+      "capacity": "4–8 pasajeros",
+      "luggage": "8 maletas",
+      "features": [
+        "Maletero separado",
+        "Cristales tintados",
+        "Aire acondicionado",
+        "Espacio para 8"
+      ],
+      "price": "Desde 80€"
+    },
+    "cta": "Reservar este coche",
+    "combine": {
+      "heading": "¿Más de 8 pasajeros? Combinamos.",
+      "examples": [
+        { "pax": "11 personas", "combo": "1 furgoneta + 1 berlina" },
+        { "pax": "16 personas", "combo": "2 furgonetas" },
+        { "pax": "20 personas", "combo": "2 furgonetas + 1 berlina" }
+      ],
+      "footer": "Mismo precio por vehículo. Sin sorpresas."
+    }
+  },
+  "moreServices": {
+    "eyebrow": "OTROS SERVICIOS",
+    "heading": "Más que simples trayectos.",
+    "hourly": {
+      "eyebrow": "POR HORAS",
+      "title": "París a tu ritmo.",
+      "price": "50€ / hora",
+      "body": "Tu chófer, tu itinerario. Compras, visitas, cenas — esperamos, conducimos, tú disfrutas.",
+      "bullets": [
+        "Mínimo 3 horas",
+        "Chófer dedicado",
+        "Itinerario libre"
+      ],
+      "cta": "Reservar por horas",
+      "whatsappMessage": "Hola, me gustaría reservar un chófer por horas en París. ¿Cuáles son vuestras disponibilidades?"
+    },
+    "longDistance": {
+      "eyebrow": "LARGA DISTANCIA",
+      "title": "Más allá de París.",
+      "price": "Presupuesto personalizado",
+      "body": "Reims, Champagne, Mont-Saint-Michel, Loira, Normandía. Calculamos según kilometraje y peajes.",
+      "bullets": [
+        "Presupuesto a medida",
+        "Vehículo adaptado al trayecto",
+        "Respuesta en menos de 1 hora"
+      ],
+      "cta": "Pedir presupuesto",
+      "whatsappMessage": "Hola, me gustaría un presupuesto para un trayecto de larga distancia desde París hasta …"
+    }
+  },
+  "reviews": {
+    "eyebrow": "VIAJEROS QUE NOS RECOMIENDAN",
+    "heading": "Mejor te lo mostramos.",
+    "subheading": "Lo que dicen los turistas a los que hemos llevado.",
+    "seeMore": "Ver más",
+    "seeLess": "Ver menos",
+    "reviewCount": "{n} reseñas",
+    "items": [
+      { "text": "Perfecto. Nada que objetar. Éramos 10 con mucho equipaje y organizó 1 furgoneta + 1 berlina sin complicaciones. Precio acordado respetado al euro. Repetiría sin dudarlo.", "name": "Pierre", "flag": "🇫🇷", "trip": "Disneyland → CDG", "rating": 5, "date": "hace 3 meses", "authorMeta": "Local Guide · 47 reseñas · 12 fotos" },
+      { "text": "Muy buen servicio para nuestra llegada a París con los niños. Chófer puntual, cartel con el nombre, sillas infantiles ya puestas. Un detallito: el aire acondicionado tardó 2 min en enfriar de verdad, nada importante.", "name": "Sarah", "flag": "🇺🇸", "trip": "CDG → Disneyland", "rating": 4.5, "date": "hace 1 mes", "authorMeta": "Local Guide · 23 reseñas · 8 fotos" },
+      { "text": "Genial para un viaje en familia. Sillas infantiles gratis, chófer simpático, charlamos un poco en inglés. El GPS cogió una ruta un poco más larga que Google Maps, unos 5 min extra, pero llegamos bien.", "name": "Marco", "flag": "🇮🇹", "trip": "Orly → París", "rating": 4.5, "date": "hace 2 semanas", "authorMeta": "Local Guide · 18 reseñas · 4 fotos" },
+      { "text": "Correcto. Precio respetado, coche limpio, chófer educado. Éramos 5 con equipaje y me pareció un pelín caro para la distancia, pero es tarifa fija así que al menos sabes a qué atenerte.", "name": "Elena", "flag": "🇪🇸", "trip": "CDG → Versalles", "rating": 4, "date": "hace 2 meses", "authorMeta": "31 reseñas · 5 fotos" },
+      { "text": "Chófer profesional y discreto, trayecto tranquilo, coche impecable. Habla algo de inglés pero nos hubiera gustado charlar un poco más durante el viaje. Por lo demás, sin quejas.", "name": "Ahmed", "flag": "🇦🇪", "trip": "CDG → París", "rating": 4, "date": "hace 3 semanas", "authorMeta": "Local Guide · 65 reseñas · 19 fotos" },
+      { "text": "Nuestro vuelo llegó con 2 horas de retraso y nos esperó sin rechistar, eso es un plus real. Pero la berlina se quedó muy justa para 3 adultos + 4 maletas, nos costó cargarla. Habría cogido la furgoneta directamente.", "name": "James", "flag": "🇬🇧", "trip": "Beauvais → Disneyland", "rating": 3.5, "date": "hace 1 mes", "authorMeta": "12 reseñas · 2 fotos" },
+      { "text": "Servicio correcto, nada del otro mundo pero tampoco mal. El chófer tardó en encontrar la entrada del hotel, perdimos 5-10 min. La comunicación por WhatsApp sí fue ágil. Vale para un traslado simple.", "name": "Claire", "flag": "🇫🇷", "trip": "Orly → Versalles", "rating": 3.5, "date": "hace 6 semanas", "authorMeta": "Local Guide · 9 reseñas" }
+    ],
+    "badges": {
+      "google": "Google Reviews",
+      "googleScore": "4,5",
+      "tripadvisor": "TripAdvisor"
+    }
+  },
+  "faq": {
+    "eyebrow": "PREGUNTAS FRECUENTES",
+    "heading": "Todo lo que nos preguntan los viajeros.",
+    "subPrefix": "¿Alguna duda que no aparece aquí?",
+    "subCta": "Escríbenos por WhatsApp",
+    "items": [
+      { "q": "¿Y si mi vuelo llega con retraso?", "a": "Seguimos tu vuelo en tiempo real. Tu chófer te espera hasta 60 minutos después del aterrizaje, sin coste adicional." },
+      { "q": "¿Dónde encuentro al chófer en el aeropuerto?", "a": "En la sala de llegadas, con un cartel con tu nombre. Te enviamos su foto y su WhatsApp 24h antes del trayecto." },
+      { "q": "¿Cómo se paga?", "a": "En efectivo o con tarjeta, directamente al chófer a la llegada. Sin depósito obligatorio. Puedes dejar una señal para bloquear el descuento de ida y vuelta." },
+      { "q": "¿Y si somos más de 8 personas?", "a": "Sin problema. Combinamos varios vehículos. 11 pasajeros = 1 furgoneta + 1 berlina. Precio por vehículo, sin sorpresas." }
+    ],
+    "seeAll": "Ver todas las preguntas"
+  },
+  "finalCta": {
+    "eyebrow": "¿LISTOS?",
+    "heading": "Salimos cuando tú quieras.",
+    "sub": "Elige tu trayecto. Consigue tu precio en 10 segundos.",
+    "primary": "Reservar ahora",
+    "secondary": "WhatsApp",
+    "footnote": "Disponible 24/7 · Respuesta en menos de 1 hora · Precio fijo garantizado"
+  },
+  "footer": {
+    "tagline": "Chófer privado en París",
+    "rights": "Todos los derechos reservados",
+    "legal": "Aviso legal",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "brand": {
+      "tagline": "Tu chófer privado en París desde 2020.",
+      "rating": "4,5 — Google Reviews"
+    },
+    "columns": {
+      "links": "ENLACES",
+      "contact": "CONTACTO",
+      "languages": "IDIOMAS"
+    },
+    "links": {
+      "home": "Inicio",
+      "fleet": "Nuestra flota",
+      "routes": "Tarifas",
+      "hourly": "Por horas",
+      "faq": "FAQ"
+    },
+    "contact": {
+      "hoursLabel": "Servicio",
+      "hours": "24/7 · Todos los días"
+    },
+    "legalLine": {
+      "siretLabel": "SIRET",
+      "siretValue": "—",
+      "licenseLabel": "Licencia VTC",
+      "licenseValue": "—"
+    }
+  },
+  "pages": {
+    "fleet": {
+      "hero": {
+        "eyebrow": "NUESTRA FLOTA",
+        "heading": "Dos coches. Todos los viajes cubiertos.",
+        "sub": "No buscamos la flota más grande — buscamos los coches adecuados, bien cuidados, siempre disponibles.",
+        "stats": ["2 vehículos", "1 a 8 pasajeros · más si hace falta", "100 % sin humo"]
+      },
+      "car": {
+        "eyebrow": "BERLINA",
+        "title": "Tesla Model Y",
+        "oneLiner": "Confort eléctrico, silencio absoluto, cero emisiones.",
+        "specs": [
+          { "icon": "users", "label": "1–3 pasajeros" },
+          { "icon": "briefcase", "label": "3 maletas grandes" },
+          { "icon": "zap", "label": "100 % eléctrico" },
+          { "icon": "wifi", "label": "Wi-Fi a bordo" }
+        ],
+        "features": [
+          "Climatización regulada",
+          "Cargadores USB-C en todos los asientos",
+          "Agua embotellada de cortesía",
+          "Cristales tintados",
+          "Zona de equipaje separada en el maletero",
+          "Conexión Bluetooth a petición"
+        ],
+        "bestForHeading": "Ideal para:",
+        "bestFor": [
+          "Parejas y viajeros solos",
+          "Viajes de negocios",
+          "Familias de hasta 3 personas",
+          "Equipaje ligero o medio"
+        ],
+        "cta": "Reservar la berlina",
+        "priceNote": "Desde 60 € — precio fijo"
+      },
+      "van": {
+        "eyebrow": "FURGONETA FAMILIAR",
+        "title": "Mercedes Vito · Renault Trafic",
+        "oneLiner": "El espacio que necesitan las familias, los grupos y todas sus maletas.",
+        "specs": [
+          { "icon": "users", "label": "4–8 pasajeros" },
+          { "icon": "briefcase", "label": "Hasta 8 maletas" },
+          { "icon": "shield", "label": "Asientos individuales" },
+          { "icon": "wind", "label": "Climatización trasera" }
+        ],
+        "features": [
+          "Climatización separada delante y detrás",
+          "Maletero sobredimensionado e independiente",
+          "Cristales tintados",
+          "Asientos individuales reclinables",
+          "Cargadores USB",
+          "Puerta lateral corredera — acceso fácil"
+        ],
+        "bestForHeading": "Ideal para:",
+        "bestFor": [
+          "Familias de 4 a 8 personas",
+          "Grupos de amigos",
+          "Viajeros con mucho equipaje",
+          "Traslados a Disneyland con carritos"
+        ],
+        "cta": "Reservar la furgoneta",
+        "priceNote": "Desde 80 € — precio fijo"
+      },
+      "groups": {
+        "eyebrow": "GRUPOS",
+        "heading": "¿Más de 8 personas? Nos adaptamos.",
+        "sub": "No hace falta llamar a varios taxis. Combinamos nuestros vehículos al mismo precio fijo por coche.",
+        "combos": [
+          { "pax": "11", "label": "pasajeros", "combo": "1 furgoneta + 1 berlina", "price": "140 €" },
+          { "pax": "16", "label": "pasajeros", "combo": "2 furgonetas", "price": "160 €" },
+          { "pax": "20", "label": "pasajeros", "combo": "2 furgonetas + 1 berlina", "price": "220 €" }
+        ],
+        "footer": "Se calcula automáticamente en el formulario de reserva según el número de pasajeros."
+      },
+      "always": {
+        "eyebrow": "SIEMPRE INCLUIDO",
+        "heading": "Sin suplementos, sin sorpresas.",
+        "items": [
+          { "icon": "lock", "title": "Precio fijo garantizado", "body": "La tarifa anunciada es la tarifa final. Peajes, impuestos, equipaje — todo incluido." },
+          { "icon": "baby", "title": "Sillas infantiles gratuitas", "body": "Portabebés, silla de bebé o alzador — a petición, sin coste." },
+          { "icon": "clock", "title": "Espera incluida", "body": "60 minutos de espera gratuita para vuelos, 30 minutos para trenes." },
+          { "icon": "droplet", "title": "Agua embotellada", "body": "A bordo para todos los pasajeros, en cada vehículo." }
+        ]
+      },
+      "finalCta": {
+        "heading": "¿Listo para elegir tu vehículo?",
+        "sub": "Elige el trayecto y asignamos el coche adecuado automáticamente.",
+        "primary": "Conseguir mi precio",
+        "orText": "o",
+        "whatsapp": "Escríbenos por WhatsApp"
+      }
+    },
+    "rates": {
+      "hero": {
+        "eyebrow": "NUESTRAS TARIFAS",
+        "heading": "Todos los precios. Ninguna sorpresa.",
+        "sub": "Tarifas fijas por vehículo y trayecto. Peajes incluidos, impuestos incluidos, equipaje incluido. Lo que ves es lo que pagas.",
+        "trustRow": ["Precios fijos", "Peajes incluidos", "Sillas infantiles gratis", "Pago a la llegada"]
+      },
+      "calculator": {
+        "eyebrow": "CALCULA TU PRECIO",
+        "heading": "Tu trayecto, tu precio.",
+        "sub": "Más rápido que leer la tabla de abajo.",
+        "hint": "o consulta la tabla completa más abajo"
+      },
+      "grid": {
+        "eyebrow": "TABLA COMPLETA",
+        "heading": "Todos los trayectos, todos los precios.",
+        "sub": "Precio por vehículo para un solo trayecto. Ida y vuelta: 10 % de descuento si se paga por adelantado.",
+        "colCar": "Berlina",
+        "colVan": "Furgoneta",
+        "fromLabel": "Desde",
+        "unpriced": "Consultar",
+        "footnotePrefix": "Precios en euros, por vehículo. Solo ida. Ida y vuelta: −10 % si se paga por adelantado. Trayectos no listados o de larga distancia:",
+        "footnoteCta": "contáctanos",
+        "footnoteSuffix": " para un presupuesto."
+      },
+      "hourly": {
+        "eyebrow": "POR HORAS",
+        "price": "50 € / hora",
+        "sub": "Para visitar París a tu ritmo, compras, cenas, eventos.",
+        "bullets": [
+          "Mínimo 3 horas",
+          "Chófer dedicado durante toda la reserva",
+          "Itinerario totalmente libre"
+        ],
+        "cta": "Reservar por horas",
+        "whatsappMessage": "Hola, me gustaría reservar un chófer por horas en París."
+      },
+      "longDistance": {
+        "eyebrow": "LARGA DISTANCIA",
+        "price": "Consultar",
+        "sub": "Reims, Champagne, Mont-Saint-Michel, Loira, Normandía, Fontainebleau.",
+        "bullets": [
+          "Cálculo según kilómetros y peajes",
+          "Vehículo adaptado al trayecto",
+          "Presupuesto en menos de 1 hora por WhatsApp"
+        ],
+        "cta": "Pedir presupuesto",
+        "whatsappMessage": "Hola, quisiera un presupuesto para un trayecto de larga distancia desde París."
+      },
+      "included": {
+        "eyebrow": "INCLUIDO EN CADA TARIFA",
+        "heading": "El precio es el precio.",
+        "sub": "Lo que ya está contado en cada trayecto — no pagarás un céntimo más.",
+        "items": [
+          { "icon": "check-circle", "label": "Peajes", "sub": "Todos los peajes de tu itinerario" },
+          { "icon": "check-circle", "label": "Impuestos", "sub": "IVA y impuestos profesionales incluidos" },
+          { "icon": "check-circle", "label": "Equipaje", "sub": "Maletas y bolsas sin límite razonable" },
+          { "icon": "check-circle", "label": "Sillas infantiles", "sub": "Portabebés, silla, alzador a petición" },
+          { "icon": "check-circle", "label": "Espera", "sub": "60 min para vuelos, 30 min para trenes" },
+          { "icon": "check-circle", "label": "Bienvenida personalizada", "sub": "Cartel con tu nombre en el aeropuerto" }
+        ]
+      },
+      "payment": {
+        "eyebrow": "PAGO",
+        "heading": "Paga como prefieras.",
+        "options": [
+          { "icon": "banknote", "label": "Efectivo a la llegada", "body": "Nuestro favorito. Sin comisiones, sin intermediarios." },
+          { "icon": "credit-card", "label": "Tarjeta a la llegada", "body": "Visa, Mastercard, American Express. Terminal en cada vehículo." },
+          { "icon": "percent", "label": "Depósito en línea — opcional", "body": "Para bloquear el descuento de ida y vuelta, se puede dejar un depósito online." }
+        ]
+      },
+      "finalCta": {
+        "heading": "¿Listo para salir?",
+        "sub": "Elige tu trayecto y recibe tu precio exacto.",
+        "primary": "Reservar ahora",
+        "secondaryPrefix": "o",
+        "secondary": "escríbenos por WhatsApp"
+      }
+    },
+    "faqContact": {
+      "hero": {
+        "eyebrow": "AYUDA Y CONTACTO",
+        "heading": "¿Alguna pregunta? Respondemos rápido.",
+        "sub": "WhatsApp para lo rápido, email para reservas formales. Francés, inglés, español, italiano — dinos tu preferencia."
+      },
+      "cards": {
+        "whatsapp": {
+          "meta": "RECOMENDADO",
+          "title": "WhatsApp",
+          "body": "La forma más rápida de obtener una respuesta. Presupuestos, modificaciones, dudas de última hora.",
+          "detail": "+33 6 28 65 81 27",
+          "availability": "Respuesta en menos de 1 hora · 24/7",
+          "cta": "Abrir WhatsApp",
+          "whatsappMessage": "Hola, tengo una duda sobre vuestro servicio de chófer."
+        },
+        "email": {
+          "meta": "PARA RESERVAS",
+          "title": "Email",
+          "body": "Para reservas formales, presupuestos de larga distancia, facturación.",
+          "detail": "the.driver@hotmail.com",
+          "availability": "Respuesta en menos de 1 hora",
+          "cta": "Enviar un email",
+          "subject": "Consulta"
+        },
+        "form": {
+          "meta": "PRESUPUESTO AL INSTANTE",
+          "title": "Formulario online",
+          "body": "Consigue tu precio al momento y reserva en 2 minutos.",
+          "detail": "Precio fijo antes de enviar",
+          "availability": "Disponible 24/7",
+          "cta": "Abrir el formulario"
+        }
+      },
+      "service": {
+        "eyebrow": "INFO PRÁCTICA",
+        "heading": "Lo que conviene saber.",
+        "rows": [
+          { "icon": "clock", "label": "Horario", "value": "24/7, todos los días" },
+          { "icon": "calendar", "label": "Antelación", "value": "Idealmente 24 h, solicitudes urgentes según disponibilidad" },
+          { "icon": "globe", "label": "Idiomas", "value": "Francés, inglés, español, italiano" },
+          { "icon": "credit-card", "label": "Formas de pago", "value": "Efectivo o tarjeta a la llegada · Depósito online para descuento de ida y vuelta" }
+        ]
+      },
+      "faq": {
+        "eyebrow": "PREGUNTAS FRECUENTES",
+        "heading": "Todo lo que contestamos antes de que lo preguntes.",
+        "categories": [
+          {
+            "title": "Antes del viaje",
+            "items": [
+              { "q": "¿Con cuánta antelación debo reservar?", "a": "Idealmente 24 horas. Aceptamos solicitudes urgentes según disponibilidad — WhatsApp para respuesta inmediata." },
+              { "q": "¿Puedo modificar o cancelar mi reserva?", "a": "Sí, sin coste hasta 24 h antes. WhatsApp o email — lo ajustamos al momento." },
+              { "q": "¿Cómo se paga?", "a": "Efectivo o tarjeta al chófer a la llegada. Sin depósito obligatorio por defecto." },
+              { "q": "¿Hay que dejar un depósito?", "a": "No por defecto. Depósito opcional para bloquear el descuento de ida y vuelta." },
+              { "q": "¿Puedo pagar con tarjeta?", "a": "Sí. Visa, Mastercard, Amex — terminal en cada vehículo." }
+            ]
+          },
+          {
+            "title": "En el aeropuerto",
+            "items": [
+              { "q": "¿Dónde me espera el chófer?", "a": "En la sala de llegadas, tras la aduana, con un cartel con tu nombre. Foto y WhatsApp enviados 24 h antes." },
+              { "q": "¿Qué pasa si mi vuelo llega con retraso?", "a": "Seguimos tu vuelo. Espera gratuita hasta 60 minutos después del aterrizaje efectivo." },
+              { "q": "¿Qué hago si no encuentro al chófer?", "a": "Llamada o WhatsApp al +33 6 28 65 81 27. Te localizamos al momento." },
+              { "q": "¿Y si tengo más equipaje del previsto?", "a": "Cambio a la furgoneta sin coste si te habíamos propuesto la berlina." }
+            ]
+          },
+          {
+            "title": "Durante el trayecto",
+            "items": [
+              { "q": "¿Se puede hacer una parada en el camino?", "a": "Sí. Precio confirmado por WhatsApp según el desvío. Paradas cortas suelen ser gratis." },
+              { "q": "¿Puedo cambiar el destino durante el trayecto?", "a": "Sí, si es razonable. El chófer ajusta el precio contigo." },
+              { "q": "¿Hay wifi y cargadores?", "a": "Cargadores USB en todos los vehículos. Wi-Fi disponible a petición en el Tesla." },
+              { "q": "¿Se puede fumar en el coche?", "a": "No, vehículos 100 % sin humo, vapeadores incluidos." }
+            ]
+          },
+          {
+            "title": "Peticiones especiales",
+            "items": [
+              { "q": "¿Tenéis sillas infantiles?", "a": "Sí, gratis. Portabebés (0–1 año), silla infantil (1–3 años), alzador (3–10 años). Indícanos las edades." },
+              { "q": "¿Se puede viajar con mascota?", "a": "Perros pequeños en transportín o bolso sí. WhatsApp para animales mayores." },
+              { "q": "¿Ofrecéis traslados accesibles?", "a": "Sí. WhatsApp indicándonos tus necesidades — adaptamos vehículo y asistencia." },
+              { "q": "¿Puedo reservar para otra persona?", "a": "Sí. Indica nombre y WhatsApp del pasajero al reservar." }
+            ]
+          },
+          {
+            "title": "Precios y extras",
+            "items": [
+              { "q": "¿Hay suplementos de noche o fin de semana?", "a": "No. Precios fijos 24/7, todos los días." },
+              { "q": "¿Están incluidos los peajes?", "a": "Sí, todo incluido. Nada que añadir a la llegada." },
+              { "q": "¿Y la propina?", "a": "Nunca se espera. Siempre se agradece si el servicio te ha gustado." }
+            ]
+          }
+        ]
+      },
+      "form": {
+        "eyebrow": "¿OTRA PREGUNTA?",
+        "heading": "Escríbenos.",
+        "sub": "Para todo lo que no encaje en otro sitio.",
+        "fields": {
+          "firstName": "Nombre",
+          "email": "Email",
+          "language": "Idioma preferido",
+          "message": "Mensaje"
+        },
+        "languageOptions": {
+          "fr": "Français",
+          "en": "English",
+          "es": "Español",
+          "it": "Italiano"
+        },
+        "submit": "Enviar",
+        "sending": "Enviando…",
+        "subjectPrefix": "Consulta desde la web",
+        "success": {
+          "title": "Mensaje enviado.",
+          "body": "Te respondemos en menos de 1 hora."
+        },
+        "error": "Error de envío. Escríbenos directamente:",
+        "waFallback": "WhatsApp +33 6 28 65 81 27"
+      },
+      "nudge": {
+        "body": "¿Prefieres hablar ahora mismo?",
+        "cta": "Escribir por WhatsApp"
+      }
+    }
+  }
+}

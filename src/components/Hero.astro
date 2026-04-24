@@ -1,0 +1,423 @@
+---
+import { t } from '../i18n';
+import QuotePicker from './QuotePicker.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const strings = t(locale);
+const hero = strings.hero;
+
+// H1 accent-word split — underline the last word in the display headline.
+// Handles all four locales without special-casing by language.
+const h1Words = hero.h1.trim().split(/\s+/);
+const h1Last = h1Words.pop() ?? '';
+const h1Head = h1Words.join(' ');
+
+// Localised "available now" status pill above the headline.
+const availableLabel =
+  locale === 'en' ? 'Available now'
+  : locale === 'es' ? 'Disponibles ahora'
+  : locale === 'it' ? 'Disponibile ora'
+  : 'Disponible maintenant';
+---
+
+<section class="hero has-grain" data-hero>
+  {/* Decorative layer — aura + Paris map + secondary drift. Desktop animates the second glow; mobile stays minimal. */}
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-aura"></div>
+    <div class="hero-aura-secondary"></div>
+    <svg
+      data-paris-map
+      class="hero-map"
+      viewBox="0 0 640 640"
+      fill="none" stroke="currentColor" stroke-width="1"
+      stroke-linecap="round" stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M0 340 C 90 300, 150 360, 220 320 S 360 270, 430 310 S 560 370, 640 330" />
+      <ellipse cx="320" cy="320" rx="220" ry="180" />
+      <line x1="320" y1="140" x2="320" y2="500" />
+      <line x1="120" y1="320" x2="520" y2="320" />
+      <line x1="260" y1="200" x2="380" y2="440" />
+      <line x1="380" y1="200" x2="260" y2="440" />
+      <circle cx="320" cy="320" r="4" />
+      <circle cx="280" cy="260" r="3" />
+      <circle cx="360" cy="360" r="3" />
+    </svg>
+  </div>
+
+  <div class="hero-inner page-x mx-auto max-w-[1200px]">
+    <div class="hero-grid">
+      {/* Left column — the editorial stack */}
+      <div class="hero-copy">
+        <p class="status-pill" data-reveal>
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>{availableLabel}</span>
+        </p>
+
+        <h1 class="h1 text-balance hero-h1" data-reveal data-reveal-delay="1">
+          {h1Head}{h1Head ? ' ' : ''}<span class="accent-word">{h1Last}</span>
+        </h1>
+
+        <p class="body-lg hero-sub" data-reveal data-reveal-delay="2">{hero.sub}</p>
+
+        {/* Trust chips — real badges with icons, not grey text */}
+        <ul class="trust-chips" data-reveal data-reveal-delay="3">
+          <li class="trust-chip">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="trust-chip-icon is-accent" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span>{hero.trust.rating}</span>
+          </li>
+          <li class="trust-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            <span>{hero.trust.license}</span>
+          </li>
+          <li class="trust-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
+              <path d="M9 12h.01"/>
+              <path d="M15 12h.01"/>
+              <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/>
+              <path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>
+            </svg>
+            <span>{hero.trust.childseats}</span>
+          </li>
+          <li class="trust-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            <span>{hero.trust.payment}</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Right column — the booking-picker anchor */}
+      <div class="hero-picker" data-reveal data-reveal-delay="4">
+        <QuotePicker locale={locale} variant="hero" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---------------------------------------------------------------
+     Hero surface — a composed unit with a warm glow + faint map.
+     --------------------------------------------------------------- */
+  .hero {
+    position: relative;
+    background: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-aura {
+    position: absolute;
+    top: -25%;
+    left: -10%;
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--color-accent-glow) 0%,
+      transparent 65%
+    );
+    filter: blur(80px);
+    opacity: 0.9;
+    animation: hero-aura-drift 22s var(--ease-in-out) infinite;
+  }
+
+  /* Secondary drifting glow — desktop-only, hover-capable devices only.
+     Counter-drifts against the primary aura for gentle composition motion.
+     @media (hover: hover) scopes out touch devices; prefers-reduced-motion disables. */
+  .hero-aura-secondary {
+    display: none;
+  }
+  @media (min-width: 1024px) and (hover: hover) {
+    .hero-aura-secondary {
+      display: block;
+      position: absolute;
+      bottom: -20%;
+      right: -8%;
+      width: 720px;
+      height: 720px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        color-mix(in oklab, var(--color-accent) 14%, transparent) 0%,
+        transparent 60%
+      );
+      filter: blur(90px);
+      opacity: 0.55;
+      animation: hero-aura-counter 28s var(--ease-in-out) infinite;
+    }
+  }
+  @keyframes hero-aura-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%     { transform: translate(80px, 30px) scale(1.08); }
+  }
+  @keyframes hero-aura-counter {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+    50%     { transform: translate(-60px, -40px) scale(1.06); opacity: 0.75; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-aura,
+    .hero-aura-secondary { animation: none; }
+  }
+
+  .hero-map {
+    position: absolute;
+    top: 0;
+    right: -120px;
+    height: 100%;
+    width: 640px;
+    color: var(--color-ink);
+    opacity: 0.06;
+    display: none;
+    will-change: transform;
+  }
+  @media (min-width: 768px) {
+    .hero-map { display: block; }
+  }
+  @media (max-width: 767px) {
+    .hero-aura {
+      width: 620px;
+      height: 620px;
+      filter: blur(60px);
+      animation-duration: 26s;
+    }
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+  @media (min-width: 768px) {
+    .hero-inner { padding-top: 88px; padding-bottom: 88px; }
+  }
+  @media (min-width: 1024px) {
+    .hero-inner { padding-top: 104px; padding-bottom: 104px; }
+  }
+
+  /* Composition — mobile: tight vertical stack. Desktop: 55/45 asymmetric,
+     but with only 40px gap and the picker card visually pulling the left column
+     (instead of a lonely right column with empty air). */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    .hero-grid {
+      /* Desktop: picker card gains weight — tighter copy column on the left */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: 48px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 64px;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Status pill — pulsing dot above the headline.
+     --------------------------------------------------------------- */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 10px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-graphite);
+  }
+  .status-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    flex-shrink: 0;
+  }
+  .status-dot::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    opacity: 0.4;
+    animation: status-pulse 2s var(--ease-in-out) infinite;
+  }
+  @keyframes status-pulse {
+    0%, 100% { transform: scale(0.6); opacity: 0.45; }
+    50% { transform: scale(1.4); opacity: 0; }
+  }
+
+  /* ---------------------------------------------------------------
+     Headline — editorial accent on the final word.
+     --------------------------------------------------------------- */
+  .hero-h1 {
+    margin-top: 18px;
+    max-width: 14ch;
+  }
+  @media (min-width: 768px) {
+    .hero-h1 { margin-top: 22px; max-width: 16ch; }
+  }
+  .accent-word {
+    position: relative;
+    display: inline-block;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+  .accent-word::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6%;
+    height: 0.32em;
+    background: color-mix(in oklab, var(--color-accent) 30%, transparent);
+    z-index: -1;
+    border-radius: 3px;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 700ms var(--ease-out) 500ms;
+  }
+  [data-reveal].is-visible .accent-word::after {
+    transform: scaleX(1);
+  }
+
+  .hero-sub {
+    margin-top: 16px;
+    max-width: 36ch;
+  }
+  @media (min-width: 768px) {
+    .hero-sub { margin-top: 22px; }
+  }
+
+  /* ---------------------------------------------------------------
+     Trust chips — real badges with icons. Flex-wrap on mobile.
+     --------------------------------------------------------------- */
+  .trust-chips {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  @media (min-width: 768px) {
+    .trust-chips { margin-top: 30px; gap: 10px; }
+  }
+  .trust-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-ink) 4%, transparent);
+    transition: border-color 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .trust-chip:hover {
+    border-color: var(--color-graphite);
+    transform: translateY(-1px);
+  }
+  .trust-chip-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-graphite);
+    flex-shrink: 0;
+  }
+  .trust-chip-icon.is-accent { color: var(--color-accent); }
+
+  /* ---------------------------------------------------------------
+     Picker column — on desktop, nudge up into the headline's visual field
+     so the hero reads as ONE unit rather than two columns.
+     --------------------------------------------------------------- */
+  .hero-picker {
+    position: relative;
+  }
+  @media (min-width: 768px) {
+    .hero-picker {
+      max-width: 480px;
+      margin-left: auto;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-picker {
+      max-width: 520px;
+    }
+  }
+</style>
+
+<script>
+  // Desktop-only, hover-capable, reduced-motion-aware cursor parallax
+  // on the faint Paris map. Max 8px travel, RAF-lerped.
+  function run() {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!hero) return;
+    const svg = hero.querySelector<SVGElement>('[data-paris-map]');
+    if (!svg) return;
+
+    const canHover = window.matchMedia('(hover: hover)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!canHover || reduce) return;
+
+    let targetX = 0, targetY = 0, curX = 0, curY = 0, raf = 0;
+
+    function tick() {
+      curX += (targetX - curX) * 0.08;
+      curY += (targetY - curY) * 0.08;
+      svg!.style.transform = `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0)`;
+      if (Math.abs(targetX - curX) > 0.05 || Math.abs(targetY - curY) > 0.05) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+      }
+    }
+
+    hero.addEventListener('mousemove', (e) => {
+      const r = hero.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      targetX = -nx * 8;
+      targetY = -ny * 8;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    hero.addEventListener('mouseleave', () => {
+      targetX = 0;
+      targetY = 0;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

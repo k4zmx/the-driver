@@ -1,0 +1,82 @@
+# The Driver
+
+Multilingual landing page for **The Driver**, a private chauffeur / taxi service for tourists in Paris.
+
+## Stack
+
+- **Framework:** [Astro](https://astro.build) (static, multi-page)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com) (v4, via `@tailwindcss/vite`)
+- **Interactivity:** Vanilla JS by default. [Alpine.js](https://alpinejs.dev) is added on-demand only for components that truly need reactivity.
+- **Forms:** [Web3Forms](https://web3forms.com) — no backend; submissions go straight to the client's email.
+- **Analytics:** [Plausible](https://plausible.io) — GDPR-friendly, no cookie banner needed in France. Disabled by default; enable in [src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro) once the production domain is live.
+- **Hosting:** [Cloudflare Pages](https://pages.cloudflare.com) (build command `npm run build`, output directory `dist`).
+
+## Languages
+
+Astro's built-in i18n, path-based routing, `prefixDefaultLocale: false`.
+
+| Locale | URL prefix |
+| ------ | ---------- |
+| French (default) | `/` |
+| English | `/en/` |
+| Spanish | `/es/` |
+| Italian | `/it/` |
+
+## Run locally
+
+```sh
+npm install
+npm run dev        # http://localhost:4321
+```
+
+Other commands:
+
+```sh
+npm run build      # output to ./dist
+npm run preview    # preview the built site
+```
+
+## Deploy to Cloudflare Pages
+
+1. Push this repo to GitHub / GitLab.
+2. In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**.
+3. Select the repo and use these build settings:
+   - **Framework preset:** Astro
+   - **Build command:** `npm run build`
+   - **Build output directory:** `dist`
+   - **Node version:** 22 (or later — see `package.json` → `engines`)
+4. Deploy. First deploy gives you a `*.pages.dev` URL; add the client's custom domain afterward.
+5. Once the production domain is live, update `site` in [astro.config.mjs](astro.config.mjs) and enable the Plausible script in [src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro).
+
+## Where to edit things
+
+- **Prices & route matrix** → [src/data/routes.js](src/data/routes.js). Single source of truth — `PRICES[from][to] = { car, van }`. Update `HOURLY_RATE`, `ROUND_TRIP_DISCOUNT`, and `VEHICLE_CAPACITY` here too.
+- **Vehicle definitions** → [src/data/vehicles.js](src/data/vehicles.js).
+- **All user-facing text** → [src/i18n/fr.json](src/i18n/fr.json), [en.json](src/i18n/en.json), [es.json](src/i18n/es.json), [it.json](src/i18n/it.json). No hardcoded strings in components — add a key here, reference via `t(locale).section.key`.
+- **Global styles** → [src/styles/global.css](src/styles/global.css).
+- **Shared layout, meta, Plausible** → [src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro).
+
+## Folder layout
+
+```
+src/
+  components/         Nav, Footer, LanguageSwitcher, (Hero, BookingForm, Fleet… later)
+  layouts/
+    BaseLayout.astro  <head>, lang attribute, nav, footer
+  pages/
+    index.astro       FR home
+    en/index.astro    EN home
+    es/index.astro    ES home
+    it/index.astro    IT home
+  i18n/
+    fr.json / en.json / es.json / it.json
+    index.js          t(locale), localizedPath(locale, path)
+  data/
+    routes.js         Pickups, drops, price matrix, capacity, hourly rate
+    vehicles.js       Vehicle definitions
+  styles/
+    global.css        Tailwind entrypoint
+public/
+  images/             Real photos go here
+  favicon.svg
+```

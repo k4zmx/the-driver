@@ -1,0 +1,751 @@
+---
+import { PICKUP_POINTS, DROP_POINTS, PRICES, VEHICLE_CAPACITY, ROUND_TRIP_DISCOUNT } from '../data/routes.js';
+import { t } from '../i18n';
+import LocationPicker from './LocationPicker.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const strings = t(locale);
+const f = strings.form;
+
+// Subset of pickup/dropoff that should reveal a free-form address field.
+const CITY_PICKUPS = ['Disneyland', 'Versailles'];
+const AIRPORT_PICKUPS = ['CDG', 'Orly', 'Beauvais'];
+const STATION_PICKUPS = ['Paris Train Station'];
+const CITY_DROPOFFS = ['Paris', 'Disneyland', 'Versailles'];
+
+const configBlob = {
+  prices: PRICES,
+  vehicle: VEHICLE_CAPACITY,
+  roundTripDiscount: ROUND_TRIP_DISCOUNT,
+  airportPickups: AIRPORT_PICKUPS,
+  stationPickups: STATION_PICKUPS,
+  cityPickups: CITY_PICKUPS,
+  cityDropoffs: CITY_DROPOFFS,
+  labels: {
+    tripOneWay: f.trip.oneWay,
+    tripRoundTrip: f.trip.roundTrip,
+    unavailable: strings.hero.price.unavailable,
+    empty: strings.hero.price.empty,
+  },
+  locale,
+  // Web3Forms public access key — filled at runtime from `.env` via import.meta.env
+  accessKey: import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '',
+  whatsapp: '33628658127',
+};
+
+const countryCodes = [
+  { cc: '+33', flag: '🇫🇷', label: 'France' },
+  { cc: '+44', flag: '🇬🇧', label: 'UK' },
+  { cc: '+1',  flag: '🇺🇸', label: 'US / CA' },
+  { cc: '+34', flag: '🇪🇸', label: 'España' },
+  { cc: '+39', flag: '🇮🇹', label: 'Italia' },
+  { cc: '+49', flag: '🇩🇪', label: 'Deutschland' },
+  { cc: '+41', flag: '🇨🇭', label: 'Suisse' },
+  { cc: '+32', flag: '🇧🇪', label: 'België' },
+  { cc: '+31', flag: '🇳🇱', label: 'Nederland' },
+  { cc: '+351', flag: '🇵🇹', label: 'Portugal' },
+  { cc: '+86', flag: '🇨🇳', label: '中国' },
+  { cc: '+81', flag: '🇯🇵', label: '日本' },
+];
+
+const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
+---
+
+<section id="booking-form" aria-labelledby={`${uid}-heading`}>
+  <div class="section-y">
+    <div class="page-x mx-auto max-w-[640px]">
+
+    <header class="mb-8 md:mb-10">
+      <p class="meta-label mb-3">{f.eyebrow}</p>
+      <h2 id={`${uid}-heading`} class="h2 text-balance">{f.heading}</h2>
+      <p class="mt-3 body-lg">{f.subheading}</p>
+    </header>
+
+    {/* Success + error cards (hidden by default) */}
+    <div
+      data-role="success"
+      class="hidden rounded-[var(--radius-card)] bg-[color:var(--color-paper)] border border-[color:var(--color-success)]/30 p-6 md:p-8"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="flex items-start gap-3">
+        <svg class="h-6 w-6 text-[color:var(--color-success)] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <div>
+          <p class="h3 text-[color:var(--color-ink)]">{f.success.title}</p>
+          <p class="mt-3 text-[color:var(--color-graphite)]" data-role="success-body">{f.success.body}</p>
+        </div>
+      </div>
+    </div>
+
+    <form
+      data-booking-form
+      data-form-id={uid}
+      action="https://api.web3forms.com/submit"
+      method="POST"
+      class="md:bg-[color:var(--color-paper)] md:border md:border-[color:var(--color-smoke)] md:rounded-[var(--radius-card)] md:shadow-[var(--shadow-card)] md:p-10 space-y-10"
+      novalidate
+    >
+      <script is:inline type="application/json" data-form-config={uid} set:html={JSON.stringify(configBlob)} />
+
+      {/* Web3Forms required fields (hidden) */}
+      <input type="hidden" name="access_key" value={configBlob.accessKey} />
+      <input type="hidden" name="subject" data-role="subject" value="Nouvelle réservation" />
+      <input type="hidden" name="from_name" data-role="from-name" value="" />
+      <input type="hidden" name="language" value={locale} />
+      <input type="hidden" name="vehicle_summary" data-role="vehicle-summary" value="" />
+      <input type="hidden" name="total_price" data-role="total-price" value="" />
+      {/* Honeypot */}
+      <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" />
+
+      {/* ---- Group 1: Trip ---- */}
+      <fieldset class="space-y-4">
+        <legend class="meta-label w-full flex items-center justify-between">
+          <span>{f.groups.trip}</span>
+        </legend>
+
+        <div class="space-y-3">
+          <LocationPicker
+            uid={`${uid}-pickup`}
+            name="pickup"
+            dataRole="pickup"
+            label={strings.hero.pickup.label}
+            placeholder={strings.hero.pickup.placeholder}
+            options={PICKUP_POINTS}
+            iconType="from"
+          />
+          <LocationPicker
+            uid={`${uid}-dropoff`}
+            name="dropoff"
+            dataRole="dropoff"
+            label={strings.hero.dropoff.label}
+            placeholder={strings.hero.dropoff.placeholder}
+            options={DROP_POINTS}
+            iconType="to"
+          />
+        </div>
+
+        {/* Conditional: flight number */}
+        <div data-reveal="flight" hidden>
+          <label class="meta-label block mb-2" for={`${uid}-flight`}>{f.trip.flightNumber}</label>
+          <input
+            id={`${uid}-flight`}
+            name="flight_number"
+            type="text"
+            class="field"
+            inputmode="text"
+            autocomplete="off"
+            enterkeyhint="next"
+            placeholder={f.trip.flightPlaceholder}
+          />
+        </div>
+
+        {/* Conditional: train number */}
+        <div data-reveal="train" hidden>
+          <label class="meta-label block mb-2" for={`${uid}-train`}>{f.trip.trainNumber}</label>
+          <input
+            id={`${uid}-train`}
+            name="train_number"
+            type="text"
+            class="field"
+            inputmode="text"
+            autocomplete="off"
+            enterkeyhint="next"
+            placeholder={f.trip.trainPlaceholder}
+          />
+        </div>
+
+        {/* Conditional: pickup address */}
+        <div data-reveal="pickup-address" hidden>
+          <label class="meta-label block mb-2" for={`${uid}-pickup-address`}>{f.trip.pickupAddress}</label>
+          <input
+            id={`${uid}-pickup-address`}
+            name="pickup_address"
+            type="text"
+            class="field"
+            autocomplete="street-address"
+            enterkeyhint="next"
+            placeholder={f.trip.pickupAddressPlaceholder}
+          />
+        </div>
+
+        {/* Conditional: dropoff address */}
+        <div data-reveal="dropoff-address" hidden>
+          <label class="meta-label block mb-2" for={`${uid}-dropoff-address`}>{f.trip.dropoffAddress}</label>
+          <input
+            id={`${uid}-dropoff-address`}
+            name="dropoff_address"
+            type="text"
+            class="field"
+            autocomplete="street-address"
+            enterkeyhint="next"
+            placeholder={f.trip.dropoffAddressPlaceholder}
+          />
+        </div>
+      </fieldset>
+
+      <div class="border-t border-[color:var(--color-smoke)]"></div>
+
+      {/* ---- Group 2: When & who ---- */}
+      <fieldset class="space-y-5">
+        <legend class="meta-label">{f.groups.whenWho}</legend>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="meta-label block mb-2" for={`${uid}-date`}>{f.when.date}</label>
+            <input
+              id={`${uid}-date`}
+              name="date"
+              type="date"
+              class="field"
+              required
+              enterkeyhint="next"
+            />
+          </div>
+          <div>
+            <label class="meta-label block mb-2" for={`${uid}-time`}>{f.when.time}</label>
+            <input
+              id={`${uid}-time`}
+              name="time"
+              type="time"
+              class="field"
+              required
+              enterkeyhint="next"
+            />
+          </div>
+        </div>
+
+        {/* Passengers stepper */}
+        <div>
+          <label class="meta-label block mb-2" for={`${uid}-pax`}>{f.when.passengers}</label>
+          <div class="inline-flex items-center rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)]">
+            <button
+              type="button"
+              data-role="pax-dec"
+              class="h-12 w-12 inline-flex items-center justify-center text-[color:var(--color-ink)] disabled:opacity-30"
+              aria-label={f.when.passengersDecrease}
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <input
+              id={`${uid}-pax`}
+              name="passengers"
+              type="number"
+              min="1"
+              max="20"
+              value="1"
+              inputmode="numeric"
+              class="w-12 text-center bg-transparent border-0 text-[16px] font-medium focus:outline-none"
+              data-role="pax"
+            />
+            <button
+              type="button"
+              data-role="pax-inc"
+              class="h-12 w-12 inline-flex items-center justify-center text-[color:var(--color-ink)] disabled:opacity-30"
+              aria-label={f.when.passengersIncrease}
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <p class="mt-2 text-[13px] text-[color:var(--color-graphite)]">{f.when.passengersHelp}</p>
+        </div>
+
+        {/* Trip type — big tappable radio rows */}
+        <div>
+          <span class="meta-label block mb-2">{f.trip.typeLabel}</span>
+          <div class="space-y-2" role="radiogroup" aria-label={f.trip.typeLabel}>
+            <label class="flex items-center gap-3 min-h-[48px] px-4 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
+              <input type="radio" name="trip_type" value="one-way" class="accent-[color:var(--color-accent)]" checked data-role="trip-type" />
+              <span class="text-[15px]">{f.trip.oneWay}</span>
+            </label>
+            <label class="flex items-center gap-3 min-h-[48px] px-4 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
+              <input type="radio" name="trip_type" value="round-trip" class="accent-[color:var(--color-accent)]" data-role="trip-type" />
+              <span class="text-[15px]">{f.trip.roundTrip}</span>
+            </label>
+          </div>
+
+          {/* Conditional: return date/time + discount note */}
+          <div data-reveal="return" hidden class="mt-4 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="meta-label block mb-2" for={`${uid}-return-date`}>{f.trip.returnDate}</label>
+                <input id={`${uid}-return-date`} name="return_date" type="date" class="field" />
+              </div>
+              <div>
+                <label class="meta-label block mb-2" for={`${uid}-return-time`}>{f.trip.returnTime}</label>
+                <input id={`${uid}-return-time`} name="return_time" type="time" class="field" />
+              </div>
+            </div>
+            <p class="text-[13px] text-[color:var(--color-graphite)]">{f.trip.returnNote}</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="border-t border-[color:var(--color-smoke)]"></div>
+
+      {/* ---- Group 3: Options (collapsible) ---- */}
+      <fieldset>
+        <details class="group" data-role="options">
+          <summary class="list-none cursor-pointer flex items-center justify-between py-2 meta-label">
+            <span>{f.options.heading}</span>
+            <svg class="h-4 w-4 transition-transform group-open:rotate-180 text-[color:var(--color-graphite)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </summary>
+
+          <div class="mt-4 space-y-5">
+            {/* Child seats */}
+            <div>
+              <span class="meta-label block mb-2">{f.options.childSeats}</span>
+              <div class="space-y-2">
+                {[
+                  { key: 'cosy', label: f.options.seatCosy, hint: f.options.seatCosyHint },
+                  { key: 'baby', label: f.options.seatBaby, hint: f.options.seatBabyHint },
+                  { key: 'booster', label: f.options.seatBooster, hint: f.options.seatBoosterHint },
+                ].map((seat) => (
+                  <label class="flex items-start gap-3 min-h-[48px] px-4 py-3 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
+                    <input type="checkbox" name={`seat_${seat.key}`} value="1" class="mt-1 accent-[color:var(--color-accent)]" />
+                    <span class="flex-1">
+                      <span class="block text-[15px] text-[color:var(--color-ink)]">{seat.label}</span>
+                      <span class="block text-[13px] text-[color:var(--color-graphite)]">{seat.hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Extra stop */}
+            <div>
+              <label class="flex items-center gap-3 min-h-[48px] px-4 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
+                <input type="checkbox" name="extra_stop" value="1" class="accent-[color:var(--color-accent)]" data-role="extra-stop" />
+                <span class="text-[15px]">{f.options.extraStop}</span>
+              </label>
+              <div data-reveal="extra-stop-details" hidden class="mt-3">
+                <label class="sr-only" for={`${uid}-stop-details`}>{f.options.extraStopDetails}</label>
+                <input
+                  id={`${uid}-stop-details`}
+                  name="extra_stop_details"
+                  type="text"
+                  class="field"
+                  placeholder={f.options.extraStopPlaceholder}
+                  autocomplete="off"
+                />
+                <p class="mt-2 text-[13px] text-[color:var(--color-graphite)]">{f.options.extraStopNote}</p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </fieldset>
+
+      <div class="border-t border-[color:var(--color-smoke)]"></div>
+
+      {/* ---- Group 4: Your info ---- */}
+      <fieldset class="space-y-4">
+        <legend class="meta-label">{f.groups.you}</legend>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="meta-label block mb-2" for={`${uid}-firstname`}>{f.you.firstName}</label>
+            <input
+              id={`${uid}-firstname`}
+              name="first_name"
+              type="text"
+              class="field"
+              autocomplete="given-name"
+              enterkeyhint="next"
+              required
+            />
+          </div>
+          <div>
+            <label class="meta-label block mb-2" for={`${uid}-lastname`}>{f.you.lastName}</label>
+            <input
+              id={`${uid}-lastname`}
+              name="last_name"
+              type="text"
+              class="field"
+              autocomplete="family-name"
+              enterkeyhint="next"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="meta-label block mb-2" for={`${uid}-phone`}>{f.you.phone}</label>
+          <div class="flex gap-2">
+            <select
+              name="country_code"
+              class="field field-select !w-[120px] shrink-0"
+              autocomplete="tel-country-code"
+              aria-label={f.you.countryCode}
+            >
+              {countryCodes.map((c) => (
+                <option value={c.cc} selected={c.cc === '+33'}>{c.flag} {c.cc}</option>
+              ))}
+            </select>
+            <input
+              id={`${uid}-phone`}
+              name="phone_number"
+              type="tel"
+              class="field"
+              inputmode="tel"
+              autocomplete="tel-national"
+              enterkeyhint="next"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="meta-label block mb-2" for={`${uid}-email`}>{f.you.email}</label>
+          <input
+            id={`${uid}-email`}
+            name="email"
+            type="email"
+            class="field"
+            inputmode="email"
+            autocomplete="email"
+            enterkeyhint="done"
+            required
+          />
+        </div>
+      </fieldset>
+
+      {/* ---- Group 5: Summary + submit ---- */}
+      <div class="rounded-[12px] border border-[color:var(--color-smoke)] bg-[color:var(--color-cream)] p-5 md:p-6">
+        <p class="meta-label mb-3">{f.summary.heading}</p>
+        <dl class="text-[14px] space-y-2">
+          <div class="flex justify-between gap-4">
+            <dt class="text-[color:var(--color-graphite)]">{f.summary.route}</dt>
+            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-route">—</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-[color:var(--color-graphite)]">{f.summary.vehicle}</dt>
+            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-vehicle">—</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-[color:var(--color-graphite)]">{f.summary.passengers}</dt>
+            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-pax">1</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-[color:var(--color-graphite)]">{f.summary.type}</dt>
+            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-type">{f.trip.oneWay}</dd>
+          </div>
+        </dl>
+        <div class="mt-4 pt-4 border-t border-[color:var(--color-smoke)] flex justify-between items-baseline">
+          <span class="meta-label">{f.summary.total}</span>
+          <span class="font-display text-[32px] leading-none tabular-nums" data-role="summary-total">—</span>
+        </div>
+      </div>
+
+      <div class="space-y-3" data-role="error-container">
+        <button
+          type="submit"
+          class="btn-primary w-full"
+          data-role="form-submit"
+        >
+          <span data-role="submit-label">{f.submit.cta}</span>
+          <svg data-role="submit-spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-6.2-8.55" />
+          </svg>
+        </button>
+        <p class="text-center text-[13px] text-[color:var(--color-graphite)]">{f.submit.reassurance}</p>
+        <p data-role="submit-error" class="hidden text-[14px] text-[color:var(--color-danger)] text-center" role="alert"></p>
+      </div>
+    </form>
+
+    {/* Alternative WhatsApp CTA */}
+    <div class="mt-8 pt-6 border-t border-[color:var(--color-smoke)] text-center">
+      <p class="text-[14px] text-[color:var(--color-graphite)] mb-3">{f.whatsapp.prompt}</p>
+      <a
+        data-role="whatsapp-link"
+        href={`https://wa.me/${configBlob.whatsapp}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-secondary inline-flex"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>{f.whatsapp.cta}</span>
+      </a>
+    </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  type Config = {
+    prices: Record<string, Record<string, { car?: number; van?: number }>>;
+    vehicle: { car: { max: number; model: string }; van: { max: number; model: string } };
+    roundTripDiscount: number;
+    airportPickups: string[];
+    stationPickups: string[];
+    cityPickups: string[];
+    cityDropoffs: string[];
+    labels: { tripOneWay: string; tripRoundTrip: string; unavailable: string; empty: string };
+    locale: string;
+    accessKey: string;
+    whatsapp: string;
+  };
+
+  function initForm(form: HTMLFormElement) {
+    const id = form.dataset.formId;
+    const dataEl = document.querySelector<HTMLScriptElement>(`script[data-form-config="${id}"]`);
+    if (!dataEl?.textContent) return;
+    const cfg = JSON.parse(dataEl.textContent) as Config;
+
+    const $ = <T extends Element = HTMLElement>(sel: string) => form.querySelector<T>(sel)!;
+    const pickup = $<HTMLSelectElement>('[data-role="pickup"]');
+    const dropoff = $<HTMLSelectElement>('[data-role="dropoff"]');
+    const paxInput = $<HTMLInputElement>('[data-role="pax"]');
+    const paxInc = $<HTMLButtonElement>('[data-role="pax-inc"]');
+    const paxDec = $<HTMLButtonElement>('[data-role="pax-dec"]');
+    const tripRadios = form.querySelectorAll<HTMLInputElement>('[data-role="trip-type"]');
+    const extraStop = $<HTMLInputElement>('[data-role="extra-stop"]');
+    const submitBtn = $<HTMLButtonElement>('[data-role="form-submit"]');
+    const submitLabel = $('[data-role="submit-label"]');
+    const submitSpinner = $('[data-role="submit-spinner"]');
+    const errorEl = $('[data-role="submit-error"]');
+    const successCard = form.parentElement?.querySelector<HTMLElement>('[data-role="success"]') ?? null;
+    const successBody = successCard?.querySelector<HTMLElement>('[data-role="success-body"]') ?? null;
+    const whatsappLink = form.parentElement?.querySelector<HTMLAnchorElement>('[data-role="whatsapp-link"]') ?? null;
+
+    const sRoute = $('[data-role="summary-route"]');
+    const sVehicle = $('[data-role="summary-vehicle"]');
+    const sPax = $('[data-role="summary-pax"]');
+    const sType = $('[data-role="summary-type"]');
+    const sTotal = $('[data-role="summary-total"]');
+
+    const CAR_SEATS = cfg.vehicle.car.max;
+    const VAN_SEATS = cfg.vehicle.van.max;
+
+    // ---- Conditional reveals -----------------------------------------
+    function setReveal(name: string, show: boolean) {
+      const el = form.querySelector<HTMLElement>(`[data-reveal="${name}"]`);
+      if (!el) return;
+      el.hidden = !show;
+      // Clear values when hidden so stale data isn't submitted
+      if (!show) {
+        el.querySelectorAll<HTMLInputElement>('input').forEach((i) => {
+          if (i.type === 'checkbox') i.checked = false;
+          else i.value = '';
+        });
+      }
+    }
+
+    function refreshConditionals() {
+      const pu = pickup.value;
+      const dr = dropoff.value;
+      setReveal('flight', cfg.airportPickups.includes(pu));
+      setReveal('train', cfg.stationPickups.includes(pu));
+      setReveal('pickup-address', cfg.cityPickups.includes(pu));
+      setReveal('dropoff-address', cfg.cityDropoffs.includes(dr));
+      const tripType = [...tripRadios].find((r) => r.checked)?.value;
+      setReveal('return', tripType === 'round-trip');
+      setReveal('extra-stop-details', extraStop.checked);
+
+      // Disable same-point drop-off
+      for (const opt of Array.from(dropoff.options)) {
+        if (!opt.value) continue;
+        opt.disabled = opt.value === pu;
+      }
+      if (dropoff.value === pu) dropoff.value = '';
+    }
+
+    // ---- Pricing + summary -------------------------------------------
+    function computeCombo(pax: number, carPrice?: number, vanPrice?: number) {
+      if (pax <= CAR_SEATS) {
+        if (typeof carPrice !== 'number') return null;
+        return { combo: [['car', 1]] as [string, number][], total: carPrice };
+      }
+      if (pax <= VAN_SEATS) {
+        if (typeof vanPrice !== 'number') return null;
+        return { combo: [['van', 1]] as [string, number][], total: vanPrice };
+      }
+      if (typeof carPrice !== 'number' || typeof vanPrice !== 'number') return null;
+      let best: { combo: [string, number][]; total: number } | null = null;
+      const maxVans = Math.ceil(pax / VAN_SEATS) + 1;
+      for (let v = 0; v <= maxVans; v++) {
+        const remaining = Math.max(0, pax - v * VAN_SEATS);
+        const c = Math.ceil(remaining / CAR_SEATS);
+        if (v * VAN_SEATS + c * CAR_SEATS < pax) continue;
+        const total = v * vanPrice + c * carPrice;
+        const combo = [['van', v], ['car', c]].filter(([, n]) => (n as number) > 0) as [string, number][];
+        if (!best || total < best.total) best = { combo, total };
+      }
+      return best;
+    }
+
+    function vehicleSummaryLabel(combo: [string, number][]) {
+      return combo
+        .map(([type, n]) => `${n}× ${cfg.vehicle[type as 'car' | 'van'].model}`)
+        .join(' + ');
+    }
+
+    function refreshSummary() {
+      const pu = pickup.value;
+      const dr = dropoff.value;
+      const pax = Math.max(1, Math.min(20, parseInt(paxInput.value || '1', 10)));
+      const tripType = [...tripRadios].find((r) => r.checked)?.value ?? 'one-way';
+
+      sRoute.textContent = pu && dr ? `${pu} → ${dr}` : '—';
+      sPax.textContent = String(pax);
+      sType.textContent = tripType === 'round-trip' ? cfg.labels.tripRoundTrip : cfg.labels.tripOneWay;
+
+      const cell = pu && dr ? cfg.prices[pu]?.[dr] : undefined;
+      const computed = computeCombo(pax, cell?.car, cell?.van);
+      if (!computed) {
+        sVehicle.textContent = '—';
+        sTotal.textContent = pu && dr ? cfg.labels.unavailable : '—';
+        (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = '';
+        (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = '';
+        return;
+      }
+      let total = computed.total;
+      if (tripType === 'round-trip') total = Math.round(total * 2 * (1 - cfg.roundTripDiscount));
+      const veh = vehicleSummaryLabel(computed.combo);
+      sVehicle.textContent = veh;
+      sTotal.textContent = `€${total}`;
+      (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = veh;
+      (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = String(total);
+    }
+
+    // ---- Passenger stepper -------------------------------------------
+    function setPax(n: number) {
+      const clamped = Math.max(1, Math.min(20, Math.floor(n)));
+      paxInput.value = String(clamped);
+      paxDec.disabled = clamped <= 1;
+      paxInc.disabled = clamped >= 20;
+      refreshSummary();
+    }
+    paxInc.addEventListener('click', () => setPax(parseInt(paxInput.value || '1', 10) + 1));
+    paxDec.addEventListener('click', () => setPax(parseInt(paxInput.value || '1', 10) - 1));
+    paxInput.addEventListener('input', () => setPax(parseInt(paxInput.value || '1', 10) || 1));
+
+    // ---- Date min = today --------------------------------------------
+    const today = new Date().toISOString().slice(0, 10);
+    form.querySelectorAll<HTMLInputElement>('input[type="date"]').forEach((el) => {
+      el.min = today;
+    });
+
+    // ---- WhatsApp link prefill ---------------------------------------
+    function updateWhatsApp() {
+      if (!whatsappLink) return;
+      const pu = pickup.value || '?';
+      const dr = dropoff.value || '?';
+      const pax = paxInput.value;
+      const date = (form.querySelector<HTMLInputElement>('input[name="date"]')!).value;
+      const time = (form.querySelector<HTMLInputElement>('input[name="time"]')!).value;
+      const msg =
+        `Bonjour, je souhaite un devis : ${pu} → ${dr}` +
+        (date ? `, ${date}` : '') +
+        (time ? ` ${time}` : '') +
+        `, ${pax} pax.`;
+      whatsappLink.href = `https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(msg)}`;
+    }
+
+    // ---- Wire up events ----------------------------------------------
+    form.addEventListener('change', () => {
+      refreshConditionals();
+      refreshSummary();
+      updateWhatsApp();
+    });
+    form.addEventListener('input', updateWhatsApp);
+
+    // ---- Prefill from URL / hero event -------------------------------
+    function applySelection(pu?: string, dr?: string) {
+      if (pu && [...pickup.options].some((o) => o.value === pu)) pickup.value = pu;
+      if (dr && [...dropoff.options].some((o) => o.value === dr)) dropoff.value = dr;
+      refreshConditionals();
+      refreshSummary();
+      updateWhatsApp();
+    }
+    const params = new URLSearchParams(window.location.search);
+    applySelection(params.get('pickup') ?? undefined, params.get('dropoff') ?? undefined);
+    window.addEventListener('thedriver:quote-selected', (e: Event) => {
+      const { pickup: p, dropoff: d } = (e as CustomEvent).detail;
+      applySelection(p, d);
+      // Focus first empty required field
+      const firstEmpty = form.querySelector<HTMLInputElement>(
+        'input[required]:placeholder-shown, input[required]:not([value]), input[required][value=""]',
+      );
+      setTimeout(() => firstEmpty?.focus(), 600);
+    });
+
+    // ---- Submit ------------------------------------------------------
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.add('hidden');
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      // Build from_name + subject from current form values
+      const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
+      const last = (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim();
+      (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = `${first} ${last}`.trim();
+      (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value =
+        `Nouvelle réservation — ${pickup.value} → ${dropoff.value} — ${(form.querySelector<HTMLInputElement>('[name="date"]')!).value}`;
+
+      if (!cfg.accessKey) {
+        errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitLabel.textContent = submitBtn.dataset.loadingText || submitLabel.textContent!;
+      submitSpinner.classList.remove('hidden');
+
+      try {
+        const body = new FormData(form);
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body,
+        });
+        const out = await res.json().catch(() => ({} as any));
+        if (!res.ok || out.success === false) {
+          throw new Error(out.message || 'submission failed');
+        }
+
+        // Success: replace the form with the success card
+        if (successCard && successBody) {
+          const phoneCode = (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value;
+          const phoneNum = (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value;
+          successBody.textContent = successBody.textContent!.replace('{phone}', `${phoneCode} ${phoneNum}`);
+          form.hidden = true;
+          successCard.classList.remove('hidden');
+          successCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (err) {
+        errorEl.textContent = (err as Error).message || 'Submission failed.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitSpinner.classList.add('hidden');
+      }
+    });
+
+    // initial render
+    refreshConditionals();
+    refreshSummary();
+    updateWhatsApp();
+    setPax(parseInt(paxInput.value || '1', 10));
+  }
+
+  function run() {
+    document.querySelectorAll<HTMLFormElement>('[data-booking-form]').forEach(initForm);
+  }
+
+  // Reveal/open behaviour is now owned by BookingModal — this component only
+  // binds the form's own logic (fields, submit, conditional reveals, prefill).
+  document.addEventListener('astro:page-load', run);
+</script>

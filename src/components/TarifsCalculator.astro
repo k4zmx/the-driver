@@ -1,0 +1,122 @@
+---
+import { t, pathForRoute } from '../i18n';
+import QuotePicker from './QuotePicker.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const calc = t(locale).pages.rates.calculator;
+const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
+---
+
+<section class="tcalc" aria-labelledby="tcalc-heading">
+  <div class="tcalc-top-accent" aria-hidden="true"></div>
+  <div class="tcalc-bg" aria-hidden="true"><div class="tcalc-glow"></div></div>
+
+  <div class="tcalc-inner page-x mx-auto max-w-[640px] text-center">
+    <p class="tcalc-eyebrow" data-reveal>{calc.eyebrow}</p>
+    <h2 id="tcalc-heading" class="tcalc-heading" data-reveal data-reveal-delay="1">{calc.heading}</h2>
+    <p class="tcalc-sub" data-reveal data-reveal-delay="2">{calc.sub}</p>
+
+    <div class="tcalc-picker" data-reveal data-reveal-delay="3">
+      <QuotePicker locale={locale} variant="compact" targetHref={homeBooking} />
+    </div>
+
+    <p class="tcalc-hint" data-reveal data-reveal-delay="4">
+      <Icon name="arrow-down" size={14} strokeWidth={2} class="tcalc-hint-icon" />
+      <span>{calc.hint}</span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .tcalc {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 768px) {
+    .tcalc { padding-top: 96px; padding-bottom: 104px; }
+  }
+
+  .tcalc-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right, transparent,
+      color-mix(in oklab, var(--color-accent) 45%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+  .tcalc-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .tcalc-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 800px; height: 800px;
+    margin: -400px 0 0 -400px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 22%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(80px);
+    opacity: 0.7;
+  }
+
+  .tcalc-inner { position: relative; z-index: 1; }
+
+  .tcalc-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 14px;
+  }
+  .tcalc-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--color-cream);
+  }
+  @media (min-width: 768px) {
+    .tcalc-heading { font-size: 40px; }
+  }
+  .tcalc-sub {
+    margin: 14px auto 0;
+    max-width: 48ch;
+    font-size: 15px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  }
+  .tcalc-picker {
+    margin: 32px auto 0;
+    max-width: 440px;
+    text-align: left;
+  }
+  .tcalc-hint {
+    margin: 22px auto 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 65%, transparent);
+  }
+  .tcalc-hint-icon {
+    color: color-mix(in oklab, var(--color-accent) 85%, transparent);
+  }
+</style>

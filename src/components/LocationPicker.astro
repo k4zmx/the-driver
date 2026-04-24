@@ -1,0 +1,628 @@
+---
+/**
+ * Accessible combobox for From / To pickup-dropoff selection.
+ *
+ * Strategy: keeps the native <select> in the DOM (hidden, but functional)
+ * so existing form submission + change-event listeners + cross-picker
+ * disable logic keep working unchanged. A custom button + listbox sits
+ * visually on top and drives the native select by value-sync + change
+ * dispatch.
+ *
+ * On mobile (<768px) the listbox opens as a bottom sheet with backdrop.
+ * On desktop it opens as an inline dropdown beneath the trigger.
+ */
+interface Props {
+  /** Unique ID fragment — trigger + menu get suffixed IDs from this. */
+  uid: string;
+  /** Form field name — usually 'pickup' or 'dropoff'. */
+  name: string;
+  /** `data-role` attribute that existing scripts query. */
+  dataRole: string;
+  /** Floating label text ("DÉPART" / "ARRIVÉE"). */
+  label: string;
+  /** Empty-state trigger text. */
+  placeholder: string;
+  /** Locations to choose from. */
+  options: string[];
+  /** Which pin glyph to use (departure vs destination). */
+  iconType: 'from' | 'to';
+  /** Mobile bottom-sheet header (defaults to `label`). */
+  sheetTitle?: string;
+}
+
+const {
+  uid,
+  name,
+  dataRole,
+  label,
+  placeholder,
+  options,
+  iconType,
+  sheetTitle,
+} = Astro.props;
+
+const triggerId = `${uid}-trigger`;
+const menuId = `${uid}-menu`;
+const labelId = `${uid}-label`;
+const sheetHeaderId = `${uid}-sheet-header`;
+
+const fromPath = `<path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>`;
+const toPath = `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`;
+const iconSvg = iconType === 'from' ? fromPath : toPath;
+---
+
+<div class="lp" data-lp data-lp-role={dataRole}>
+  {/* Native select — hidden from users but drives form state + existing scripts */}
+  <select
+    id={`${uid}-native`}
+    class="lp-native"
+    name={name}
+    data-role={dataRole}
+    data-lp-native
+    autocomplete="off"
+    required
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <option value="">{placeholder}</option>
+    {options.map((opt: string) => (
+      <option value={opt}>{opt}</option>
+    ))}
+  </select>
+
+  {/* Custom combobox trigger */}
+  <button
+    type="button"
+    id={triggerId}
+    class="lp-trigger"
+    data-lp-trigger
+    role="combobox"
+    aria-haspopup="listbox"
+    aria-controls={menuId}
+    aria-expanded="false"
+    aria-labelledby={`${labelId} ${triggerId}-display`}
+  >
+    <svg
+      class="lp-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      set:html={iconSvg}
+    />
+    <span id={labelId} class="lp-label">{label}</span>
+    <span
+      id={`${triggerId}-display`}
+      class="lp-display is-empty"
+      data-lp-display
+      data-placeholder={placeholder}
+    >{placeholder}</span>
+    <svg
+      class="lp-chev"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+
+  {/* Backdrop — rendered always, shown only on mobile when menu is open */}
+  <div class="lp-backdrop" data-lp-backdrop aria-hidden="true"></div>
+
+  {/* Listbox menu */}
+  <div
+    id={menuId}
+    class="lp-menu"
+    data-lp-menu
+    role="listbox"
+    aria-labelledby={labelId}
+    hidden
+  >
+    <div class="lp-sheet-head" aria-hidden="true">
+      <span class="lp-grip"></span>
+      <p class="lp-sheet-title" id={sheetHeaderId}>{sheetTitle ?? label}</p>
+      <button
+        type="button"
+        class="lp-sheet-close"
+        data-lp-close
+        aria-label="Close"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="lp-options" role="none">
+      {options.map((opt: string) => (
+        <li role="none">
+          <button
+            type="button"
+            class="lp-option"
+            role="option"
+            data-lp-option
+            data-value={opt}
+            aria-selected="false"
+          >
+            <span class="lp-option-label">{opt}</span>
+            <svg class="lp-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .lp {
+    position: relative;
+  }
+
+  /* Native select — invisible but still in the DOM for form submit + scripts.
+     display:none is fine; forms still submit display:none controls. */
+  .lp-native {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------------
+     Trigger button — matches the previous .qp-field-inner look.
+     Floating small-caps label + selected value + chevron.
+     --------------------------------------------------------------- */
+  .lp-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 64px;
+    padding: 22px 44px 6px 52px;
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-input);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: pointer;
+    text-align: left;
+    transition:
+      border-color 200ms var(--ease-out),
+      background-color 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out);
+  }
+  .lp-trigger:hover {
+    border-color: color-mix(in oklab, var(--color-ink) 30%, var(--color-smoke));
+  }
+  .lp-trigger:focus-visible,
+  .lp-trigger[aria-expanded="true"] {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 25%, transparent);
+  }
+  .lp[data-filled="true"] .lp-trigger {
+    background: color-mix(in oklab, var(--color-cream) 80%, var(--color-paper));
+  }
+
+  .lp-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-accent);
+    pointer-events: none;
+  }
+
+  .lp-label {
+    position: absolute;
+    top: 10px;
+    left: 52px;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-graphite);
+    font-weight: 500;
+    pointer-events: none;
+  }
+
+  .lp-display {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lp-display.is-empty {
+    color: var(--color-graphite);
+    font-weight: 400;
+  }
+
+  .lp-chev {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--color-graphite);
+    pointer-events: none;
+    transition: transform 200ms var(--ease-out);
+  }
+  .lp-trigger[aria-expanded="true"] .lp-chev {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* ---------------------------------------------------------------
+     Backdrop — only visible on mobile bottom sheet
+     --------------------------------------------------------------- */
+  .lp-backdrop {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .lp-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: color-mix(in oklab, var(--color-ink) 42%, transparent);
+      opacity: 0;
+      transition: opacity 180ms var(--ease-out);
+      pointer-events: none;
+    }
+    .lp[data-lp-open="true"] .lp-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Menu — desktop: inline dropdown. Mobile: bottom sheet.
+     --------------------------------------------------------------- */
+  .lp-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    padding: 6px;
+    margin: 0;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 12px;
+    box-shadow:
+      0 12px 32px -8px rgba(0, 0, 0, 0.18),
+      0 2px 8px -2px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+    pointer-events: none;
+    z-index: 60;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .lp-menu[data-open="true"] {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .lp-menu[hidden] { display: block; }  /* kept in DOM for animation; hidden attr toggled off when shown */
+
+  @media (max-width: 767px) {
+    .lp-menu {
+      position: fixed;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 80;
+      max-height: 72vh;
+      border-radius: 20px 20px 0 0;
+      padding: 0 0 16px;
+      transform: translateY(16px);
+      transition: opacity 220ms var(--ease-out), transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.2);
+    }
+    .lp-menu[data-open="true"] {
+      transform: translateY(0);
+    }
+  }
+
+  /* Sheet header — hidden on desktop, visible on mobile */
+  .lp-sheet-head {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .lp-sheet-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 8px 16px 12px;
+      border-bottom: 1px solid var(--color-smoke);
+      position: relative;
+    }
+    .lp-grip {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--color-smoke);
+    }
+    .lp-sheet-title {
+      margin: 14px 0 0;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-graphite);
+    }
+    .lp-sheet-close {
+      margin-top: 10px;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--color-cream);
+      color: var(--color-ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 200ms var(--ease-out);
+    }
+    .lp-sheet-close:hover { background: var(--color-smoke); }
+    .lp-sheet-close svg { width: 18px; height: 18px; }
+  }
+
+  .lp-options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  @media (max-width: 767px) {
+    .lp-options {
+      padding: 8px 8px 0;
+      overflow-y: auto;
+      max-height: calc(72vh - 64px);
+    }
+  }
+
+  .lp-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  @media (max-width: 767px) {
+    .lp-option { min-height: 52px; padding: 0 16px; font-size: 16.5px; }
+  }
+  .lp-option:hover,
+  .lp-option:focus-visible {
+    background: var(--color-cream);
+    outline: none;
+  }
+  .lp-option[aria-selected="true"] {
+    background: color-mix(in oklab, var(--color-accent) 8%, var(--color-cream));
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .lp-option[aria-disabled="true"] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .lp-option-label { flex: 1; min-width: 0; }
+  .lp-option-check {
+    width: 14px;
+    height: 14px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 150ms var(--ease-out);
+  }
+  .lp-option[aria-selected="true"] .lp-option-check {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  // LocationPicker controller — each instance is a self-contained combobox
+  // that mirrors its state into a hidden <select data-role=...> so every
+  // existing script (QuotePicker, BookingForm, modal prefill) continues to
+  // work unchanged.
+
+  function initPicker(lp: HTMLElement) {
+    if (lp.dataset.lpInitted === 'true') return;
+    lp.dataset.lpInitted = 'true';
+
+    const native = lp.querySelector<HTMLSelectElement>('[data-lp-native]');
+    const trigger = lp.querySelector<HTMLButtonElement>('[data-lp-trigger]');
+    const menu = lp.querySelector<HTMLElement>('[data-lp-menu]');
+    const backdrop = lp.querySelector<HTMLElement>('[data-lp-backdrop]');
+    const closeBtn = lp.querySelector<HTMLButtonElement>('[data-lp-close]');
+    const display = lp.querySelector<HTMLElement>('[data-lp-display]');
+    const options = Array.from(lp.querySelectorAll<HTMLButtonElement>('[data-lp-option]'));
+    if (!native || !trigger || !menu || !display) return;
+
+    let isOpen = false;
+    let lastFocused: HTMLElement | null = null;
+
+    function syncFromNative() {
+      const val = native!.value;
+      const placeholder = display!.dataset.placeholder || '';
+      display!.textContent = val || placeholder;
+      display!.classList.toggle('is-empty', !val);
+      lp.dataset.filled = val ? 'true' : 'false';
+      options.forEach((opt) => {
+        const v = opt.dataset.value;
+        opt.setAttribute('aria-selected', String(v === val && v !== ''));
+      });
+    }
+
+    function syncDisabledState() {
+      // Reflect the native <option> disabled attr (set by QuotePicker's
+      // refreshDropoffOptions) onto the custom options.
+      const nativeOpts = native!.querySelectorAll<HTMLOptionElement>('option');
+      options.forEach((customOpt) => {
+        const val = customOpt.dataset.value;
+        const nOpt = Array.from(nativeOpts).find((o) => o.value === val);
+        if (nOpt?.disabled) {
+          customOpt.setAttribute('aria-disabled', 'true');
+          customOpt.tabIndex = -1;
+        } else {
+          customOpt.removeAttribute('aria-disabled');
+          customOpt.tabIndex = 0;
+        }
+      });
+    }
+
+    function setOpen(open: boolean) {
+      if (open === isOpen) return;
+      isOpen = open;
+      trigger!.setAttribute('aria-expanded', String(open));
+      lp.dataset.lpOpen = String(open);
+
+      if (open) {
+        lastFocused = document.activeElement as HTMLElement;
+        syncDisabledState();
+        menu!.hidden = false;
+        // Close any other open LocationPickers on the page
+        document.querySelectorAll<HTMLElement>('[data-lp]').forEach((other) => {
+          if (other !== lp && other.dataset.lpOpen === 'true') {
+            const t = other.querySelector<HTMLButtonElement>('[data-lp-trigger]');
+            t?.dispatchEvent(new CustomEvent('lp:force-close'));
+          }
+        });
+        requestAnimationFrame(() => {
+          menu!.dataset.open = 'true';
+        });
+        // Mobile: lock body scroll when bottom sheet is open
+        if (window.matchMedia('(max-width: 767px)').matches) {
+          document.body.style.overflow = 'hidden';
+        }
+        // Focus first selected, or first enabled option
+        setTimeout(() => {
+          const selected = options.find((o) => o.getAttribute('aria-selected') === 'true' && o.getAttribute('aria-disabled') !== 'true');
+          const firstEnabled = options.find((o) => o.getAttribute('aria-disabled') !== 'true');
+          (selected ?? firstEnabled)?.focus();
+        }, 40);
+      } else {
+        menu!.dataset.open = 'false';
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          if (lp.dataset.lpOpen === 'false') menu!.hidden = true;
+        }, 240);
+        // Restore focus to trigger only if focus was inside the menu
+        if (document.activeElement && menu!.contains(document.activeElement)) {
+          trigger!.focus();
+        }
+      }
+    }
+
+    function selectOption(opt: HTMLButtonElement) {
+      if (opt.getAttribute('aria-disabled') === 'true') return;
+      const val = opt.dataset.value || '';
+      native!.value = val;
+      // Dispatch native change event so existing scripts pick it up
+      native!.dispatchEvent(new Event('change', { bubbles: true }));
+      syncFromNative();
+      setOpen(false);
+    }
+
+    // --- wiring ---
+    trigger.addEventListener('click', () => setOpen(!isOpen));
+    trigger.addEventListener('lp:force-close' as any, () => setOpen(false));
+
+    trigger.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (isOpen) return;
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpen(true);
+      }
+    });
+
+    closeBtn?.addEventListener('click', () => setOpen(false));
+    backdrop?.addEventListener('click', () => setOpen(false));
+
+    options.forEach((opt, idx) => {
+      opt.addEventListener('click', () => selectOption(opt));
+      opt.addEventListener('keydown', (e: KeyboardEvent) => {
+        const enabled = options.filter((o) => o.getAttribute('aria-disabled') !== 'true');
+        const enabledIdx = enabled.indexOf(opt);
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectOption(opt);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          enabled[(enabledIdx + 1) % enabled.length]?.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          enabled[(enabledIdx - 1 + enabled.length) % enabled.length]?.focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          enabled[0]?.focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          enabled[enabled.length - 1]?.focus();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          setOpen(false);
+        } else if (e.key === 'Tab') {
+          // Close on Tab-out
+          setOpen(false);
+        }
+      });
+    });
+
+    // Click outside to close (desktop)
+    document.addEventListener('click', (e) => {
+      if (!lp.contains(e.target as Node) && isOpen) setOpen(false);
+    });
+
+    // Escape anywhere → close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) setOpen(false);
+    });
+
+    // Listen for external changes to native select (e.g. URL prefill, event-driven
+    // applySelection from BookingForm) and sync the display.
+    native.addEventListener('change', syncFromNative);
+
+    // Initial render
+    syncFromNative();
+    syncDisabledState();
+  }
+
+  function run() {
+    document.querySelectorAll<HTMLElement>('[data-lp]').forEach(initPicker);
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

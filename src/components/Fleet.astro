@@ -1,0 +1,469 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).fleet;
+
+const vehicles = [
+  {
+    key: 'car',
+    data: s.berline,
+    silhouette: `<path d="M19 17h2l.64-2.54c.24-.959.24-1.962 0-2.92l-1.07-4.27A3 3 0 0 0 17.66 5H6.34a3 3 0 0 0-2.91 2.27L2.36 11.54c-.24.958-.24 1.961 0 2.92L3 17h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17h10"/>`,
+  },
+  {
+    key: 'van',
+    data: s.van,
+    silhouette: `<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>`,
+  },
+];
+---
+
+<section id="fleet" class="fleet section-y" aria-labelledby="fleet-heading">
+  <div class="page-x mx-auto max-w-[1200px]">
+    <header class="max-w-[640px]" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="fleet-heading" class="h2 text-balance">{s.heading}</h2>
+      {s.subheading && <p class="body-lg mt-3">{s.subheading}</p>}
+    </header>
+
+    <div class="fleet-grid mt-12 md:mt-16">
+      {vehicles.map((v, i) => (
+        <article
+          class="fleet-card group"
+          data-reveal
+          data-reveal-dir={i === 0 ? 'left' : 'right'}
+          data-reveal-delay="1"
+        >
+          <div class="fleet-image">
+            <span class="fleet-image-glow" aria-hidden="true"></span>
+            <svg class="fleet-silhouette placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={v.silhouette} />
+          </div>
+
+          <div class="fleet-body">
+            <p class="fleet-eyebrow">{v.data.label}</p>
+            <h3 class="fleet-title">{v.data.model}</h3>
+
+            <ul class="fleet-specs">
+              <li class="fleet-spec">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>{v.data.capacity}</span>
+              </li>
+              <li class="fleet-spec">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="7" width="20" height="14" rx="2"/>
+                  <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>{v.data.luggage}</span>
+              </li>
+            </ul>
+
+            <ul class="fleet-features accent-bar">
+              {v.data.features.map((feature: string, fi: number) => (
+                <li class="fleet-feature" style={`--fi: ${fi}`}>{feature}</li>
+              ))}
+            </ul>
+
+            <div class="fleet-bestfor">
+              <p class="fleet-bestfor-label">{s.berline?.bestForHeading ?? 'Idéal pour'}</p>
+            </div>
+
+            <div class="fleet-footer">
+              <p class="fleet-price">{v.data.price}</p>
+              <button
+                type="button"
+                class="fleet-cta"
+                data-press
+                data-fleet-book
+                data-vehicle={v.key}
+              >
+                <span>{s.cta}</span>
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    {/* Combo explainer — styled as a standalone callout, not another card */}
+    <aside class="fleet-combo mt-10 md:mt-14" data-reveal data-reveal-delay="2">
+      <div class="fleet-combo-head">
+        <span class="fleet-combo-mark" aria-hidden="true">9+</span>
+        <div>
+          <h4 class="fleet-combo-title">{s.combine.heading}</h4>
+        </div>
+      </div>
+      <dl class="fleet-combo-grid">
+        {s.combine.examples.map((ex: { pax: string; combo: string }) => (
+          <div class="fleet-combo-row">
+            <dt class="fleet-combo-pax">{ex.pax}</dt>
+            <dd class="fleet-combo-mix">
+              <span class="fleet-combo-arrow" aria-hidden="true">→</span>
+              {ex.combo}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p class="fleet-combo-foot">{s.combine.footer}</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .fleet {
+    background: var(--color-cream);
+    position: relative;
+  }
+  /* Subtle top/bottom hairlines — chapter markers w/o a full background change */
+  .fleet::before,
+  .fleet::after {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: color-mix(in oklab, var(--color-smoke) 90%, transparent);
+  }
+  .fleet::before { top: 0; }
+  .fleet::after { bottom: 0; }
+
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 768px) {
+    .fleet-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  }
+
+  .fleet-card {
+    position: relative;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition:
+      transform 300ms var(--ease-out),
+      border-color 300ms var(--ease-out),
+      box-shadow 320ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .fleet-card:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in oklab, var(--color-ink) 25%, var(--color-smoke));
+      box-shadow: 0 22px 60px -20px rgba(26, 26, 26, 0.16);
+    }
+  }
+
+  /* Image area — better gradient background + drift silhouette on hover */
+  .fleet-image {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        ellipse at 30% 30%,
+        color-mix(in oklab, var(--color-cream) 70%, var(--color-paper)) 0%,
+        var(--color-cream) 55%
+      );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-graphite);
+  }
+  .fleet-image-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 80%, var(--color-accent-glow) 0%, transparent 55%);
+    opacity: 0;
+    transition: opacity 420ms var(--ease-out);
+  }
+  .fleet-card:hover .fleet-image-glow { opacity: 1; }
+  .fleet-silhouette {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    transition: transform 600ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .fleet-card:hover .fleet-silhouette { transform: translateX(12px); }
+  }
+
+  .fleet-body {
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  @media (min-width: 768px) {
+    .fleet-body { padding: 32px 32px 28px; }
+  }
+
+  .fleet-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin: 0;
+  }
+  .fleet-title {
+    margin: 6px 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .fleet-title { font-size: 32px; }
+  }
+
+  .fleet-specs {
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fleet-spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    font-size: 13px;
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .fleet-spec svg { width: 14px; height: 14px; color: var(--color-graphite); }
+
+  .fleet-features {
+    margin: 22px 0 0;
+    padding: 0 0 0 16px;
+    list-style: none;
+    border-left: 2px solid var(--color-smoke);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fleet-feature {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-graphite);
+  }
+
+  /* "Best for" row — styled as a distinct tag-like block */
+  .fleet-bestfor {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: color-mix(in oklab, var(--color-accent) 6%, var(--color-cream));
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklab, var(--color-accent) 20%, transparent);
+  }
+  .fleet-bestfor-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .fleet-bestfor-label::before {
+    content: '★ ';
+    color: var(--color-accent);
+  }
+
+  /* Footer row — price + CTA side-by-side on desktop, stacked on mobile */
+  .fleet-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-smoke);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  @media (min-width: 640px) {
+    .fleet-footer {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .fleet-price {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .fleet-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color 220ms var(--ease-out),
+      transform 180ms var(--ease-out),
+      box-shadow 260ms var(--ease-out);
+  }
+  .fleet-cta:hover {
+    background: var(--color-accent);
+    box-shadow: 0 12px 28px -10px color-mix(in oklab, var(--color-accent) 75%, transparent);
+  }
+  .fleet-cta:active { transform: scale(0.98); }
+  .fleet-cta:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+
+  /* ---------------------------------------------------------------
+     Combo callout — distinct from cards, not another card.
+     Warm tinted block with bigger typography on numbers.
+     --------------------------------------------------------------- */
+  .fleet-combo {
+    position: relative;
+    padding: 28px 24px;
+    border-radius: var(--radius-card);
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-accent) 8%, var(--color-cream)) 0%,
+        var(--color-cream) 70%
+      );
+    border: 1px solid color-mix(in oklab, var(--color-accent) 20%, var(--color-smoke));
+  }
+  @media (min-width: 768px) {
+    .fleet-combo { padding: 32px 40px; }
+  }
+
+  .fleet-combo-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .fleet-combo-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    height: 56px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .fleet-combo-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .fleet-combo-title { font-size: 26px; }
+  }
+
+  .fleet-combo-grid {
+    margin: 22px 0 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .fleet-combo-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  }
+  .fleet-combo-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: var(--color-paper);
+    border-radius: 12px;
+    border: 1px solid color-mix(in oklab, var(--color-smoke) 80%, transparent);
+  }
+  .fleet-combo-pax {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .fleet-combo-mix {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--color-graphite);
+    margin: 0;
+  }
+  .fleet-combo-arrow { color: var(--color-accent); }
+
+  .fleet-combo-foot {
+    margin: 18px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-graphite);
+  }
+</style>
+
+<script>
+  // Each "Réserver cette voiture" opens the booking modal (Prompt-1 component).
+  // Passes vehicle preference in the event detail so future prefill hooks can use it.
+  function run() {
+    document.querySelectorAll<HTMLButtonElement>('[data-fleet-book]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const vehicle = btn.dataset.vehicle || '';
+        const hasModal = !!document.querySelector('[data-booking-modal]');
+        if (hasModal) {
+          window.dispatchEvent(
+            new CustomEvent('thedriver:open-booking', { detail: { vehicle } }),
+          );
+        } else {
+          // Cross-page fallback: navigate home with the hash; modal auto-opens there.
+          location.assign(
+            `${location.pathname.split('/').slice(0, -1).join('/') || '/'}#booking-form`,
+          );
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

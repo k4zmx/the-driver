@@ -1,0 +1,327 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const strings = t(locale).form;
+
+// Labels for the close button + drag handle, pulled from existing i18n where available.
+// We reuse the form heading as the modal title so it's meaningful to screen readers.
+const titleId = 'booking-modal-title';
+---
+
+<div
+  class="modal"
+  data-booking-modal
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={titleId}
+  aria-hidden="true"
+  hidden
+>
+  {/* Backdrop — click to close, fades in with the panel */}
+  <div class="modal-backdrop" data-modal-backdrop aria-hidden="true"></div>
+
+  {/* Panel — bottom sheet on mobile, centered dialog on desktop */}
+  <div class="modal-panel" role="document">
+    <div class="modal-grip md:hidden" aria-hidden="true"></div>
+
+    <button
+      type="button"
+      class="modal-close"
+      data-modal-close
+      aria-label={locale === 'fr' ? 'Fermer' : locale === 'es' ? 'Cerrar' : locale === 'it' ? 'Chiudi' : 'Close'}
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+
+    {/* Accessible title — visually hidden because the slotted form has its own heading */}
+    <h2 id={titleId} class="sr-only">{strings.heading}</h2>
+
+    <div class="modal-body">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  @media (min-width: 768px) {
+    .modal { align-items: center; padding: 32px; }
+  }
+  .modal[hidden] { display: none; }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--color-ink) 42%, transparent);
+    opacity: 0;
+    transition: opacity 240ms var(--ease-out);
+  }
+  .modal.is-open .modal-backdrop { opacity: 1; }
+
+  .modal-panel {
+    position: relative;
+    width: 100%;
+    max-height: 92vh;
+    background: var(--color-paper);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.18);
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms var(--ease-out);
+    overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .modal-panel {
+      width: min(640px, calc(100vw - 64px));
+      max-height: min(88vh, 820px);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.25);
+      transform: translateY(16px) scale(0.985);
+    }
+  }
+  .modal.is-open .modal-panel {
+    transform: none;
+    opacity: 1;
+  }
+
+  .modal-grip {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-smoke);
+    z-index: 1;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .modal-close:hover { background: var(--color-smoke); }
+  .modal-close:active { transform: scale(0.94); }
+  .modal-close:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+
+  .modal-body {
+    padding-top: 24px;
+    padding-bottom: 16px;
+    overflow-y: auto;
+    max-height: inherit;
+    /* Tighter internal paddings than the old section-y */
+  }
+  @media (min-width: 768px) {
+    .modal-body { padding-top: 20px; }
+  }
+
+  /* Neutralise the slotted <section>'s vertical padding + max width — the modal
+     controls its own chrome. We scope via :global so Astro's scoped selectors
+     don't hide this rule from the slotted component. */
+  .modal-body :global(#booking-form) {
+    padding: 0;
+  }
+  .modal-body :global(#booking-form .section-y) {
+    padding-top: 4px;
+    padding-bottom: 24px;
+  }
+  .modal-body :global(#booking-form .page-x) {
+    padding-left: 20px;
+    padding-right: 20px;
+    max-width: none;
+  }
+  @media (min-width: 768px) {
+    .modal-body :global(#booking-form .page-x) {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+  /* Inside the modal the form shouldn't also have its own card chrome on desktop */
+  .modal-body :global(#booking-form form[data-booking-form]) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* Reduced-motion: no slide, just swap opacity */
+  @media (prefers-reduced-motion: reduce) {
+    .modal-panel,
+    .modal-backdrop {
+      transition: opacity 120ms linear;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Booking modal controller — global. Opens on:
+  //   • thedriver:open-booking custom event (optionally with {pickup, dropoff} detail)
+  //   • any click on a[href*="#booking-form"] on the same page
+  //   • page load if URL contains ?pickup=... / ?dropoff=... / #booking-form
+  // Close on: Esc, backdrop click, X button.
+  function run() {
+    const modalRef = document.querySelector<HTMLElement>('[data-booking-modal]');
+    if (!modalRef) return;
+    const modal = modalRef;
+
+    const backdrop = modal.querySelector<HTMLElement>('[data-modal-backdrop]');
+    const closeBtn = modal.querySelector<HTMLButtonElement>('[data-modal-close]');
+    const panelRef = modal.querySelector<HTMLElement>('.modal-panel');
+    if (!panelRef) return;
+    const panel = panelRef;
+
+    let lastFocus: HTMLElement | null = null;
+    let savedScroll = 0;
+
+    function focusableInside(root: HTMLElement) {
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => !el.hasAttribute('hidden') && el.offsetParent !== null);
+    }
+
+    function open(detail?: { pickup?: string; dropoff?: string }) {
+      if (modal.getAttribute('aria-hidden') === 'false') {
+        // Already open — just re-dispatch the prefill event so the form updates.
+        if (detail) {
+          window.dispatchEvent(new CustomEvent('thedriver:quote-selected', { detail }));
+        }
+        return;
+      }
+      lastFocus = document.activeElement as HTMLElement | null;
+      savedScroll = window.scrollY;
+
+      modal.hidden = false;
+      // Double rAF so the initial styles apply before is-open kicks in (smooth transition)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+      });
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      // Fire prefill — the slotted BookingForm already listens for this
+      if (detail) {
+        window.dispatchEvent(new CustomEvent('thedriver:quote-selected', { detail }));
+      }
+
+      // Focus first focusable inside (close button or first input)
+      setTimeout(() => {
+        const focusables = focusableInside(panel);
+        (focusables[0] ?? closeBtn)?.focus();
+      }, 120);
+    }
+
+    function close() {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      // Wait for the closing transition, then fully hide
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) modal.hidden = true;
+      }, 340);
+      // Restore focus + scroll position (preserves user's place on the page)
+      lastFocus?.focus({ preventScroll: true });
+      window.scrollTo({ top: savedScroll, behavior: 'instant' as ScrollBehavior });
+    }
+
+    // --- wire-up ---
+    backdrop?.addEventListener('click', close);
+    closeBtn?.addEventListener('click', close);
+
+    // Esc to close + focus trap
+    document.addEventListener('keydown', (e) => {
+      if (modal.getAttribute('aria-hidden') === 'true') return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusables = focusableInside(panel!);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    // Global open hook
+    window.addEventListener('thedriver:open-booking', ((e: Event) => {
+      const detail = (e as CustomEvent).detail as { pickup?: string; dropoff?: string } | undefined;
+      open(detail);
+    }) as EventListener);
+
+    // Quote-selected also implies the user wants to book — open the modal
+    window.addEventListener('thedriver:quote-selected', ((e: Event) => {
+      const detail = (e as CustomEvent).detail as { pickup?: string; dropoff?: string } | undefined;
+      // Only open via this path if we're not already open (prefill-refire above handles it)
+      if (modal.getAttribute('aria-hidden') === 'true') open(detail);
+    }) as EventListener);
+
+    // Any link targeting #booking-form on this page → open modal, suppress navigation
+    document.addEventListener('click', (e) => {
+      const a = (e.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a) return;
+      const raw = a.getAttribute('href') || '';
+      if (!raw.includes('#booking-form')) return;
+      const url = new URL(raw, location.href);
+      // Cross-page link? Let the browser navigate, the destination page will auto-open.
+      if (url.pathname !== location.pathname) return;
+      e.preventDefault();
+      open();
+    });
+
+    // Auto-open on arrival if the URL signals a booking intent
+    const params = new URLSearchParams(location.search);
+    if (location.hash === '#booking-form' || params.get('pickup') || params.get('dropoff')) {
+      const detail: { pickup?: string; dropoff?: string } = {};
+      const p = params.get('pickup');
+      const d = params.get('dropoff');
+      if (p) detail.pickup = p;
+      if (d) detail.dropoff = d;
+      // Small delay so the page layout settles + reveals run before we interrupt
+      setTimeout(() => open(detail), 300);
+    }
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

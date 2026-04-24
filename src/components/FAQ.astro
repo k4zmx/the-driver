@@ -1,0 +1,278 @@
+---
+import { t, pathForRoute } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).faq;
+
+const WA_NUMBER = '33628658127';
+const waLink = `https://wa.me/${WA_NUMBER}`;
+const faqPageHref = `${pathForRoute('faqContact', locale)}#faq`;
+---
+
+<section id="faq" class="hfaq section-y has-grain" aria-labelledby="faq-heading">
+  <div class="hfaq-bg" aria-hidden="true">
+    <div class="hfaq-glow"></div>
+  </div>
+
+  <div class="page-x mx-auto max-w-[760px] relative">
+    <header class="hfaq-head" data-reveal>
+      <div class="hfaq-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="faq-heading" class="h2 text-balance">{s.heading}</h2>
+      <p class="body-lg mt-3">
+        {s.subPrefix}{' '}
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-underline text-[color:var(--color-ink)]"
+        >{s.subCta} →</a>
+      </p>
+    </header>
+
+    <ul class="hfaq-list mt-10 md:mt-12" data-reveal data-reveal-delay="1">
+      {s.items.map((item: { q: string; a: string }, i: number) => (
+        <li class="hfaq-row">
+          <details class="hfaq-item">
+            <summary class="hfaq-summary">
+              <span class="hfaq-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="hfaq-question">{item.q}</span>
+              <span class="hfaq-toggle" aria-hidden="true">
+                <span class="whyus-bar whyus-bar-h"></span>
+                <span class="whyus-bar whyus-bar-v"></span>
+              </span>
+            </summary>
+            <div class="hfaq-answer">
+              <p>{item.a}</p>
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+
+    <div class="hfaq-footer mt-10 md:mt-12" data-reveal>
+      <a href={faqPageHref} class="hfaq-see-all" data-press>
+        <span>{s.seeAll ?? 'See all questions'}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hfaq {
+    position: relative;
+    background: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  /* Background mood — a barely-visible accent glow bottom-right */
+  .hfaq-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hfaq-glow {
+    position: absolute;
+    bottom: -15%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 14%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(60px);
+    opacity: 0.7;
+  }
+  @media (max-width: 767px) {
+    .hfaq-glow { width: 360px; height: 360px; filter: blur(50px); }
+  }
+
+  .hfaq-head {
+    position: relative;
+  }
+  /* Decorative question-mark glyph — editorial marker */
+  .hfaq-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-accent) 10%, var(--color-paper));
+    border: 1px solid color-mix(in oklab, var(--color-accent) 25%, transparent);
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    box-shadow: 0 4px 14px -6px color-mix(in oklab, var(--color-accent) 40%, transparent);
+  }
+  .hfaq-mark svg { width: 20px; height: 20px; }
+
+  .hfaq-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .hfaq-row {
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    margin-bottom: 10px;
+    transition: border-color 240ms var(--ease-out), transform 240ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .hfaq-row:hover {
+      border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    }
+  }
+
+  .hfaq-item summary::-webkit-details-marker { display: none; }
+  .hfaq-item summary::marker { content: ''; }
+
+  .hfaq-summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    min-height: 64px;
+  }
+  @media (min-width: 768px) {
+    .hfaq-summary { padding: 22px 26px; }
+  }
+  .hfaq-summary:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 45%, transparent);
+    outline-offset: 2px;
+    border-radius: var(--radius-card);
+  }
+
+  /* Accent-dot style numeric marker — replaces generic bullet, adds visual rhythm */
+  .hfaq-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-accent) 12%, var(--color-cream));
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .hfaq-item[open] .hfaq-num {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .hfaq-question {
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: var(--color-ink);
+    transition: color 200ms var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .hfaq-question { font-size: 18px; }
+  }
+  .hfaq-summary:hover .hfaq-question,
+  .hfaq-item[open] .hfaq-question {
+    color: var(--color-accent);
+  }
+
+  .hfaq-toggle {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid var(--color-smoke);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .hfaq-item[open] .hfaq-toggle {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  .hfaq-item[open] .whyus-bar-v {
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+
+  .hfaq-answer {
+    padding: 0 26px 20px;
+    max-width: 62ch;
+  }
+  @media (max-width: 767px) {
+    .hfaq-answer { padding: 0 22px 18px; }
+  }
+  .hfaq-answer p {
+    margin: 0;
+    padding-left: 50px; /* aligns under the question text (num + gap) */
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-graphite);
+  }
+  @media (max-width: 767px) {
+    .hfaq-answer p { padding-left: 0; font-size: 15px; }
+  }
+
+  /* See-all CTA */
+  .hfaq-footer {
+    display: flex;
+    justify-content: center;
+  }
+  .hfaq-see-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-ink);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  .hfaq-see-all:hover { background: var(--color-ink); color: var(--color-paper); }
+  .hfaq-see-all:active { transform: scale(0.98); }
+  .hfaq-see-all svg {
+    width: 16px; height: 16px;
+    transition: transform 200ms var(--ease-out);
+  }
+  .hfaq-see-all:hover svg { transform: translateX(3px); }
+</style>

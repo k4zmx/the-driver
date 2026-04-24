@@ -1,0 +1,313 @@
+---
+import { PICKUP_POINTS, DROP_POINTS, PRICES } from '../data/routes.js';
+import { t } from '../i18n';
+import LocationPicker from './LocationPicker.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+  /** Optional visual variant — 'hero' gets bigger price, 'compact' smaller. */
+  variant?: 'hero' | 'compact';
+  /**
+   * Where the submit button should go.
+   * - Same-page: leave default '#booking-form' (script smooth-scrolls to it).
+   * - Different page: pass an absolute path like '/#booking-form' (FR) or '/en/#booking-form'.
+   *   The form GET-submits naturally; the destination page reads the query params and prefills.
+   */
+  targetHref?: string;
+}
+
+const { locale, variant = 'hero', targetHref = '#booking-form' } = Astro.props;
+const strings = t(locale);
+const hero = strings.hero;
+
+// Serialise prices + strings for the inline script (no external fetch).
+const dataBlob = {
+  prices: PRICES,
+  labels: {
+    from: hero.price.from,
+    empty: hero.price.empty,
+    unavailable: hero.price.unavailable,
+  },
+};
+
+const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
+---
+
+<form
+  class:list={[
+    'quote-picker relative rounded-[var(--radius-card)] bg-[color:var(--color-paper)] border border-[color:var(--color-smoke)] p-5 flex flex-col gap-3',
+    variant === 'hero' ? 'md:p-7 lg:p-8 shadow-[var(--shadow-card)]' : 'md:p-6',
+  ]}
+  action={targetHref}
+  method="get"
+  data-quote-picker
+  data-picker-id={uid}
+  novalidate
+>
+  <script is:inline type="application/json" data-picker-data={uid} set:html={JSON.stringify(dataBlob)} />
+
+  {/* Pickup — custom combobox (hidden native select inside drives form state) */}
+  <LocationPicker
+    uid={`${uid}-pickup`}
+    name="pickup"
+    dataRole="pickup"
+    label={hero.pickup.label}
+    placeholder={hero.pickup.placeholder}
+    options={PICKUP_POINTS}
+    iconType="from"
+  />
+
+  {/* Connector — soft dashed line with centered arrow dot */}
+  <div class="qp-connector" aria-hidden="true">
+    <span class="qp-connector-line"></span>
+    <span class="qp-connector-dot">
+      <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <polyline points="19 12 12 19 5 12"/>
+      </svg>
+    </span>
+    <span class="qp-connector-line"></span>
+  </div>
+
+  {/* Drop-off */}
+  <LocationPicker
+    uid={`${uid}-dropoff`}
+    name="dropoff"
+    dataRole="dropoff"
+    label={hero.dropoff.label}
+    placeholder={hero.dropoff.placeholder}
+    options={DROP_POINTS}
+    iconType="to"
+  />
+
+  {/* Divider + price */}
+  <div class="pt-4 mt-1 border-t border-[color:var(--color-smoke)]">
+    <div class="meta-label mb-1" data-role="price-label">{hero.price.empty}</div>
+    <div
+      class:list={[
+        'font-display font-medium tracking-[-0.02em] text-[color:var(--color-ink)] leading-none tabular-nums',
+        variant === 'hero' ? 'text-[48px] md:text-[56px] lg:text-[64px]' : 'text-[36px]',
+      ]}
+      data-role="price-display"
+      aria-live="polite"
+    >
+      —
+    </div>
+  </div>
+
+  {/* CTA */}
+  <button
+    type="submit"
+    class="btn-primary w-full mt-2"
+    data-role="submit"
+    data-press
+    aria-disabled="true"
+    disabled
+  >
+    <span>{hero.cta}</span>
+    <svg
+      class="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  </button>
+</form>
+
+<style>
+  /* Connector between the two LocationPickers — dashed line + arrow dot */
+  .qp-connector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 20px;
+    padding: 0 20px;
+    color: var(--color-graphite);
+    opacity: 0.75;
+  }
+  .qp-connector-line {
+    flex: 1;
+    height: 1px;
+    background-image: linear-gradient(to right, var(--color-smoke) 50%, transparent 50%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+  .qp-connector-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    width: 22px;
+    border-radius: 999px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  // Progressive enhancement for the quote picker:
+  //  - live price updates
+  //  - disabled duplicate point in drop-off
+  //  - price count-up animation
+  //  - on submit: scroll to #booking-form and broadcast selection
+  // Without JS: form still GET-submits to #booking-form with pickup/dropoff params.
+
+  type PriceCell = { car?: number; van?: number };
+  type PriceMatrix = Record<string, Record<string, PriceCell>>;
+  type Labels = { from: string; empty: string; unavailable: string };
+
+  function initPicker(form: HTMLFormElement) {
+    const id = form.dataset.pickerId;
+    const dataEl = document.querySelector<HTMLScriptElement>(
+      `script[data-picker-data="${id}"]`,
+    );
+    if (!dataEl?.textContent) return;
+
+    const { prices, labels } = JSON.parse(dataEl.textContent) as {
+      prices: PriceMatrix;
+      labels: Labels;
+    };
+
+    const pickup = form.querySelector<HTMLSelectElement>('[data-role="pickup"]')!;
+    const dropoff = form.querySelector<HTMLSelectElement>('[data-role="dropoff"]')!;
+    const priceEl = form.querySelector<HTMLElement>('[data-role="price-display"]')!;
+    const labelEl = form.querySelector<HTMLElement>('[data-role="price-label"]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-role="submit"]')!;
+
+    let currentPrice = 0;
+    let wasPriced = false;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    function liftCard() {
+      if (reduceMotion) return;
+      form.classList.add('is-lifted');
+      setTimeout(() => form.classList.remove('is-lifted'), 600);
+    }
+
+    function refreshDropoffOptions() {
+      const from = pickup.value;
+      for (const opt of Array.from(dropoff.options)) {
+        if (!opt.value) continue;
+        opt.disabled = opt.value === from;
+      }
+      if (dropoff.value && dropoff.value === from) dropoff.value = '';
+    }
+
+    function animatePrice(to: number) {
+      const from = currentPrice;
+      if (from === to) {
+        priceEl.textContent = `€${to}`;
+        return;
+      }
+      const duration = 400;
+      const start = performance.now();
+      function step(now: number) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        const v = Math.round(from + (to - from) * eased);
+        priceEl.textContent = `€${v}`;
+        if (t < 1) requestAnimationFrame(step);
+        else currentPrice = to;
+      }
+      requestAnimationFrame(step);
+    }
+
+    function setFilled() {
+      pickup.dataset.filled = pickup.value ? 'true' : 'false';
+      dropoff.dataset.filled = dropoff.value ? 'true' : 'false';
+    }
+
+    function update() {
+      refreshDropoffOptions();
+      setFilled();
+      const from = pickup.value;
+      const to = dropoff.value;
+
+      if (!from || !to) {
+        priceEl.textContent = '—';
+        labelEl.textContent = labels.empty;
+        submit.setAttribute('aria-disabled', 'true');
+        submit.disabled = true;
+        currentPrice = 0;
+        wasPriced = false;
+        return;
+      }
+
+      const cell = prices[from]?.[to];
+      const carPrice = cell?.car;
+
+      if (typeof carPrice !== 'number') {
+        priceEl.textContent = '—';
+        labelEl.textContent = labels.unavailable;
+        submit.setAttribute('aria-disabled', 'true');
+        submit.disabled = true;
+        currentPrice = 0;
+        wasPriced = false;
+        return;
+      }
+
+      labelEl.textContent = labels.from;
+      submit.setAttribute('aria-disabled', 'false');
+      submit.disabled = false;
+
+      if (reduceMotion) {
+        priceEl.textContent = `€${carPrice}`;
+        currentPrice = carPrice;
+      } else {
+        animatePrice(carPrice);
+      }
+
+      // Card lifts once, the first moment a real price lands.
+      if (!wasPriced) liftCard();
+      wasPriced = true;
+    }
+
+    pickup.addEventListener('change', update);
+    dropoff.addEventListener('change', update);
+
+    form.addEventListener('submit', (e) => {
+      if (submit.disabled) {
+        e.preventDefault();
+        return;
+      }
+      const detail = { pickup: pickup.value, dropoff: dropoff.value };
+
+      // Same-page case: a BookingModal is listening; open it + prefill, no navigation.
+      const modalHere = document.querySelector('[data-booking-modal]');
+      if (modalHere) {
+        e.preventDefault();
+        const url = new URL(window.location.href);
+        url.searchParams.set('pickup', pickup.value);
+        url.searchParams.set('dropoff', pickup.value ? pickup.value : '');
+        url.searchParams.set('dropoff', dropoff.value);
+        history.replaceState(null, '', url.toString());
+        window.dispatchEvent(new CustomEvent('thedriver:open-booking', { detail }));
+        return;
+      }
+
+      // Cross-page (e.g. on the Tarifs page): broadcast the selection, then let
+      // the form GET-submit naturally so the destination page auto-opens the modal.
+      window.dispatchEvent(new CustomEvent('thedriver:quote-selected', { detail }));
+    });
+
+    // Prefill from URL (if user lands directly on /?pickup=CDG&dropoff=Paris)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('pickup')) pickup.value = params.get('pickup') ?? '';
+    if (params.get('dropoff')) dropoff.value = params.get('dropoff') ?? '';
+    update();
+  }
+
+  function run() {
+    document.querySelectorAll<HTMLFormElement>('[data-quote-picker]').forEach(initPicker);
+  }
+  // Re-run after ClientRouter navigations (astro:page-load fires on first load too).
+  document.addEventListener('astro:page-load', run);
+</script>

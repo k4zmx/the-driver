@@ -1,0 +1,135 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.rates.hero;
+---
+
+<section class="th has-grain" aria-labelledby="th-heading">
+  <div class="th-bg" aria-hidden="true">
+    <div class="th-glow"></div>
+  </div>
+
+  <div class="th-inner page-x mx-auto max-w-[760px] text-center">
+    <p class="th-eyebrow" data-reveal>{s.eyebrow}</p>
+    <h1 id="th-heading" class="th-heading text-balance" data-reveal data-reveal-delay="1">{s.heading}</h1>
+    <p class="th-sub" data-reveal data-reveal-delay="2">{s.sub}</p>
+
+    <ul class="th-trust" data-reveal data-reveal-delay="3">
+      {s.trustRow.map((item: string, i: number) => (
+        <>
+          {i > 0 && <li class="th-trust-sep" aria-hidden="true"></li>}
+          <li class="th-trust-item">{item}</li>
+        </>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .th {
+    position: relative;
+    background: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 768px) {
+    .th { padding-top: 96px; padding-bottom: 104px; }
+  }
+
+  .th-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .th-glow {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    width: 800px;
+    height: 800px;
+    margin-left: -400px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--color-accent-glow) 0%,
+      transparent 60%
+    );
+    filter: blur(70px);
+    opacity: 0.7;
+  }
+  @media (max-width: 767px) {
+    .th-glow { width: 560px; height: 560px; margin-left: -280px; filter: blur(50px); }
+  }
+
+  .th-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .th-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 16px;
+  }
+  .th-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    max-width: 16ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (min-width: 768px) {
+    .th-heading { font-size: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .th-heading { font-size: 64px; }
+  }
+  .th-sub {
+    margin: 22px auto 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-graphite);
+  }
+  @media (min-width: 768px) {
+    .th-sub { font-size: 17px; }
+  }
+
+  .th-trust {
+    list-style: none;
+    padding: 0;
+    margin: 28px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--color-graphite);
+    font-weight: 500;
+  }
+  .th-trust-sep {
+    width: 4px; height: 4px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-graphite) 28%, transparent);
+  }
+  .th-trust-item { line-height: 1.4; }
+</style>

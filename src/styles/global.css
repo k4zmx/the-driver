@@ -1,0 +1,574 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Design tokens
+   Tailwind v4 reads these and generates utilities automatically
+   (bg-cream, text-ink, border-smoke, font-display, shadow-card,
+   rounded-card, etc).
+   --------------------------------------------------------------- */
+@theme {
+  /* Colors — backgrounds & text */
+  --color-cream: #F8F5EE;
+  --color-paper: #FFFFFF;
+  --color-ink: #1A1A1A;
+  --color-graphite: #4A4A48;
+  --color-smoke: #E8E3D8;
+
+  /* Accent (single lead accent — use sparingly: CTA, active state, focus ring) */
+  --color-accent: #C94F3A;
+  --color-accent-ink: #A33D2B;
+
+  /* Dark surface — used for the navbar "floating layer" and contrast sections.
+     Warm near-black (not pure #000), pairs with the cream body bg. */
+  --color-night: #14131A;
+  --color-night-soft: #1F1D25;
+
+  /* Accent glow — tinted radial gradient base for hero + CTA glows */
+  --color-accent-glow: rgba(201, 79, 58, 0.22);
+
+  /* Status */
+  --color-success: #2F6F4F;
+  --color-warning: #C08A2E;
+  --color-danger: #B4432A;
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+
+  /* Radii */
+  --radius-input: 10px;
+  --radius-card: 16px;
+
+  /* Shadow — reserved for the booking form card only */
+  --shadow-card: 0 2px 32px -8px rgba(26, 26, 26, 0.08);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 200ms;
+  --dur-med: 450ms;
+  --dur-slow: 700ms;
+
+  /* Warm paper grain — very subtle SVG turbulence, inline so no extra request. */
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.015 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+}
+
+/* ---------------------------------------------------------------
+   Base resets & baseline
+   --------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  /* Focus ring — applies everywhere unless overridden */
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 45%, transparent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* No 300ms tap delay */
+  button, a, label, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Native select styling baseline — we re-add a chevron per-component */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none;
+  }
+
+  /* Inputs: never below 16px to prevent iOS zoom on focus */
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   Reusable primitives
+   --------------------------------------------------------------- */
+@layer components {
+  /* Meta label — small uppercase tracked label, used over form groups and above price */
+  .meta-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-graphite);
+  }
+
+  /* Section vertical rhythm — 64 mobile / 96 desktop */
+  .section-y {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+  @media (min-width: 768px) {
+    .section-y {
+      padding-top: 96px;
+      padding-bottom: 96px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section-y {
+      padding-top: 128px;
+      padding-bottom: 128px;
+    }
+  }
+
+  /* Page gutter — 16px mobile, 32px tablet, 48px desktop (capped at max-w) */
+  .page-x {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  @media (min-width: 640px) {
+    .page-x {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .page-x {
+      padding-left: 48px;
+      padding-right: 48px;
+    }
+  }
+
+  /* Button — primary (accent) */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 0 20px;
+    border-radius: var(--radius-input);
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+    transition: background-color 200ms var(--ease-standard), opacity 200ms var(--ease-standard);
+  }
+  .btn-primary:hover { background-color: var(--color-accent-ink); }
+  .btn-primary:active { opacity: 0.88; }
+  .btn-primary:disabled,
+  .btn-primary[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Button — secondary (outline ink) */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 0 20px;
+    border-radius: var(--radius-input);
+    border: 1px solid var(--color-ink);
+    background-color: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    transition: background-color 200ms var(--ease-standard), opacity 200ms var(--ease-standard);
+  }
+  .btn-secondary:hover { background-color: var(--color-smoke); }
+  .btn-secondary:active { opacity: 0.88; }
+
+  /* Input / select base — 56px thumb-friendly */
+  .field {
+    width: 100%;
+    min-height: 56px;
+    padding: 0 16px;
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-input);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.2;
+    transition: border-color 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard);
+  }
+  .field::placeholder { color: var(--color-graphite); opacity: 0.7; }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-ink);
+    border-width: 1.5px;
+    padding: 0 15.5px;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  /* Select wrapper — adds chevron without breaking native picker */
+  .field-select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A4A48' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  /* Type scale — apply via class to keep markup semantic */
+  .h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  @media (min-width: 768px) {
+    .h1 { font-size: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .h1 { font-size: 64px; }
+  }
+
+  .h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .h2 { font-size: 40px; }
+  }
+
+  .h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+  @media (min-width: 768px) {
+    .h3 { font-size: 24px; line-height: 1.3; }
+  }
+
+  .body-lg {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--color-graphite);
+  }
+  @media (max-width: 767px) {
+    .body-lg { font-size: 16px; line-height: 1.55; }
+  }
+
+  /* ---------------------------------------------------------------
+     Grain — warm paper texture on cream sections only.
+     Applied via `.has-grain` class. Invisible on --paper / --ink.
+     --------------------------------------------------------------- */
+  .has-grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .has-grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--grain);
+    background-size: 200px 200px;
+    pointer-events: none;
+    z-index: -1;
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+  }
+
+  /* ---------------------------------------------------------------
+     Reveal utilities — opacity + small rise.
+     Paired with Intersection Observer in src/scripts/reveal.js.
+     Never animates width/height/margin — CLS stays at 0.
+     --------------------------------------------------------------- */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity var(--dur-slow) var(--ease-out),
+                transform var(--dur-slow) var(--ease-out);
+    will-change: opacity, transform;
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal-delay="1"] { transition-delay: 80ms; }
+  [data-reveal-delay="2"] { transition-delay: 160ms; }
+  [data-reveal-delay="3"] { transition-delay: 240ms; }
+  [data-reveal-delay="4"] { transition-delay: 320ms; }
+  [data-reveal-delay="5"] { transition-delay: 400ms; }
+  [data-reveal-delay="6"] { transition-delay: 480ms; }
+  [data-reveal-delay="7"] { transition-delay: 560ms; }
+  [data-reveal-delay="8"] { transition-delay: 640ms; }
+
+  /* Directional reveals for the two Fleet-page vehicle images */
+  [data-reveal-dir="left"] { transform: translate(-16px, 24px); }
+  [data-reveal-dir="right"] { transform: translate(16px, 24px); }
+  [data-reveal-dir="left"].is-visible,
+  [data-reveal-dir="right"].is-visible { transform: none; }
+
+  /* Clip-path wipe for fleet vehicle images */
+  [data-reveal-clip="left"] {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 900ms var(--ease-out);
+  }
+  [data-reveal-clip="right"] {
+    clip-path: inset(0 0 0 100%);
+    transition: clip-path 900ms var(--ease-out);
+  }
+  [data-reveal-clip].is-visible { clip-path: inset(0 0 0 0); }
+
+  /* Word-by-word reveal used by FinalCTA — children inherit visibility from parent's is-visible */
+  [data-reveal-words] > [data-reveal-word] {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity var(--dur-med) var(--ease-out),
+                transform var(--dur-med) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 60ms);
+    will-change: opacity, transform;
+  }
+  [data-reveal-words].is-visible > [data-reveal-word] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Timeline — the horizontal/vertical line in HowItWorks draws itself in */
+  .timeline-line {
+    background: var(--color-smoke);
+    transition: transform var(--dur-slow) var(--ease-out);
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+  [data-reveal].is-visible .timeline-line { transform: scaleX(1); }
+  @media (max-width: 767px) {
+    .timeline-line {
+      transform-origin: center top;
+      transform: scaleY(0);
+    }
+    [data-reveal].is-visible .timeline-line { transform: scaleY(1); }
+  }
+
+  /* Feature-list accent bar on home Fleet — grows from top when revealed */
+  .accent-bar {
+    position: relative;
+  }
+  .accent-bar::before {
+    content: "";
+    position: absolute;
+    left: -1px;   /* covers the border-l-2 */
+    top: 0;
+    width: 2px;
+    height: 0;
+    background: var(--color-accent);
+    transition: height 500ms var(--ease-out);
+  }
+  [data-reveal].is-visible .accent-bar::before,
+  .accent-bar.is-visible::before { height: 100%; }
+
+  /* Placeholder shimmer for image tiles */
+  .placeholder-shimmer {
+    animation: placeholder-shimmer 3s var(--ease-in-out) infinite;
+  }
+  @keyframes placeholder-shimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Contact page — WhatsApp "recommended" card gets a slow pulse.
+     Pauses on hover / keyboard focus within. */
+  .card-recommended {
+    animation: subtle-pulse 4s ease-in-out infinite;
+    will-change: border-color;
+  }
+  .card-recommended:hover,
+  .card-recommended:focus-within {
+    animation-play-state: paused;
+  }
+  @keyframes subtle-pulse {
+    0%, 100% { border-color: var(--color-accent); }
+    50% { border-color: var(--color-accent-ink); }
+  }
+
+  /* Animated underline for in-prose body links.
+     Opt-in via `.link-underline` so nav/button links are untouched. */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 250ms var(--ease-out), color 200ms var(--ease-out);
+    text-decoration: none;
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Active press feedback for interactive targets (mobile tap confirmation) */
+  .btn-primary:active,
+  .btn-secondary:active,
+  a[data-press]:active,
+  button[data-press]:active {
+    transform: scale(0.98);
+    transition: transform 100ms var(--ease-out);
+  }
+
+  /* Tabular numerals for currency / price contexts */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  /* Booking-form card gets a brief elevation lift when a price lands.
+     JS toggles .is-lifted for ~600ms then removes. */
+  .quote-picker {
+    transition: box-shadow 300ms var(--ease-out);
+  }
+  .quote-picker.is-lifted {
+    box-shadow: 0 8px 48px -12px rgba(26, 26, 26, 0.14);
+  }
+
+  /* Native <details> smooth open/close — modern browsers only.
+     Older browsers fall back to instant open (acceptable UX). */
+  @supports selector(::details-content) {
+    details::details-content {
+      opacity: 0;
+      block-size: 0;
+      overflow: clip;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        block-size var(--dur-med) var(--ease-out),
+        content-visibility var(--dur-med) allow-discrete;
+    }
+    details[open]::details-content {
+      opacity: 1;
+      block-size: auto;
+    }
+    @starting-style {
+      details[open]::details-content {
+        opacity: 0;
+        block-size: 0;
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Accordion primitives — shared by WhyUs, MoreServices, home FAQ.
+     Grid-template-rows collapse is smooth and accessible.
+     --------------------------------------------------------------- */
+  .whyus-head {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 200ms var(--ease-out);
+  }
+  .whyus-head:hover .whyus-title,
+  .whyus-item.is-open .whyus-title {
+    color: var(--color-ink);
+  }
+  .whyus-head:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 45%, transparent);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  .whyus-toggle {
+    position: relative;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .whyus-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: currentColor;
+    border-radius: 1px;
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .whyus-bar-h {
+    width: 14px;
+    height: 1.5px;
+    transform: translate(-50%, -50%);
+  }
+  .whyus-bar-v {
+    width: 1.5px;
+    height: 14px;
+    transform: translate(-50%, -50%);
+  }
+  .whyus-item.is-open .whyus-bar-v {
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+  .whyus-item.is-open .whyus-toggle {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  .whyus-body-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .whyus-item.is-open .whyus-body-wrap {
+    grid-template-rows: 1fr;
+  }
+  .whyus-body {
+    overflow: hidden;
+  }
+  .whyus-body > p {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 300ms var(--ease-out) 100ms, transform 300ms var(--ease-out) 100ms;
+  }
+  .whyus-item.is-open .whyus-body > p {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Tarifs matrix: hovered row gets a soft tint via :has(),
+     hovered column via a JS-added class; accent outline on exact cell. */
+  .price-matrix tbody tr:has(td:hover) {
+    background-color: color-mix(in oklab, var(--color-cream) 92%, var(--color-accent) 8%);
+  }
+  .price-matrix td.is-col-hover {
+    background-color: color-mix(in oklab, var(--color-cream) 92%, var(--color-accent) 8%);
+  }
+  .price-matrix td:hover {
+    outline: 1px solid var(--color-accent);
+    outline-offset: -1px;
+    transition: outline 150ms var(--ease-out);
+  }
+}

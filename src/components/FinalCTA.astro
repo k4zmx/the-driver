@@ -1,0 +1,314 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).finalCta;
+
+const WA_NUMBER = '33628658127';
+const waHref = `https://wa.me/${WA_NUMBER}`;
+
+// Word-by-word reveal on the headline — one editorial moment at the close.
+const headingWords: string[] = s.heading.split(/\s+/).filter(Boolean);
+---
+
+<section class="fcta section-y" aria-labelledby="fcta-heading">
+  {/* Chapter marker — thin accent line at top, matches WhyUs / MoreServices dark sections */}
+  <div class="fcta-top-accent" aria-hidden="true"></div>
+
+  {/* Decorative compositional layer */}
+  <div class="fcta-bg" aria-hidden="true">
+    <div class="fcta-glow"></div>
+    <div class="fcta-grid"></div>
+  </div>
+
+  <div class="fcta-inner page-x mx-auto max-w-[760px] text-center">
+    <p class="fcta-eyebrow" data-reveal>{s.eyebrow}</p>
+
+    <h2 id="fcta-heading" class="fcta-heading" data-reveal-words>
+      {headingWords.map((word, i) => (
+        <>
+          <span data-reveal-word style={`--i: ${i}`}>{word}</span>
+          {i < headingWords.length - 1 ? ' ' : ''}
+        </>
+      ))}
+    </h2>
+
+    <p class="fcta-sub" data-reveal data-reveal-delay="2">{s.sub}</p>
+
+    <div class="fcta-actions" data-reveal data-reveal-delay="3">
+      {/* Primary — opens the booking modal via the global event hook */}
+      <button
+        type="button"
+        class="fcta-primary"
+        data-open-booking
+        data-press
+      >
+        <span class="fcta-primary-label">{s.primary}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+
+      {/* Secondary — WhatsApp */}
+      <a
+        href={waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="fcta-secondary"
+        data-press
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+    </div>
+
+    <p class="fcta-footnote" data-reveal data-reveal-delay="4">{s.footnote}</p>
+  </div>
+</section>
+
+<style>
+  /* ---------------------------------------------------------------
+     Closing chapter — dark night surface, rhymes with WhyUs + MoreServices.
+     --------------------------------------------------------------- */
+  .fcta {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .fcta-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in oklab, var(--color-accent) 50%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+
+  /* Background composition — warm glow + masked dot grid.
+     Grid is the SOS-Depanne compositional element, tuned to our palette. */
+  .fcta-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .fcta-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1000px;
+    height: 1000px;
+    margin: -500px 0 0 -500px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 28%, transparent) 0%,
+      transparent 55%
+    );
+    filter: blur(80px);
+    opacity: 0.75;
+  }
+  .fcta-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--color-cream) 10%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-cream) 10%, transparent) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse at 50% 50%, black 10%, transparent 65%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 10%, transparent 65%);
+    opacity: 0.55;
+  }
+  @media (max-width: 767px) {
+    .fcta-glow { width: 640px; height: 640px; margin: -320px 0 0 -320px; filter: blur(60px); }
+    .fcta-grid { background-size: 44px 44px; }
+  }
+
+  /* Inner */
+  .fcta-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fcta-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 18px;
+  }
+  .fcta-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-cream);
+  }
+  @media (min-width: 768px) {
+    .fcta-heading { font-size: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .fcta-heading { font-size: 68px; }
+  }
+  .fcta-sub {
+    margin: 20px auto 0;
+    max-width: 46ch;
+    font-size: 17px;
+    line-height: 1.6;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  }
+  @media (max-width: 767px) {
+    .fcta-sub { font-size: 16px; line-height: 1.55; }
+  }
+
+  /* Buttons — stacked mobile / side-by-side desktop */
+  .fcta-actions {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+  }
+  @media (min-width: 640px) {
+    .fcta-actions {
+      flex-direction: row;
+      gap: 14px;
+    }
+  }
+  @media (min-width: 768px) {
+    .fcta-actions { margin-top: 44px; }
+  }
+
+  /* Primary — accent pill with shimmer sweep, same as prior pass but tuned for dark bg */
+  .fcta-primary {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 28px;
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow:
+      0 18px 40px -12px color-mix(in oklab, var(--color-accent) 60%, transparent),
+      0 0 0 1px color-mix(in oklab, white 10%, transparent) inset;
+    transition:
+      background-color 220ms var(--ease-out),
+      box-shadow 260ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  @media (min-width: 640px) {
+    .fcta-primary { width: auto; min-width: 240px; }
+  }
+  .fcta-primary:hover {
+    background: var(--color-accent-ink);
+    box-shadow:
+      0 22px 48px -12px color-mix(in oklab, var(--color-accent) 70%, transparent),
+      0 0 0 1px color-mix(in oklab, white 16%, transparent) inset;
+  }
+  .fcta-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklab, white 40%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    transition: transform 900ms var(--ease-out);
+    pointer-events: none;
+  }
+  .fcta-primary:hover::after { transform: translateX(120%); }
+  .fcta-primary svg { width: 16px; height: 16px; position: relative; z-index: 1; }
+  .fcta-primary-label { position: relative; z-index: 1; }
+
+  /* Secondary — cream-outlined pill that fills on hover */
+  .fcta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 28px;
+    width: 100%;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-cream);
+    border: 1.5px solid color-mix(in oklab, var(--color-cream) 30%, transparent);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    transition:
+      background-color 220ms var(--ease-out),
+      color 220ms var(--ease-out),
+      border-color 220ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  @media (min-width: 640px) {
+    .fcta-secondary { width: auto; }
+  }
+  .fcta-secondary:hover {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    border-color: var(--color-cream);
+  }
+  .fcta-secondary svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .fcta-footnote {
+    margin: 26px auto 0;
+    max-width: 52ch;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: color-mix(in oklab, var(--color-cream) 55%, transparent);
+  }
+</style>
+
+<script>
+  // Primary "Réserver" opens the booking modal via the global event hook
+  // wired up in BookingModal.astro (Prompt 1). No page scroll, no form touched.
+  function run() {
+    document.querySelectorAll<HTMLButtonElement>('[data-open-booking]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (document.querySelector('[data-booking-modal]')) {
+          window.dispatchEvent(new CustomEvent('thedriver:open-booking'));
+        } else {
+          // Fallback on pages without the modal: navigate home with the hash.
+          location.assign('/#booking-form');
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

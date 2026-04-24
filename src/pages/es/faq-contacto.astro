@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactHero from '../../components/ContactHero.astro';
+import ContactCards from '../../components/ContactCards.astro';
+import ServiceDetails from '../../components/ServiceDetails.astro';
+import FullFAQ from '../../components/FullFAQ.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import ContactNudge from '../../components/ContactNudge.astro';
+
+const locale = 'es' as const;
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="faqContact"
+  title="FAQ y Contacto — ¿Una pregunta? Respondemos rápido · The Driver"
+  description="Todas las respuestas a las preguntas frecuentes, contacto por WhatsApp y email, formulario de contacto. Disponible 24/7."
+>
+  <ContactHero locale={locale} />
+  <ContactCards locale={locale} />
+  <ServiceDetails locale={locale} />
+  <FullFAQ locale={locale} />
+  <ContactForm locale={locale} />
+  <ContactNudge locale={locale} />
+</BaseLayout>

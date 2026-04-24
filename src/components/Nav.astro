@@ -1,0 +1,525 @@
+---
+import { t, LOCALES, pathForRoute } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+  routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+}
+
+const { locale, routeKey = 'home' } = Astro.props;
+const strings = t(locale);
+
+const homeHref = pathForRoute('home', locale);
+const fleetHref = pathForRoute('fleet', locale);
+const ratesHref = pathForRoute('rates', locale);
+const faqHref = pathForRoute('faqContact', locale);
+
+const WA_NUMBER = '33628658127';
+const waHref = `https://wa.me/${WA_NUMBER}`;
+
+const currentLocale = t(locale);
+---
+
+<header class="site-nav" data-nav>
+  <nav
+    class="page-x mx-auto flex h-14 md:h-[68px] max-w-[1200px] items-center justify-between gap-3"
+    aria-label="Primary"
+  >
+    <a
+      href={homeHref}
+      class="brand inline-flex items-baseline gap-1 font-display text-[20px] md:text-[22px] leading-none tracking-[-0.01em]"
+    >
+      <span class="font-medium">The Driver</span>
+      <span class="brand-dot leading-none" aria-hidden="true">.</span>
+    </a>
+
+    <ul class="hidden md:flex items-center gap-8 text-[14px] font-medium">
+      <li>
+        <a class:list={['nav-link', routeKey === 'home' && 'is-active']} href={homeHref}>
+          {strings.nav.home}
+        </a>
+      </li>
+      <li>
+        <a class:list={['nav-link', routeKey === 'fleet' && 'is-active']} href={fleetHref}>
+          {strings.nav.fleet}
+        </a>
+      </li>
+      <li>
+        <a class:list={['nav-link', routeKey === 'rates' && 'is-active']} href={ratesHref}>
+          {strings.nav.routes}
+        </a>
+      </li>
+      <li>
+        <a class:list={['nav-link', routeKey === 'faqContact' && 'is-active']} href={faqHref}>
+          {strings.nav.contact}
+        </a>
+      </li>
+    </ul>
+
+    <div class="flex items-center gap-2 md:gap-4">
+      {/* Custom language menu — replaces the old native <select>. Matches the site's design system. */}
+      <div class="lang-menu" data-lang-menu>
+        <button
+          type="button"
+          class="lang-trigger"
+          data-lang-trigger
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Switch language"
+        >
+          <span class="lang-trigger-flag" aria-hidden="true">{currentLocale.flag ?? ''}</span>
+          <span class="lang-trigger-code">{locale.toUpperCase()}</span>
+          <svg class="lang-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        <ul class="lang-list" data-lang-list role="menu" hidden>
+          {LOCALES.map((l) => {
+            const other = t(l);
+            const isCurrent = l === locale;
+            return (
+              <li role="none">
+                <a
+                  role="menuitem"
+                  href={pathForRoute(routeKey, l)}
+                  hreflang={l}
+                  class:list={['lang-option', isCurrent && 'is-current']}
+                  aria-current={isCurrent ? 'true' : undefined}
+                >
+                  <span class="lang-option-flag" aria-hidden="true">{other.flag ?? ''}</span>
+                  <span class="lang-option-label">{other.localeName}</span>
+                  {isCurrent && (
+                    <svg class="lang-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <a
+        href={waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nav-cta hidden md:inline-flex items-center gap-2 h-10 px-4 rounded-full"
+        data-press
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+
+      <button
+        type="button"
+        class="md:hidden nav-hamburger h-10 w-10 inline-flex items-center justify-center rounded-full"
+        data-nav-toggle
+        aria-label="Menu"
+        aria-expanded="false"
+        aria-controls="nav-drawer"
+      >
+        <span class="nav-hamburger-bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <div id="nav-drawer" class="nav-drawer md:hidden" data-nav-drawer aria-hidden="true">
+    <div class="nav-drawer-inner">
+      <ul class="page-x py-6 space-y-1">
+        <li>
+          <a class:list={['nav-drawer-link', routeKey === 'home' && 'is-active']} href={homeHref}>{strings.nav.home}</a>
+        </li>
+        <li>
+          <a class:list={['nav-drawer-link', routeKey === 'fleet' && 'is-active']} href={fleetHref}>{strings.nav.fleet}</a>
+        </li>
+        <li>
+          <a class:list={['nav-drawer-link', routeKey === 'rates' && 'is-active']} href={ratesHref}>{strings.nav.routes}</a>
+        </li>
+        <li>
+          <a class:list={['nav-drawer-link', routeKey === 'faqContact' && 'is-active']} href={faqHref}>{strings.nav.contact}</a>
+        </li>
+        <li class="pt-4">
+          <a href={waHref} target="_blank" rel="noopener noreferrer" class="nav-cta w-full justify-center inline-flex items-center gap-2 h-12 rounded-full" data-press>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            <span>WhatsApp · +33 6 28 65 81 27</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: var(--color-night);
+    color: var(--color-cream);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
+    transition: transform 240ms var(--ease-out), background-color 200ms var(--ease-out);
+    will-change: transform;
+  }
+  @media (min-width: 768px) {
+    .site-nav {
+      background: color-mix(in oklab, var(--color-night) 92%, transparent);
+      backdrop-filter: saturate(160%) blur(14px);
+      -webkit-backdrop-filter: saturate(160%) blur(14px);
+    }
+  }
+  @media (max-width: 767px) {
+    .site-nav { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--color-night); }
+  }
+  .site-nav.is-hidden { transform: translateY(-100%); }
+
+  body {
+    padding-top: 56px;
+  }
+  @media (min-width: 768px) {
+    body { padding-top: 68px; }
+  }
+
+  .brand { color: var(--color-cream); }
+  .brand-dot { color: var(--color-accent); }
+
+  .nav-link {
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+    transition: color 200ms var(--ease-out);
+    position: relative;
+  }
+  .nav-link:hover { color: var(--color-cream); }
+  .nav-link.is-active { color: var(--color-cream); }
+  .nav-link.is-active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-accent);
+  }
+
+  /* ---------------------------------------------------------------
+     Custom language menu — design-system matched dropdown.
+     --------------------------------------------------------------- */
+  .lang-menu {
+    position: relative;
+  }
+  .lang-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 10px 0 10px;
+    border: 1px solid color-mix(in oklab, var(--color-cream) 16%, transparent);
+    background: color-mix(in oklab, var(--color-cream) 8%, transparent);
+    color: var(--color-cream);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  }
+  .lang-trigger:hover {
+    background: color-mix(in oklab, var(--color-cream) 14%, transparent);
+  }
+  .lang-trigger[aria-expanded="true"] {
+    background: color-mix(in oklab, var(--color-cream) 16%, transparent);
+    border-color: color-mix(in oklab, var(--color-cream) 28%, transparent);
+  }
+  .lang-trigger:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 55%, transparent);
+    outline-offset: 2px;
+  }
+  .lang-trigger-flag { font-size: 14px; line-height: 1; }
+  .lang-trigger-code { line-height: 1; }
+  .lang-trigger-chevron {
+    width: 12px;
+    height: 12px;
+    color: color-mix(in oklab, var(--color-cream) 60%, transparent);
+    transition: transform 200ms var(--ease-out);
+  }
+  .lang-trigger[aria-expanded="true"] .lang-trigger-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* The menu itself — a real paper surface dropdown, not a night surface */
+  .lang-list {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    padding: 6px;
+    margin: 0;
+    list-style: none;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.18),
+                0 2px 8px -2px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+    pointer-events: none;
+    z-index: 60;
+  }
+  .lang-list[data-open="true"] {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .lang-list[hidden] { display: block; }  /* keep in DOM for animation; hidden attr toggled off when shown */
+
+  .lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out);
+  }
+  .lang-option:hover,
+  .lang-option:focus-visible {
+    background: var(--color-cream);
+    outline: none;
+  }
+  .lang-option.is-current {
+    color: var(--color-ink);
+  }
+  .lang-option-flag { font-size: 16px; line-height: 1; flex-shrink: 0; }
+  .lang-option-label { flex: 1; }
+  .lang-option-check {
+    width: 14px; height: 14px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .nav-cta {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    box-shadow:
+      0 6px 20px -6px color-mix(in oklab, var(--color-accent) 60%, transparent),
+      0 0 0 1px color-mix(in oklab, white 8%, transparent) inset;
+    transition: background-color 200ms var(--ease-out), box-shadow 240ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .nav-cta:hover {
+    background: var(--color-accent-ink);
+    box-shadow:
+      0 10px 28px -6px color-mix(in oklab, var(--color-accent) 70%, transparent),
+      0 0 0 1px color-mix(in oklab, white 12%, transparent) inset;
+  }
+
+  /* Hamburger */
+  .nav-hamburger {
+    color: var(--color-cream);
+    background: color-mix(in oklab, var(--color-cream) 8%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 14%, transparent);
+    transition: background-color 200ms var(--ease-out);
+  }
+  .nav-hamburger:hover { background: color-mix(in oklab, var(--color-cream) 14%, transparent); }
+  .nav-hamburger-bars {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 12px;
+  }
+  .nav-hamburger-bars > span {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: transform 240ms var(--ease-out), top 240ms var(--ease-out);
+  }
+  .nav-hamburger-bars > span:nth-child(1) { top: 3px; }
+  .nav-hamburger-bars > span:nth-child(2) { top: 8px; }
+  [aria-expanded="true"] .nav-hamburger-bars > span:nth-child(1) {
+    top: 5.5px;
+    transform: rotate(45deg);
+  }
+  [aria-expanded="true"] .nav-hamburger-bars > span:nth-child(2) {
+    top: 5.5px;
+    transform: rotate(-45deg);
+  }
+
+  /* Mobile drawer */
+  .nav-drawer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-night);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .nav-drawer[data-open="true"] { grid-template-rows: 1fr; }
+  .nav-drawer-inner { overflow: hidden; }
+  .nav-drawer-link {
+    display: block;
+    padding: 14px 4px;
+    font-size: 17px;
+    font-weight: 500;
+    color: color-mix(in oklab, var(--color-cream) 82%, transparent);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
+    transition: color 200ms var(--ease-out);
+  }
+  .nav-drawer-link:hover,
+  .nav-drawer-link.is-active {
+    color: var(--color-cream);
+  }
+  .nav-drawer-link.is-active {
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  // Nav: drawer toggle + hide-on-scroll-down + custom language menu
+  function run() {
+    const nav = document.querySelector<HTMLElement>('[data-nav]');
+    if (!nav) return;
+
+    // --- drawer toggle ---
+    const toggle = nav.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+    const drawer = nav.querySelector<HTMLElement>('[data-nav-drawer]');
+    if (toggle && drawer) {
+      const setOpen = (open: boolean) => {
+        drawer.dataset.open = String(open);
+        toggle.setAttribute('aria-expanded', String(open));
+        drawer.setAttribute('aria-hidden', String(!open));
+        document.body.style.overflow = open ? 'hidden' : '';
+      };
+      toggle.addEventListener('click', () => setOpen(drawer.dataset.open !== 'true'));
+      drawer.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) setOpen(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer.dataset.open === 'true') setOpen(false);
+      });
+    }
+
+    // --- language menu ---
+    const langMenu = nav.querySelector<HTMLElement>('[data-lang-menu]');
+    const langTrigger = nav.querySelector<HTMLButtonElement>('[data-lang-trigger]');
+    const langList = nav.querySelector<HTMLElement>('[data-lang-list]');
+
+    if (langMenu && langTrigger && langList) {
+      const setLangOpen = (open: boolean) => {
+        langTrigger.setAttribute('aria-expanded', String(open));
+        if (open) {
+          langList.hidden = false;
+          // allow layout frame before triggering the transition
+          requestAnimationFrame(() => langList.dataset.open = 'true');
+        } else {
+          langList.dataset.open = 'false';
+          setTimeout(() => {
+            if (langList.dataset.open !== 'true') langList.hidden = true;
+          }, 170);
+        }
+      };
+
+      langTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = langTrigger.getAttribute('aria-expanded') === 'true';
+        setLangOpen(!isOpen);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!langMenu.contains(e.target as Node)) setLangOpen(false);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && langTrigger.getAttribute('aria-expanded') === 'true') {
+          e.preventDefault();
+          setLangOpen(false);
+          langTrigger.focus();
+        }
+      });
+
+      // Keyboard nav inside the menu — arrows + Home/End
+      const options = Array.from(langList.querySelectorAll<HTMLAnchorElement>('.lang-option'));
+      langList.addEventListener('keydown', (e) => {
+        const currentIdx = options.findIndex((o) => o === document.activeElement);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          options[(currentIdx + 1 + options.length) % options.length]?.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          options[(currentIdx - 1 + options.length) % options.length]?.focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          options[0]?.focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          options[options.length - 1]?.focus();
+        }
+      });
+
+      // First menu item gets focus when opened via keyboard
+      langTrigger.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') &&
+            langTrigger.getAttribute('aria-expanded') !== 'true') {
+          e.preventDefault();
+          setLangOpen(true);
+          setTimeout(() => options[0]?.focus(), 40);
+        }
+      });
+    }
+
+    // --- hide on scroll down, show on scroll up ---
+    const navEl = nav;
+    let lastY = window.scrollY;
+    let ticking = false;
+    const threshold = 8;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const dy = y - lastY;
+        const drawerOpen = drawer?.dataset.open === 'true';
+        const langOpen = langTrigger?.getAttribute('aria-expanded') === 'true';
+
+        if (reduce || drawerOpen || langOpen) {
+          navEl.classList.remove('is-hidden');
+        } else if (y < 80) {
+          navEl.classList.remove('is-hidden');
+        } else if (dy > threshold) {
+          navEl.classList.add('is-hidden');
+        } else if (dy < -threshold) {
+          navEl.classList.remove('is-hidden');
+        }
+        lastY = y;
+        ticking = false;
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

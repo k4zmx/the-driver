@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TarifsHero from '../components/TarifsHero.astro';
+import TarifsCalculator from '../components/TarifsCalculator.astro';
+import PriceGrid from '../components/PriceGrid.astro';
+import RatesExtraCards from '../components/RatesExtraCards.astro';
+import IncludedBenefits from '../components/IncludedBenefits.astro';
+import PaymentOptions from '../components/PaymentOptions.astro';
+import PageCloseCTA from '../components/PageCloseCTA.astro';
+import { t, pathForRoute } from '../i18n';
+
+const locale = 'fr' as const;
+const cta = t(locale).pages.rates.finalCta;
+const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
+const waHref = 'https://wa.me/33628658127';
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="rates"
+  title="Tarifs — Tous les prix, aucune mauvaise surprise · The Driver"
+  description="Tarifs fixes par véhicule pour tous nos trajets à Paris. CDG, Orly, Beauvais, Disneyland, Versailles. Péages, taxes et bagages inclus."
+>
+  <TarifsHero locale={locale} />
+  <TarifsCalculator locale={locale} />
+  <PriceGrid locale={locale} />
+  <RatesExtraCards locale={locale} />
+  <IncludedBenefits locale={locale} />
+  <PaymentOptions locale={locale} />
+
+  <PageCloseCTA
+    heading={cta.heading}
+    sub={cta.sub}
+    primaryLabel={cta.primary}
+    primaryFallbackHref={homeBooking}
+    secondaryLabel={cta.secondary}
+    secondaryHref={waHref}
+  />
+</BaseLayout>

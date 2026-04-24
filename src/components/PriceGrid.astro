@@ -1,0 +1,417 @@
+---
+import { t } from '../i18n';
+import { PICKUP_POINTS, DROP_POINTS, PRICES } from '../data/routes.js';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.rates.grid;
+
+type Cell = { car?: number; van?: number } | null;
+
+function cellAt(from: string, to: string): Cell {
+  if (from === to) return null;
+  return (PRICES as any)[from]?.[to] ?? null;
+}
+
+function fmt(cell: Cell): { car: string; van: string } | null {
+  if (!cell || (typeof cell.car !== 'number' && typeof cell.van !== 'number')) return null;
+  const car = typeof cell.car === 'number' ? `${cell.car}€` : '—';
+  const van = typeof cell.van === 'number' ? `${cell.van}€` : '—';
+  return { car, van };
+}
+
+const WA = `https://wa.me/33628658127`;
+const fromToHeader = `${s.fromLabel} →`;
+---
+
+<section class="pg section-y has-grain" aria-labelledby="pg-heading">
+  <div class="page-x mx-auto max-w-[1100px]">
+    <header class="pg-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="pg-heading" class="h2 text-balance">{s.heading}</h2>
+      <p class="body-lg mt-3">{s.sub}</p>
+    </header>
+
+    <p class="pg-legend" data-reveal>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-car"></span> {s.colCar}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-van"></span> {s.colVan}</span>
+    </p>
+
+    {/* Mobile: accordion per pickup */}
+    <ul class="pg-mobile md:hidden mt-6 border-t border-[color:var(--color-smoke)]">
+      {PICKUP_POINTS.map((from) => {
+        const rows = DROP_POINTS
+          .filter((to) => to !== from)
+          .map((to) => ({ to, cell: cellAt(from, to) }))
+          .filter((r) => r.cell);
+        if (rows.length === 0) return null;
+        return (
+          <li class="pg-mobile-row">
+            <details class="pg-mobile-item">
+              <summary class="pg-mobile-summary">
+                <span class="pg-mobile-label">
+                  <span class="pg-mobile-eyebrow">{s.fromLabel}</span>
+                  <span class="pg-mobile-from">{from}</span>
+                </span>
+                <span class="pg-mobile-toggle" aria-hidden="true">
+                  <span class="whyus-bar whyus-bar-h"></span>
+                  <span class="whyus-bar whyus-bar-v"></span>
+                </span>
+              </summary>
+              <ul class="pg-mobile-list">
+                {rows.map((r) => {
+                  const p = fmt(r.cell);
+                  return (
+                    <li class="pg-mobile-leg">
+                      <span class="pg-mobile-leg-to">{r.to}</span>
+                      {p ? (
+                        <span class="pg-mobile-leg-price">
+                          <span class="pg-price-car">{p.car}</span>
+                          <span class="pg-price-sep" aria-hidden="true">/</span>
+                          <span class="pg-price-van">{p.van}</span>
+                        </span>
+                      ) : (
+                        <span class="pg-mobile-leg-price pg-td-miss">{s.unpriced}</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          </li>
+        );
+      })}
+    </ul>
+
+    {/* Desktop: matrix table */}
+    <div class="pg-desktop hidden md:block mt-8" data-reveal data-reveal-delay="1">
+      <div class="pg-table-wrap">
+        <table class="price-matrix pg-table" data-price-matrix>
+          <thead>
+            <tr>
+              <th scope="col" class="pg-th pg-th-corner" data-col="_">
+                {fromToHeader}
+              </th>
+              {DROP_POINTS.map((d, idx) => (
+                <th scope="col" class="pg-th" data-col={String(idx)}>
+                  {d}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PICKUP_POINTS.map((from, i) => (
+              <tr
+                class:list={['matrix-row', i % 2 === 0 ? 'pg-row-paper' : 'pg-row-cream']}
+                style={`--i: ${i}`}
+              >
+                <th scope="row" class="pg-row-head">{from}</th>
+                {DROP_POINTS.map((to, idx) => {
+                  const cell = cellAt(from, to);
+                  const p = fmt(cell);
+                  const empty = from === to;
+                  return (
+                    <td
+                      class="pg-td"
+                      title={!p && !empty ? s.unpriced : undefined}
+                      data-col={String(idx)}
+                    >
+                      {empty ? <span class="pg-td-empty">·</span>
+                        : p ? (
+                          <span class="pg-price">
+                            <span class="pg-price-car">{p.car}</span>
+                            <span class="pg-price-sep" aria-hidden="true">/</span>
+                            <span class="pg-price-van">{p.van}</span>
+                          </span>
+                        ) : <span class="pg-td-miss">—</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="pg-foot">
+      {s.footnotePrefix}{' '}
+      <a href={WA} target="_blank" rel="noopener noreferrer" class="link-underline text-[color:var(--color-ink)]">{s.footnoteCta}</a>{s.footnoteSuffix}
+    </p>
+  </div>
+</section>
+
+<style>
+  .pg {
+    background: var(--color-cream);
+  }
+  .pg-head { max-width: 640px; }
+
+  /* Legend — two chips explaining the X€ / Y€ columns (car / van) */
+  .pg-legend {
+    margin-top: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+  }
+  .pg-legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ink);
+    letter-spacing: 0.04em;
+  }
+  .pg-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .pg-legend-dot.is-car { background: var(--color-accent); }
+  .pg-legend-dot.is-van { background: var(--color-ink); }
+
+  /* ---------------------------------------------------------------
+     Mobile accordion — matches home FAQ / WhyUs visual language.
+     --------------------------------------------------------------- */
+  .pg-mobile {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0;
+  }
+  .pg-mobile-row {
+    border-bottom: 1px solid var(--color-smoke);
+  }
+  .pg-mobile-item summary::-webkit-details-marker { display: none; }
+  .pg-mobile-item summary::marker { content: ''; }
+  .pg-mobile-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 4px;
+    min-height: 56px;
+  }
+  .pg-mobile-label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pg-mobile-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-graphite);
+  }
+  .pg-mobile-from {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+  .pg-mobile-toggle {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid var(--color-smoke);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .pg-mobile-item[open] .pg-mobile-toggle {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  .pg-mobile-item[open] .whyus-bar-v {
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+
+  .pg-mobile-list {
+    list-style: none;
+    padding: 0 4px 16px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .pg-mobile-leg {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid color-mix(in oklab, var(--color-smoke) 60%, transparent);
+    font-size: 14px;
+  }
+  .pg-mobile-leg-to { color: var(--color-graphite); }
+  /* .pg-mobile-leg-price styles consolidated below (see split-colour block) */
+
+  /* ---------------------------------------------------------------
+     Desktop matrix — polished, premium, readable.
+     --------------------------------------------------------------- */
+  .pg-table-wrap {
+    position: relative;
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+    overflow: auto;
+    background: var(--color-paper);
+  }
+  .pg-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+  }
+  .pg-th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 14px 18px;
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-smoke);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-graphite);
+    white-space: nowrap;
+  }
+  .pg-th-corner {
+    z-index: 3;
+    left: 0;
+    border-right: 1px solid var(--color-smoke);
+    color: var(--color-graphite);
+  }
+  .pg-row-head {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    padding: 14px 18px;
+    background-color: inherit;
+    border-right: 1px solid var(--color-smoke);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-smoke) 70%, transparent);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+  .pg-row-paper { background: var(--color-paper); }
+  .pg-row-cream { background: color-mix(in oklab, var(--color-cream) 60%, var(--color-paper)); }
+
+  .pg-td {
+    padding: 14px 18px;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-smoke) 70%, transparent);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+    white-space: nowrap;
+    transition: background-color 160ms var(--ease-out);
+  }
+
+  /* Car prices tinted accent, van prices tinted ink — matches the section's
+     colour key. The separator stays neutral so the eye pairs the two values. */
+  .pg-price {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .pg-price-car { color: var(--color-accent); }
+  .pg-price-van { color: var(--color-ink); }
+  .pg-price-sep {
+    color: color-mix(in oklab, var(--color-graphite) 50%, transparent);
+    font-weight: 400;
+  }
+
+  /* Mobile variant — same treatment in the accordion rows */
+  .pg-mobile-leg-price {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .pg-mobile-leg-price.pg-td-miss {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-graphite);
+  }
+  .matrix-row:last-child .pg-row-head,
+  .matrix-row:last-child .pg-td { border-bottom: 0; }
+
+  .pg-td-empty {
+    color: color-mix(in oklab, var(--color-graphite) 40%, transparent);
+  }
+  .pg-td-miss {
+    font-family: var(--font-sans);
+    color: var(--color-graphite);
+    font-weight: 400;
+  }
+
+  /* Row cascade on reveal — top-to-bottom 40ms stagger */
+  .matrix-row {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity var(--dur-med) var(--ease-out),
+      transform var(--dur-med) var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 40ms);
+  }
+  [data-reveal].is-visible .matrix-row {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Footnote */
+  .pg-foot {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--color-graphite);
+  }
+</style>
+
+<script>
+  // Desktop cross-highlight — hover any cell tints the cells in its column.
+  // Row highlight via tr:has(td:hover) (pure CSS, global.css).
+  function run() {
+    const matrix = document.querySelector<HTMLElement>('[data-price-matrix]');
+    if (!matrix) return;
+
+    function setCol(idx: string | null) {
+      matrix!.querySelectorAll('td.is-col-hover').forEach((el) => el.classList.remove('is-col-hover'));
+      if (!idx) return;
+      matrix!.querySelectorAll(`td[data-col="${idx}"]`).forEach((el) => el.classList.add('is-col-hover'));
+    }
+
+    matrix.addEventListener('mouseover', (e) => {
+      const cell = (e.target as Element | null)?.closest?.('td[data-col]') as HTMLElement | null;
+      setCol(cell?.dataset.col ?? null);
+    });
+    matrix.addEventListener('mouseleave', () => setCol(null));
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

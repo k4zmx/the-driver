@@ -1,0 +1,493 @@
+---
+import { t, localizedPath } from '../i18n';
+import { PRICES } from '../data/routes.js';
+import { getRoutePrice } from '../utils/pricing.js';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).destinations;
+
+function minCarAcross(legs: [string, string][]) {
+  let min: number | null = null;
+  for (const [from, to] of legs) {
+    const p = getRoutePrice(from, to, 'car');
+    if (typeof p === 'number' && (min === null || p < min)) min = p;
+  }
+  return min;
+}
+
+const base = localizedPath(locale, '/');
+function cardLink(dropoff?: string, anchor = 'booking-form') {
+  const q = dropoff ? `?dropoff=${encodeURIComponent(dropoff)}` : '';
+  return `${base}${q}#${anchor}`;
+}
+
+const cards = [
+  {
+    key: 'parisHotels',
+    title: s.cards.parisHotels,
+    price: minCarAcross([['CDG', 'Paris'], ['Orly', 'Paris'], ['Beauvais', 'Paris']]),
+    dropoff: 'Paris',
+    href: cardLink('Paris'),
+  },
+  {
+    key: 'disneyland',
+    title: s.cards.disneyland,
+    price: minCarAcross([['CDG', 'Disneyland'], ['Orly', 'Disneyland'], ['Beauvais', 'Disneyland']]),
+    dropoff: 'Disneyland',
+    href: cardLink('Disneyland'),
+  },
+  {
+    key: 'versailles',
+    title: s.cards.versailles,
+    price: minCarAcross([['CDG', 'Versailles'], ['Orly', 'Versailles'], ['Beauvais', 'Versailles']]),
+    dropoff: 'Versailles',
+    href: cardLink('Versailles'),
+  },
+  {
+    key: 'trainStations',
+    title: s.cards.trainStations,
+    price: minCarAcross([['CDG', 'Paris Train Station'], ['Orly', 'Paris Train Station'], ['Beauvais', 'Paris Train Station']]),
+    dropoff: 'Paris Train Station',
+    href: cardLink('Paris Train Station'),
+  },
+  {
+    key: 'betweenAirports',
+    title: s.cards.betweenAirports,
+    price: minCarAcross([['CDG', 'Orly'], ['CDG', 'Beauvais'], ['Orly', 'CDG'], ['Beauvais', 'CDG']]),
+    dropoff: '',
+    href: cardLink(),
+  },
+  {
+    key: 'hourly',
+    title: s.cards.hourly,
+    special: s.cards.hourlyPrice,
+    dropoff: '',
+    href: `${base}#hourly`,
+  },
+];
+// Keep PRICES import reachable so bundler includes it.
+void PRICES;
+
+const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je souhaite un devis pour une destination spécifique…')}`;
+---
+
+<section class="dest section-y" aria-labelledby="dest-heading">
+  <div class="page-x mx-auto max-w-[1200px]">
+    <header class="max-w-[640px]" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="dest-heading" class="h2 text-balance">{s.heading}</h2>
+      {s.subheading && <p class="body-lg mt-3">{s.subheading}</p>}
+    </header>
+
+    <div class="dest-scroller mt-10 md:mt-14" data-reveal data-reveal-delay="1">
+      {/* Arrow buttons — positioned at vertical center of the track */}
+      <button
+        type="button"
+        class="dest-arrow dest-arrow-prev"
+        data-dest-prev
+        aria-label="Previous"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+
+      <ul class="dest-track" data-dest-track>
+        {cards.map((card) => (
+          <li class="dest-slot">
+            <a
+              href={card.href}
+              data-destination-card
+              data-dropoff={card.dropoff}
+              data-press
+              class="dest-card group"
+            >
+              <div class="dest-card-image">
+                <svg class="dest-card-svg placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="dest-card-body">
+                <h3 class="dest-card-title">{card.title}</h3>
+                <p class="dest-card-price">
+                  {card.special
+                    ? card.special
+                    : card.price !== null
+                      ? (<>
+                          <span class="dest-card-price-prefix">{s.fromPrefix}</span>
+                          <span class="dest-card-price-val">{`€${card.price}`}</span>
+                        </>)
+                      : s.fromPrefix
+                  }
+                </p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <button
+        type="button"
+        class="dest-arrow dest-arrow-next"
+        data-dest-next
+        aria-label="Next"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    {/* Mobile-only dot indicators */}
+    <ol class="dest-dots md:hidden mt-4 flex items-center justify-center gap-2" aria-hidden="true" data-dest-dots>
+      {cards.map((_c, i: number) => (
+        <li
+          class="h-1.5 w-1.5 rounded-full bg-[color:var(--color-smoke)] transition-all duration-200"
+          data-dot-index={String(i)}
+        />
+      ))}
+    </ol>
+
+    {/* "Other destination?" — now a proper outlined CTA button */}
+    <div class="dest-footer mt-10 md:mt-12" data-reveal>
+      <span class="dest-footer-text">{s.otherPrompt}</span>
+      <a
+        href={waLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="dest-footer-cta"
+        data-press
+      >
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>{s.otherCta}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dest {
+    background: var(--color-paper);
+  }
+
+  /* ---------------------------------------------------------------
+     Scroller — horizontal on every viewport. Arrows overlap edges.
+     --------------------------------------------------------------- */
+  .dest-scroller {
+    position: relative;
+  }
+
+  .dest-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 16px;
+    padding-inline: 16px;
+    margin-inline: -16px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    mask-image: linear-gradient(
+      to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%
+    );
+    scroll-behavior: smooth;
+  }
+  .dest-track::-webkit-scrollbar { display: none; }
+
+  @media (min-width: 768px) {
+    .dest-track {
+      gap: 20px;
+      padding-inline: 24px;
+      margin-inline: -24px;
+    }
+  }
+
+  .dest-slot {
+    flex: 0 0 180px;
+    scroll-snap-align: start;
+  }
+  .dest-slot:last-child { margin-right: 16px; }
+  @media (min-width: 768px) {
+    .dest-slot { flex: 0 0 260px; }
+  }
+  @media (min-width: 1024px) {
+    .dest-slot { flex: 0 0 280px; }
+  }
+
+  /* ---------------------------------------------------------------
+     Arrow buttons — circular, overlap the scroller edges.
+     Hidden only when reduced-motion has no use for them.
+     --------------------------------------------------------------- */
+  .dest-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--color-smoke);
+    box-shadow:
+      0 10px 24px -10px rgba(26, 26, 26, 0.2),
+      0 0 0 1px color-mix(in oklab, white 40%, transparent) inset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background-color 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      transform 180ms var(--ease-out),
+      opacity 200ms var(--ease-out);
+  }
+  .dest-arrow svg { width: 18px; height: 18px; }
+  .dest-arrow:hover {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    border-color: var(--color-accent);
+  }
+  .dest-arrow:active { transform: translateY(-50%) scale(0.94); }
+  .dest-arrow:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+  .dest-arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dest-arrow-prev { left: -4px; }
+  .dest-arrow-next { right: -4px; }
+  @media (min-width: 768px) {
+    .dest-arrow-prev { left: -22px; }
+    .dest-arrow-next { right: -22px; }
+  }
+
+  /* ---------------------------------------------------------------
+     Card
+     --------------------------------------------------------------- */
+  .dest-card {
+    display: block;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition:
+      transform 240ms var(--ease-out),
+      border-color 240ms var(--ease-out),
+      box-shadow 280ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .dest-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-graphite);
+      box-shadow: 0 14px 40px -18px rgba(26, 26, 26, 0.16);
+    }
+  }
+  .dest-card:active { opacity: 0.92; }
+
+  .dest-card-image {
+    aspect-ratio: 4 / 5;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-accent) 6%, var(--color-cream)) 0%,
+        var(--color-smoke) 100%
+      );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-graphite);
+    overflow: hidden;
+  }
+  .dest-card-svg {
+    width: 28px; height: 28px;
+    transition: transform 400ms var(--ease-out);
+  }
+  .dest-card:hover .dest-card-svg { transform: scale(1.08); }
+
+  .dest-card-body {
+    padding: 18px 18px 20px;
+  }
+  .dest-card-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+    margin: 0;
+  }
+  .dest-card-price {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--color-graphite);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .dest-card-price-prefix {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-graphite) 80%, transparent);
+  }
+  .dest-card-price-val {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  /* Dot indicators — mobile only, update via IntersectionObserver */
+  [data-dot-index].is-current {
+    background-color: var(--color-accent);
+    width: 16px;
+    border-radius: 999px;
+  }
+
+  /* ---------------------------------------------------------------
+     Footer CTA — promoted to a real outlined button
+     --------------------------------------------------------------- */
+  .dest-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .dest-footer { flex-direction: row; justify-content: center; gap: 16px; }
+  }
+  .dest-footer-text {
+    font-size: 14px;
+    color: var(--color-graphite);
+  }
+  .dest-footer-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-ink);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  .dest-footer-cta:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border-color: var(--color-ink);
+  }
+  .dest-footer-cta:active { transform: scale(0.98); }
+</style>
+
+<script>
+  // Scroller: arrow buttons + dot indicator. Arrows scroll by one card width.
+  // Disabled states reflect true scroll position so users don't bounce off edges.
+  function run() {
+    const scroller = document.querySelector<HTMLElement>('[data-dest-track]');
+    if (!scroller) return;
+
+    const prev = document.querySelector<HTMLButtonElement>('[data-dest-prev]');
+    const next = document.querySelector<HTMLButtonElement>('[data-dest-next]');
+    const dots = document.querySelectorAll<HTMLElement>('[data-dot-index]');
+
+    function stepSize() {
+      const card = scroller!.querySelector<HTMLElement>('.dest-slot');
+      if (!card) return 200;
+      const rect = card.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(scroller!).columnGap || '0') || 12;
+      return rect.width + gap;
+    }
+
+    function updateArrowStates() {
+      if (!prev || !next) return;
+      const max = scroller!.scrollWidth - scroller!.clientWidth - 2;
+      prev.disabled = scroller!.scrollLeft <= 2;
+      next.disabled = scroller!.scrollLeft >= max;
+    }
+
+    prev?.addEventListener('click', () => {
+      scroller!.scrollBy({ left: -stepSize(), behavior: 'smooth' });
+    });
+    next?.addEventListener('click', () => {
+      scroller!.scrollBy({ left: stepSize(), behavior: 'smooth' });
+    });
+
+    scroller.addEventListener('scroll', () => {
+      requestAnimationFrame(updateArrowStates);
+    }, { passive: true });
+    updateArrowStates();
+
+    // Mobile dot indicator — which card is in view at > 60% intersection
+    if (dots.length && 'IntersectionObserver' in window) {
+      const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+      const cards = scroller.querySelectorAll<HTMLElement>('.dest-slot');
+      const io = new IntersectionObserver((entries) => {
+        if (!isMobile()) return;
+        for (const e of entries) {
+          if (e.intersectionRatio > 0.6) {
+            const idx = Array.prototype.indexOf.call(cards, e.target);
+            dots.forEach((d, i) => d.classList.toggle('is-current', i === idx));
+          }
+        }
+      }, { root: scroller, threshold: [0, 0.6, 1] });
+      cards.forEach((c) => io.observe(c));
+    }
+
+    // Prefill-on-click: keep the existing event dispatch so clicking a card
+    // also opens the booking modal on this page.
+    scroller.querySelectorAll<HTMLAnchorElement>('[data-destination-card]').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        const href = card.getAttribute('href') || '';
+        const hashIdx = href.indexOf('#');
+        const hash = hashIdx >= 0 ? href.slice(hashIdx + 1) : '';
+        const dropoff = card.dataset.dropoff || '';
+        const url = new URL(href, location.href);
+        // Cross-page link? Let it navigate.
+        if (url.pathname !== location.pathname) return;
+        e.preventDefault();
+        if (dropoff) {
+          const newUrl = new URL(location.href);
+          newUrl.searchParams.set('dropoff', dropoff);
+          if (hash) newUrl.hash = hash;
+          history.replaceState(null, '', newUrl.toString());
+        }
+        // Always dispatch — BookingModal picks it up and opens on home.
+        window.dispatchEvent(
+          new CustomEvent('thedriver:open-booking', { detail: { dropoff } }),
+        );
+        // If no modal (e.g. Tarifs page), fall back to smooth-scroll anchor.
+        if (!document.querySelector('[data-booking-modal]')) {
+          const target = hash ? document.getElementById(hash) : null;
+          target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

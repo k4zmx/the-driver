@@ -1,0 +1,156 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.fleet.hero;
+---
+
+<section class="fh" aria-labelledby="fh-heading">
+  {/* Thin accent hairline — matches the chapter-marker treatment used by WhyUs / MoreServices */}
+  <div class="fh-top-accent" aria-hidden="true"></div>
+
+  {/* Decorative glow layer */}
+  <div class="fh-bg" aria-hidden="true">
+    <div class="fh-glow"></div>
+  </div>
+
+  <div class="fh-inner page-x mx-auto max-w-[960px] text-center">
+    <p class="fh-eyebrow" data-reveal>{s.eyebrow}</p>
+    <h1 id="fh-heading" class="fh-heading text-balance" data-reveal data-reveal-delay="1">
+      {s.heading}
+    </h1>
+    <p class="fh-sub" data-reveal data-reveal-delay="2">{s.sub}</p>
+
+    <ul class="fh-stats" data-reveal data-reveal-delay="3">
+      {s.stats.map((stat: string, i: number) => (
+        <>
+          {i > 0 && <li class="fh-stats-sep" aria-hidden="true"></li>}
+          <li class="fh-stat">{stat}</li>
+        </>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .fh {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 768px) {
+    .fh { padding-top: 96px; padding-bottom: 104px; }
+  }
+
+  .fh-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in oklab, var(--color-accent) 45%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+
+  .fh-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .fh-glow {
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    width: 900px;
+    height: 900px;
+    margin-left: -450px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 20%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(80px);
+    opacity: 0.7;
+  }
+  @media (max-width: 767px) {
+    .fh-glow { width: 620px; height: 620px; margin-left: -310px; filter: blur(60px); }
+  }
+
+  .fh-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fh-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 16px;
+  }
+  .fh-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-cream);
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (min-width: 768px) {
+    .fh-heading { font-size: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .fh-heading { font-size: 64px; }
+  }
+  .fh-sub {
+    margin: 20px auto 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  }
+  @media (min-width: 768px) {
+    .fh-sub { font-size: 17px; margin-top: 24px; }
+  }
+
+  .fh-stats {
+    list-style: none;
+    padding: 0;
+    margin: 32px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 80%, transparent);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .fh-stats-sep {
+    width: 4px; height: 4px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-cream) 30%, transparent);
+  }
+  .fh-stat { line-height: 1.4; }
+</style>

@@ -1,0 +1,540 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).reviews;
+
+// Google-ish avatar palette — muted solid circles, deliberately NOT terracotta
+// so the accent stays precious. Deterministic by first letter.
+const avatarPalette: Record<string, string> = {
+  P: '#7B8060', // olive
+  S: '#4B8B8E', // teal
+  M: '#8F5B7E', // plum
+  E: '#6B8F6E', // sage
+  A: '#A6845A', // sand
+  J: '#A06B6B', // dusty rose
+  C: '#4A6885', // navy
+};
+
+function stars(rating: number) {
+  return (Math.max(0, Math.min(5, rating)) / 5) * 100;
+}
+
+// Interpolate the "reviewCount" template for the aggregate badge.
+const totalReviews = s.items.length;
+const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalReviews));
+---
+
+<section class="rv section-y" aria-labelledby="rv-heading">
+  <div class="page-x mx-auto max-w-[1200px]">
+    <header class="rv-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="rv-heading" class="h2 text-balance">{s.heading}</h2>
+      {s.subheading && <p class="body-lg mt-3">{s.subheading}</p>}
+    </header>
+
+    {/* Aggregate badge — Google logo + score + stars + review count */}
+    <div class="rv-agg" data-reveal data-reveal-delay="1">
+      <svg class="rv-agg-logo" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+        <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.1 5.6l6.2 5.2C41.4 35.7 44 30.2 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+      </svg>
+      <div class="rv-agg-score">
+        <span class="rv-agg-num tabular-nums">{s.badges.googleScore}</span>
+        <span class="rv-stars" style={`--pct: ${stars(4.5)}%`} aria-label={`${s.badges.googleScore} / 5`}>
+          <span class="rv-stars-empty">
+            {Array.from({ length: 5 }).map(() => (
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ))}
+          </span>
+          <span class="rv-stars-filled">
+            {Array.from({ length: 5 }).map(() => (
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ))}
+          </span>
+        </span>
+      </div>
+      <div class="rv-agg-meta">
+        <p class="rv-agg-brand">{s.badges.google}</p>
+        <p class="rv-agg-count">{reviewCountText}</p>
+      </div>
+    </div>
+
+    {/* Scroller with arrow buttons — identical pattern on mobile + desktop */}
+    <div class="rv-scroller mt-10 md:mt-12" data-reveal data-reveal-delay="2">
+      <button type="button" class="rv-arrow rv-arrow-prev" data-rv-prev aria-label="Previous review">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+
+      <ul class="rv-track" data-rv-track>
+        {s.items.map((r: {
+          text: string; name: string; flag: string; trip: string;
+          rating?: number; date?: string; authorMeta?: string;
+        }, i: number) => {
+          const rating = typeof r.rating === 'number' ? r.rating : 5;
+          const avatarColor = avatarPalette[r.name[0]] ?? '#7B8060';
+          return (
+            <li class="rv-slot" data-review-index={String(i)}>
+              <article class="rv-card">
+                {/* Top row: avatar + name + date */}
+                <header class="rv-card-head">
+                  <div class="rv-avatar" style={`background:${avatarColor}`} aria-hidden="true">
+                    {r.name[0]}
+                  </div>
+                  <div class="rv-author">
+                    <p class="rv-author-name">
+                      {r.name} <span class="rv-author-flag" aria-hidden="true">{r.flag}</span>
+                    </p>
+                    {r.authorMeta && <p class="rv-author-meta">{r.authorMeta}</p>}
+                  </div>
+                  {r.date && <p class="rv-date">{r.date}</p>}
+                </header>
+
+                {/* Star row — Google amber, half-star support via clipped overlay */}
+                <span class="rv-stars rv-stars-inline" style={`--pct: ${stars(rating)}%`} aria-label={`${rating}/5`}>
+                  <span class="rv-stars-empty">
+                    {Array.from({ length: 5 }).map(() => (
+                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ))}
+                  </span>
+                  <span class="rv-stars-filled">
+                    {Array.from({ length: 5 }).map(() => (
+                      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ))}
+                  </span>
+                </span>
+
+                {/* Review body — 4-line clamp w/ fade + See more toggle (JS only if overflow) */}
+                <div class="rv-body">
+                  <p class="rv-text" data-rv-text>{r.text}</p>
+                  <button
+                    type="button"
+                    class="rv-more"
+                    data-rv-more
+                    data-label-more={s.seeMore ?? 'See more'}
+                    data-label-less={s.seeLess ?? 'See less'}
+                    hidden
+                  >
+                    {s.seeMore ?? 'See more'}
+                  </button>
+                </div>
+
+                {/* Trip pill */}
+                <p class="rv-trip">
+                  <svg class="rv-trip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>{r.trip}</span>
+                </p>
+              </article>
+            </li>
+          );
+        })}
+      </ul>
+
+      <button type="button" class="rv-arrow rv-arrow-next" data-rv-next aria-label="Next review">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    {/* Dot indicators — mobile only, tracks which card is snapped-in */}
+    <ol class="rv-dots md:hidden mt-5 flex items-center justify-center gap-2" aria-hidden="true" data-rv-dots>
+      {s.items.map((_r: unknown, i: number) => (
+        <li class="rv-dot" data-dot-index={String(i)} />
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  /* Scoped Google-star color. This is the ONLY place it's used. */
+  .rv { --star: #FBBC04; }
+
+  .rv {
+    background: var(--color-paper);
+  }
+
+  .rv-head { max-width: 640px; }
+
+  /* Aggregate badge — Google-style trust anchor */
+  .rv-agg {
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+  }
+  .rv-agg-logo { width: 28px; height: 28px; flex-shrink: 0; }
+  .rv-agg-score { display: flex; flex-direction: column; gap: 4px; }
+  .rv-agg-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+  .rv-agg-meta {
+    border-left: 1px solid var(--color-smoke);
+    padding-left: 14px;
+  }
+  .rv-agg-brand {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    margin: 0;
+    line-height: 1.25;
+  }
+  .rv-agg-count {
+    font-size: 12px;
+    color: var(--color-graphite);
+    margin: 2px 0 0;
+  }
+
+  /* ---------------------------------------------------------------
+     Scroller — identical pattern on mobile + desktop.
+     --------------------------------------------------------------- */
+  .rv-scroller { position: relative; }
+
+  .rv-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 16px;
+    padding: 4px 16px 10px;
+    margin-inline: -16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    list-style: none;
+    mask-image: linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+    scroll-behavior: smooth;
+  }
+  .rv-track::-webkit-scrollbar { display: none; }
+  @media (min-width: 768px) {
+    .rv-track {
+      gap: 18px;
+      padding: 4px 24px 10px;
+      margin-inline: -24px;
+    }
+  }
+
+  .rv-slot {
+    flex: 0 0 calc(100% - 32px);
+    max-width: 360px;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 640px) {
+    .rv-slot { flex: 0 0 340px; max-width: 340px; }
+  }
+  .rv-slot:last-child { margin-right: 16px; }
+
+  /* Arrow buttons — same recipe as Destinations arrows */
+  .rv-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--color-smoke);
+    box-shadow:
+      0 10px 24px -10px rgba(26, 26, 26, 0.2),
+      0 0 0 1px color-mix(in oklab, white 40%, transparent) inset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out),
+      border-color 200ms var(--ease-out),
+      transform 180ms var(--ease-out),
+      opacity 200ms var(--ease-out);
+  }
+  .rv-arrow svg { width: 18px; height: 18px; }
+  .rv-arrow:hover {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    border-color: var(--color-accent);
+  }
+  .rv-arrow:active { transform: translateY(-50%) scale(0.94); }
+  .rv-arrow:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+  .rv-arrow:disabled { opacity: 0; pointer-events: none; }
+  .rv-arrow-prev { left: -4px; }
+  .rv-arrow-next { right: -4px; }
+  @media (min-width: 768px) {
+    .rv-arrow-prev { left: -22px; }
+    .rv-arrow-next { right: -22px; }
+  }
+
+  /* ---------------------------------------------------------------
+     Card — Google-authentic layout
+     --------------------------------------------------------------- */
+  .rv-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 22px 20px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+    height: 100%;
+    transition:
+      transform 240ms var(--ease-out),
+      border-color 240ms var(--ease-out),
+      box-shadow 280ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .rv-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-graphite);
+      box-shadow: 0 18px 40px -20px rgba(26, 26, 26, 0.18);
+    }
+  }
+
+  .rv-card-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 12px;
+    align-items: start;
+  }
+  .rv-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    color: white;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 40px;
+    text-align: center;
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
+  .rv-author { min-width: 0; }
+  .rv-author-name {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-ink);
+    line-height: 1.2;
+  }
+  .rv-author-flag { margin-left: 2px; }
+  .rv-author-meta {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--color-graphite);
+    line-height: 1.3;
+  }
+  .rv-date {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--color-graphite);
+    line-height: 1.3;
+    white-space: nowrap;
+    align-self: start;
+    justify-self: end;
+  }
+
+  /* Stars — two layered SVG groups, amber, half-star via --pct */
+  .rv-stars {
+    position: relative;
+    display: inline-flex;
+    color: color-mix(in oklab, var(--color-graphite) 40%, var(--color-smoke));
+    line-height: 1;
+  }
+  .rv-stars-empty {
+    display: inline-flex;
+    gap: 2px;
+  }
+  .rv-stars-filled {
+    display: inline-flex;
+    gap: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--star);
+    width: var(--pct, 100%);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .rv-stars-empty svg,
+  .rv-stars-filled svg {
+    width: 16px;
+    height: 16px;
+  }
+  .rv-stars-inline { margin-top: -2px; }
+  /* Aggregate badge uses slightly bigger stars */
+  .rv-agg .rv-stars-empty svg,
+  .rv-agg .rv-stars-filled svg { width: 14px; height: 14px; }
+
+  /* Body text — clamp to 4 lines with a bottom fade. Expands on toggle. */
+  .rv-body { position: relative; }
+  .rv-text {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .rv-card.is-expanded .rv-text {
+    -webkit-line-clamp: unset;
+    display: block;
+  }
+  .rv-more {
+    margin-top: 6px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--color-ink) 30%, transparent);
+    text-underline-offset: 3px;
+    transition: color 200ms var(--ease-out), text-decoration-color 200ms var(--ease-out);
+  }
+  .rv-more:hover { color: var(--color-accent); text-decoration-color: var(--color-accent); }
+
+  /* Trip pill */
+  .rv-trip {
+    margin: auto 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--color-graphite);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .rv-trip-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  /* Mobile dot indicators */
+  .rv-dot {
+    height: 6px; width: 6px;
+    border-radius: 999px;
+    background: var(--color-smoke);
+    transition: all 220ms var(--ease-out);
+    list-style: none;
+  }
+  .rv-dot.is-current {
+    background: var(--color-accent);
+    width: 18px;
+    border-radius: 999px;
+  }
+</style>
+
+<script>
+  // Reviews: arrow scroll by card width, dot indicator on mobile,
+  // "See more" only when clamped text actually overflows.
+  function run() {
+    const scroller = document.querySelector<HTMLElement>('[data-rv-track]');
+    if (!scroller) return;
+
+    const prev = document.querySelector<HTMLButtonElement>('[data-rv-prev]');
+    const next = document.querySelector<HTMLButtonElement>('[data-rv-next]');
+    const dots = document.querySelectorAll<HTMLElement>('[data-dot-index]');
+
+    function stepSize() {
+      const card = scroller!.querySelector<HTMLElement>('.rv-slot');
+      if (!card) return 200;
+      const rect = card.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(scroller!).columnGap || '0') || 14;
+      return rect.width + gap;
+    }
+
+    function updateArrowStates() {
+      if (!prev || !next) return;
+      const max = scroller!.scrollWidth - scroller!.clientWidth - 2;
+      prev.disabled = scroller!.scrollLeft <= 2;
+      next.disabled = scroller!.scrollLeft >= max;
+    }
+
+    prev?.addEventListener('click', () => {
+      scroller!.scrollBy({ left: -stepSize(), behavior: 'smooth' });
+    });
+    next?.addEventListener('click', () => {
+      scroller!.scrollBy({ left: stepSize(), behavior: 'smooth' });
+    });
+
+    scroller.addEventListener('scroll', () => {
+      requestAnimationFrame(updateArrowStates);
+    }, { passive: true });
+    updateArrowStates();
+
+    // Dot indicator
+    if (dots.length && 'IntersectionObserver' in window) {
+      const cards = scroller.querySelectorAll<HTMLElement>('.rv-slot');
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.intersectionRatio > 0.6) {
+            const idx = (e.target as HTMLElement).dataset.reviewIndex;
+            dots.forEach((d) => d.classList.toggle('is-current', d.dataset.dotIndex === idx));
+          }
+        }
+      }, { root: scroller, threshold: [0, 0.6, 1] });
+      cards.forEach((c) => io.observe(c));
+    }
+
+    // See-more buttons — reveal only when the clamped text actually overflows.
+    // Uses scrollHeight vs clientHeight to detect overflow after layout.
+    scroller.querySelectorAll<HTMLElement>('[data-rv-more]').forEach((btn) => {
+      const card = btn.closest('.rv-card');
+      const text = card?.querySelector<HTMLElement>('[data-rv-text]');
+      if (!card || !text) return;
+      const labelMore = btn.dataset.labelMore || 'See more';
+      const labelLess = btn.dataset.labelLess || 'See less';
+
+      // Defer overflow check so fonts + layout settle first
+      requestAnimationFrame(() => {
+        if (text.scrollHeight - text.clientHeight > 2) {
+          btn.hidden = false;
+        }
+      });
+
+      btn.addEventListener('click', () => {
+        const open = card.classList.toggle('is-expanded');
+        btn.textContent = open ? labelLess : labelMore;
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

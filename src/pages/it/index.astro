@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import WhyUs from '../../components/WhyUs.astro';
+import HowItWorks from '../../components/HowItWorks.astro';
+import Destinations from '../../components/Destinations.astro';
+import Fleet from '../../components/Fleet.astro';
+import MoreServices from '../../components/MoreServices.astro';
+import Reviews from '../../components/Reviews.astro';
+import FAQ from '../../components/FAQ.astro';
+import FinalCTA from '../../components/FinalCTA.astro';
+import BookingModal from '../../components/BookingModal.astro';
+import BookingForm from '../../components/BookingForm.astro';
+---
+
+<BaseLayout locale="it" routeKey="home">
+  <Hero locale="it" />
+  <WhyUs locale="it" />
+  <HowItWorks locale="it" />
+  <Destinations locale="it" />
+  <Fleet locale="it" />
+  <MoreServices locale="it" />
+  <Reviews locale="it" />
+  <FAQ locale="it" />
+  <FinalCTA locale="it" />
+
+  <BookingModal locale="it">
+    <BookingForm locale="it" />
+  </BookingModal>
+</BaseLayout>

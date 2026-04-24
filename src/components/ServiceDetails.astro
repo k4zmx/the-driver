@@ -1,0 +1,90 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.faqContact.service;
+---
+
+<section class="sd section-y has-grain" aria-labelledby="sd-heading">
+  <div class="page-x mx-auto max-w-[800px]">
+    <header class="sd-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="sd-heading" class="h2 text-balance">{s.heading}</h2>
+    </header>
+
+    <ul class="sd-list mt-10 md:mt-12">
+      {s.rows.map((row: { icon: string; label: string; value: string }, i: number) => (
+        <li class="sd-row" data-reveal data-reveal-delay={String((i % 4) + 1)}>
+          <div class="sd-icon" aria-hidden="true">
+            <Icon name={row.icon} size={20} strokeWidth={1.6} />
+          </div>
+          <div class="sd-text">
+            <p class="sd-label">{row.label}</p>
+            <p class="sd-value">{row.value}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .sd {
+    background: var(--color-cream);
+  }
+  .sd-head { max-width: 640px; }
+
+  .sd-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-smoke);
+  }
+  .sd-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-smoke);
+  }
+  @media (min-width: 768px) {
+    .sd-row { padding: 24px 0; gap: 20px; }
+  }
+  .sd-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sd-text { min-width: 0; flex: 1; }
+  .sd-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-graphite);
+  }
+  .sd-value {
+    margin: 6px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .sd-value { font-size: 16px; }
+  }
+</style>

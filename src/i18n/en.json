@@ -1,0 +1,615 @@
+{
+  "locale": "en",
+  "localeName": "English",
+  "flag": "🇬🇧",
+  "nav": {
+    "home": "Home",
+    "fleet": "Our fleet",
+    "routes": "Routes & pricing",
+    "about": "About",
+    "contact": "Contact",
+    "book": "Book"
+  },
+  "cta": {
+    "bookNow": "Book now",
+    "getQuote": "Get a quote",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "learnMore": "Learn more"
+  },
+  "hero": {
+    "h1": "Your private driver in Paris.",
+    "sub": "Flat rates. English spoken. From the airport to your hotel, Disneyland or Versailles.",
+    "trust": {
+      "rating": "4.5 Google",
+      "childseats": "Free child seats",
+      "license": "VTC licensed",
+      "payment": "Pay on arrival"
+    },
+    "pickup": {
+      "label": "FROM",
+      "placeholder": "Pick a location"
+    },
+    "dropoff": {
+      "label": "TO",
+      "placeholder": "Pick a location"
+    },
+    "price": {
+      "from": "FROM",
+      "empty": "Pick your route",
+      "unavailable": "Message us for this route"
+    },
+    "cta": "Book now"
+  },
+  "form": {
+    "eyebrow": "BOOKING",
+    "heading": "Just a few more details.",
+    "subheading": "Confirmation within 1h by email and WhatsApp.",
+    "groups": {
+      "trip": "YOUR TRIP",
+      "whenWho": "WHEN & WHO",
+      "you": "YOUR DETAILS"
+    },
+    "trip": {
+      "flightNumber": "Flight number",
+      "flightPlaceholder": "e.g. AF1234",
+      "trainNumber": "Train number",
+      "trainPlaceholder": "e.g. TGV 8345",
+      "pickupAddress": "Pickup address",
+      "pickupAddressPlaceholder": "e.g. 15 rue de Rivoli, 75001 Paris",
+      "dropoffAddress": "Destination address or hotel",
+      "dropoffAddressPlaceholder": "e.g. Hôtel de Crillon, 10 place de la Concorde",
+      "typeLabel": "TRIP TYPE",
+      "oneWay": "One way",
+      "roundTrip": "Round trip",
+      "returnDate": "Return date",
+      "returnTime": "Return time",
+      "returnNote": "Save 10% when you book a round trip."
+    },
+    "when": {
+      "date": "Date",
+      "time": "Time",
+      "passengers": "Passengers",
+      "passengersHelp": "Vehicle chosen automatically.",
+      "passengersIncrease": "Add a passenger",
+      "passengersDecrease": "Remove a passenger"
+    },
+    "options": {
+      "heading": "Additional options",
+      "childSeats": "Child seats (free)",
+      "seatCosy": "Infant carrier",
+      "seatCosyHint": "0–12 months · up to 13 kg",
+      "seatBaby": "Baby seat",
+      "seatBabyHint": "1–3 years · 9–18 kg",
+      "seatBooster": "Booster",
+      "seatBoosterHint": "4–10 years · 15–36 kg",
+      "extraStop": "I need an extra stop",
+      "extraStopDetails": "Stop details",
+      "extraStopPlaceholder": "e.g. grocery stop at Carrefour Bercy",
+      "extraStopNote": "Price confirmed on WhatsApp if an extra stop is needed."
+    },
+    "you": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone",
+      "countryCode": "Country code",
+      "email": "Email"
+    },
+    "summary": {
+      "heading": "SUMMARY",
+      "route": "Route",
+      "vehicle": "Vehicle",
+      "passengers": "Passengers",
+      "type": "Type",
+      "total": "TOTAL"
+    },
+    "submit": {
+      "cta": "Confirm my booking",
+      "reassurance": "No deposit. Confirmation within the hour."
+    },
+    "success": {
+      "title": "Booking sent.",
+      "body": "Check your inbox (and spam) within the hour. We'll also reach out on WhatsApp at {phone}."
+    },
+    "whatsapp": {
+      "prompt": "Prefer WhatsApp?",
+      "cta": "Ask for a quick quote"
+    }
+  },
+  "whyUs": {
+    "eyebrow": "WHY US",
+    "heading": "No bad surprises. That's the whole point.",
+    "subheading": "What we do differently, for travelers.",
+    "cards": {
+      "fixedPrice": {
+        "title": "Fixed prices, no surprises.",
+        "body": "Your fare is locked in at booking. Traffic, tolls, detours — everything is included."
+      },
+      "greet": {
+        "title": "We meet you at arrivals.",
+        "body": "Your driver waits in the arrivals hall with a sign bearing your name. We track your flight — delays cost you nothing."
+      },
+      "contact": {
+        "title": "One direct line.",
+        "body": "You get your driver's WhatsApp number before the ride. Ask anything, change anything — directly."
+      },
+      "children": {
+        "title": "Children ride free.",
+        "body": "Infant carrier, child seat, booster — on request, at no extra charge."
+      }
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "HOW IT WORKS",
+    "heading": "Book in 2 minutes. Travel relaxed.",
+    "steps": [
+      { "title": "Pick your route.", "body": "Choose pickup and drop-off. The price shows up instantly." },
+      { "title": "Fill in the details.", "body": "Date, time, passengers, flight number. That's it." },
+      { "title": "Get your confirmation.", "body": "Within 1 hour by email and WhatsApp, with your driver's details." },
+      { "title": "Hop in, unwind.", "body": "A sign with your name at the airport. Pay cash or card on arrival." }
+    ]
+  },
+  "destinations": {
+    "eyebrow": "OUR ROUTES",
+    "heading": "Roads we know by heart.",
+    "subheading": "A clear starting price for every destination.",
+    "fromPrefix": "From",
+    "cards": {
+      "parisHotels": "Paris hotels",
+      "disneyland": "Disneyland Paris",
+      "versailles": "Château de Versailles",
+      "trainStations": "Paris train stations",
+      "betweenAirports": "Between airports",
+      "hourly": "Paris tour by the hour",
+      "hourlyPrice": "€50 / hour"
+    },
+    "otherPrompt": "Another destination?",
+    "otherCta": "WhatsApp us"
+  },
+  "fleet": {
+    "eyebrow": "OUR FLEET",
+    "heading": "Two cars. Every kind of trip.",
+    "subheading": "Pick by group size. We adapt automatically if you're a bigger group.",
+    "berline": {
+      "label": "SEDAN",
+      "model": "Tesla Model Y",
+      "capacity": "1–3 passengers",
+      "luggage": "3 bags",
+      "features": [
+        "Clean interior",
+        "USB chargers",
+        "Air conditioning",
+        "Bottled water"
+      ],
+      "price": "From €60"
+    },
+    "van": {
+      "label": "VAN",
+      "model": "Mercedes Vito · Renault Trafic",
+      "capacity": "4–8 passengers",
+      "luggage": "8 bags",
+      "features": [
+        "Separate luggage area",
+        "Tinted windows",
+        "Air conditioning",
+        "Room for 8"
+      ],
+      "price": "From €80"
+    },
+    "cta": "Book this car",
+    "combine": {
+      "heading": "More than 8 passengers? We combine.",
+      "examples": [
+        { "pax": "11 people", "combo": "1 van + 1 sedan" },
+        { "pax": "16 people", "combo": "2 vans" },
+        { "pax": "20 people", "combo": "2 vans + 1 sedan" }
+      ],
+      "footer": "Same per-vehicle price. No surprises."
+    }
+  },
+  "moreServices": {
+    "eyebrow": "MORE SERVICES",
+    "heading": "More than just transfers.",
+    "hourly": {
+      "eyebrow": "BY THE HOUR",
+      "title": "Paris on your schedule.",
+      "price": "€50 / hour",
+      "body": "Your driver, your itinerary. Shopping, sightseeing, dinners — we wait, we drive, you enjoy.",
+      "bullets": [
+        "3-hour minimum",
+        "Dedicated driver",
+        "Go wherever you like"
+      ],
+      "cta": "Book by the hour",
+      "whatsappMessage": "Hi, I'd like to book a chauffeur by the hour in Paris. Could you share your availability?"
+    },
+    "longDistance": {
+      "eyebrow": "LONG DISTANCE",
+      "title": "Beyond Paris.",
+      "price": "On request",
+      "body": "Reims, Champagne, Mont-Saint-Michel, Loire, Normandy. We quote based on distance and tolls.",
+      "bullets": [
+        "Personalised quote",
+        "Vehicle matched to the trip",
+        "Reply within 1 hour"
+      ],
+      "cta": "Ask for a quote",
+      "whatsappMessage": "Hi, I'd like a quote for a long-distance trip from Paris to …"
+    }
+  },
+  "reviews": {
+    "eyebrow": "TRAVELER REVIEWS",
+    "heading": "We'd rather show you.",
+    "subheading": "What the tourists we've driven are saying.",
+    "seeMore": "See more",
+    "seeLess": "See less",
+    "reviewCount": "{n} reviews",
+    "items": [
+      { "text": "Perfect. Nothing to fault. We were 10 with tons of luggage and he organised 1 van + 1 sedan without any fuss. Price quoted was respected to the euro. Will book again without hesitation.", "name": "Pierre", "flag": "🇫🇷", "trip": "Disneyland → CDG", "rating": 5, "date": "3 months ago", "authorMeta": "Local Guide · 47 reviews · 12 photos" },
+      { "text": "Really good service for our arrival in Paris with the kids. Driver on time, sign with our name, child seats already installed. One small thing: the AC took about 2 min to actually cool the car down, no big deal.", "name": "Sarah", "flag": "🇺🇸", "trip": "CDG → Disneyland", "rating": 4.5, "date": "1 month ago", "authorMeta": "Local Guide · 23 reviews · 8 photos" },
+      { "text": "Great for a family trip. Free child seats, friendly driver, we chatted a bit in English. The GPS took a slightly longer route than what Google Maps showed, 5 min extra, but we got there fine.", "name": "Marco", "flag": "🇮🇹", "trip": "Orly → Paris", "rating": 4.5, "date": "2 weeks ago", "authorMeta": "Local Guide · 18 reviews · 4 photos" },
+      { "text": "Solid. Price quoted was respected, clean car, polite driver. We were 5 with luggage and I thought it was a bit pricey for the distance, but it's a flat rate so at least you know what you're getting.", "name": "Elena", "flag": "🇪🇸", "trip": "CDG → Versailles", "rating": 4, "date": "2 months ago", "authorMeta": "31 reviews · 5 photos" },
+      { "text": "Professional and discreet driver, quiet ride, spotless car. He speaks some English but we would've liked to chat a bit more during the trip. Otherwise, no complaints.", "name": "Ahmed", "flag": "🇦🇪", "trip": "CDG → Paris", "rating": 4, "date": "3 weeks ago", "authorMeta": "Local Guide · 65 reviews · 19 photos" },
+      { "text": "Our flight was 2 hours late and he waited without complaining, which is a real plus. But the sedan was really tight for 3 adults + 4 suitcases, we struggled loading it. Should've gone with the van.", "name": "James", "flag": "🇬🇧", "trip": "Beauvais → Disneyland", "rating": 3.5, "date": "1 month ago", "authorMeta": "12 reviews · 2 photos" },
+      { "text": "Service was correct, nothing exceptional but nothing bad either. Driver took a bit to find our hotel entrance, we lost 5-10 min. WhatsApp communication was responsive. Would use again for a simple transfer.", "name": "Claire", "flag": "🇫🇷", "trip": "Orly → Versailles", "rating": 3.5, "date": "6 weeks ago", "authorMeta": "Local Guide · 9 reviews" }
+    ],
+    "badges": {
+      "google": "Google Reviews",
+      "googleScore": "4.5",
+      "tripadvisor": "TripAdvisor"
+    }
+  },
+  "faq": {
+    "eyebrow": "FREQUENT QUESTIONS",
+    "heading": "Everything our travelers ask us.",
+    "subPrefix": "A question not covered here?",
+    "subCta": "WhatsApp us",
+    "items": [
+      { "q": "What happens if my flight is delayed?", "a": "We track your flight in real time. Your driver waits up to 60 minutes after landing, at no extra charge." },
+      { "q": "Where do I meet my driver at the airport?", "a": "In the arrivals hall, with a sign bearing your name. We send you their photo and WhatsApp number 24h before your trip." },
+      { "q": "How do I pay?", "a": "Cash or card, paid directly to the driver on arrival. No deposit required. A deposit is possible to lock in the round-trip discount." },
+      { "q": "What if we're more than 8 people?", "a": "No problem. We combine vehicles. 11 passengers = 1 van + 1 sedan. Per-vehicle pricing, no surprises." }
+    ],
+    "seeAll": "See all questions"
+  },
+  "finalCta": {
+    "eyebrow": "READY?",
+    "heading": "We leave when you do.",
+    "sub": "Pick your route. Get your price in 10 seconds.",
+    "primary": "Book now",
+    "secondary": "WhatsApp",
+    "footnote": "Available 24/7 · Reply within 1 hour · Fixed price guaranteed"
+  },
+  "footer": {
+    "tagline": "Private chauffeur in Paris",
+    "rights": "All rights reserved",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "brand": {
+      "tagline": "Your private driver in Paris since 2020.",
+      "rating": "4.5 — Google Reviews"
+    },
+    "columns": {
+      "links": "LINKS",
+      "contact": "CONTACT",
+      "languages": "LANGUAGES"
+    },
+    "links": {
+      "home": "Home",
+      "fleet": "Our fleet",
+      "routes": "Pricing",
+      "hourly": "By the hour",
+      "faq": "FAQ"
+    },
+    "contact": {
+      "hoursLabel": "Service",
+      "hours": "24/7 · Every day"
+    },
+    "legalLine": {
+      "siretLabel": "SIRET",
+      "siretValue": "—",
+      "licenseLabel": "VTC License",
+      "licenseValue": "—"
+    }
+  },
+  "pages": {
+    "fleet": {
+      "hero": {
+        "eyebrow": "OUR FLEET",
+        "heading": "Two cars. Every kind of trip.",
+        "sub": "We're not trying to have the biggest fleet — we're trying to have the right cars, well-kept, always ready.",
+        "stats": ["2 vehicles", "1 to 8 passengers · more on request", "100% non-smoking"]
+      },
+      "car": {
+        "eyebrow": "SEDAN",
+        "title": "Tesla Model Y",
+        "oneLiner": "Electric comfort, complete silence, zero emissions.",
+        "specs": [
+          { "icon": "users", "label": "1–3 passengers" },
+          { "icon": "briefcase", "label": "3 large bags" },
+          { "icon": "zap", "label": "100% electric" },
+          { "icon": "wifi", "label": "Wi-Fi on board" }
+        ],
+        "features": [
+          "Climate-controlled cabin",
+          "USB-C chargers for every seat",
+          "Complimentary bottled water",
+          "Tinted windows",
+          "Separate luggage area in the boot",
+          "Bluetooth audio on request"
+        ],
+        "bestForHeading": "Best for:",
+        "bestFor": [
+          "Couples and solo travelers",
+          "Business trips",
+          "Families up to 3",
+          "Light-to-medium luggage"
+        ],
+        "cta": "Book the sedan",
+        "priceNote": "From €60 — flat rate"
+      },
+      "van": {
+        "eyebrow": "FAMILY VAN",
+        "title": "Mercedes Vito · Renault Trafic",
+        "oneLiner": "The space families, groups and luggage-heavy travelers actually need.",
+        "specs": [
+          { "icon": "users", "label": "4–8 passengers" },
+          { "icon": "briefcase", "label": "Up to 8 bags" },
+          { "icon": "shield", "label": "Individual seats" },
+          { "icon": "wind", "label": "Rear climate control" }
+        ],
+        "features": [
+          "Separate front/rear A/C",
+          "Oversized, separate luggage area",
+          "Tinted windows",
+          "Individual, reclining seats",
+          "USB chargers",
+          "Sliding side door — easy access"
+        ],
+        "bestForHeading": "Best for:",
+        "bestFor": [
+          "Families of 4 to 8",
+          "Groups of friends",
+          "Travelers with lots of luggage",
+          "Disneyland transfers with strollers"
+        ],
+        "cta": "Book the van",
+        "priceNote": "From €80 — flat rate"
+      },
+      "groups": {
+        "eyebrow": "GROUPS",
+        "heading": "More than 8 people? We adapt.",
+        "sub": "No need to juggle several taxis. We combine our vehicles at the same flat per-vehicle price.",
+        "combos": [
+          { "pax": "11", "label": "passengers", "combo": "1 van + 1 sedan", "price": "€140" },
+          { "pax": "16", "label": "passengers", "combo": "2 vans", "price": "€160" },
+          { "pax": "20", "label": "passengers", "combo": "2 vans + 1 sedan", "price": "€220" }
+        ],
+        "footer": "Calculated automatically in the booking form, based on your passenger count."
+      },
+      "always": {
+        "eyebrow": "ALWAYS INCLUDED",
+        "heading": "No extras, no surprises.",
+        "items": [
+          { "icon": "lock", "title": "Fixed price guaranteed", "body": "The price we quote is the price you pay. Tolls, taxes, bags — all inside." },
+          { "icon": "baby", "title": "Free child seats", "body": "Infant carrier, child seat, booster — just ask at booking." },
+          { "icon": "clock", "title": "Free waiting time", "body": "60 min free for flights, 30 min free for trains." },
+          { "icon": "droplet", "title": "Bottled water", "body": "On board for every passenger, in every vehicle." }
+        ]
+      },
+      "finalCta": {
+        "heading": "Ready to pick your vehicle?",
+        "sub": "Choose your route and the right vehicle is assigned automatically.",
+        "primary": "Get my price",
+        "orText": "or",
+        "whatsapp": "WhatsApp us"
+      }
+    },
+    "rates": {
+      "hero": {
+        "eyebrow": "OUR RATES",
+        "heading": "Every price. No bad surprises.",
+        "sub": "Flat rates per vehicle, per route. Tolls included, taxes included, luggage included. What you see is what you pay.",
+        "trustRow": ["Flat rates", "Tolls included", "Free child seats", "Pay on arrival"]
+      },
+      "calculator": {
+        "eyebrow": "WORK OUT YOUR PRICE",
+        "heading": "Your trip, your price.",
+        "sub": "Faster than reading the table below.",
+        "hint": "or read the full grid below"
+      },
+      "grid": {
+        "eyebrow": "FULL GRID",
+        "heading": "Every route, every price.",
+        "sub": "Per-vehicle price for one way. Round trip: 10% off if paid in advance.",
+        "colCar": "Sedan",
+        "colVan": "Van",
+        "fromLabel": "From",
+        "unpriced": "On request",
+        "footnotePrefix": "Prices in euros, per vehicle. One way. Round trip: −10% if paid in advance. Routes not listed or long-distance:",
+        "footnoteCta": "message us",
+        "footnoteSuffix": " for a quote."
+      },
+      "hourly": {
+        "eyebrow": "BY THE HOUR",
+        "price": "€50 / hour",
+        "sub": "For exploring Paris at your pace, shopping, dinners, events.",
+        "bullets": [
+          "3-hour minimum",
+          "Dedicated driver for the whole booking",
+          "Go wherever you like"
+        ],
+        "cta": "Book by the hour",
+        "whatsappMessage": "Hi, I'd like to book a driver by the hour in Paris."
+      },
+      "longDistance": {
+        "eyebrow": "LONG DISTANCE",
+        "price": "On request",
+        "sub": "Reims, Champagne, Mont-Saint-Michel, Loire, Normandy, Fontainebleau.",
+        "bullets": [
+          "Priced on distance and tolls",
+          "Vehicle matched to the trip",
+          "Quote within 1 hour on WhatsApp"
+        ],
+        "cta": "Ask for a quote",
+        "whatsappMessage": "Hi, I'd like a quote for a long-distance trip from Paris."
+      },
+      "included": {
+        "eyebrow": "INCLUDED IN EVERY PRICE",
+        "heading": "The price is the price.",
+        "sub": "What's already counted into every trip — you won't pay a cent more.",
+        "items": [
+          { "icon": "check-circle", "label": "Tolls", "sub": "Every toll along your route" },
+          { "icon": "check-circle", "label": "Taxes", "sub": "VAT and business taxes included" },
+          { "icon": "check-circle", "label": "Luggage", "sub": "Cases and bags, within reason" },
+          { "icon": "check-circle", "label": "Child seats", "sub": "Carrier, seat, booster on request" },
+          { "icon": "check-circle", "label": "Waiting", "sub": "60 min for flights, 30 min for trains" },
+          { "icon": "check-circle", "label": "Personal meet & greet", "sub": "Sign with your name at the airport" }
+        ]
+      },
+      "payment": {
+        "eyebrow": "PAYMENT",
+        "heading": "Pay however you like.",
+        "options": [
+          { "icon": "banknote", "label": "Cash on arrival", "body": "Our favourite. No fees, no middlemen." },
+          { "icon": "credit-card", "label": "Card on arrival", "body": "Visa, Mastercard, American Express. Terminal in every vehicle." },
+          { "icon": "percent", "label": "Online deposit — optional", "body": "A small online deposit is possible to lock in the round-trip discount." }
+        ]
+      },
+      "finalCta": {
+        "heading": "Ready to go?",
+        "sub": "Pick your route and get your exact price.",
+        "primary": "Book now",
+        "secondaryPrefix": "or",
+        "secondary": "WhatsApp us directly"
+      }
+    },
+    "faqContact": {
+      "hero": {
+        "eyebrow": "HELP & CONTACT",
+        "heading": "A question? We reply fast.",
+        "sub": "WhatsApp for quick chats, email for formal bookings. French, English, Spanish, Italian — tell us your preference."
+      },
+      "cards": {
+        "whatsapp": {
+          "meta": "RECOMMENDED",
+          "title": "WhatsApp",
+          "body": "The fastest way to get an answer. Quotes, changes, last-minute questions.",
+          "detail": "+33 6 28 65 81 27",
+          "availability": "Reply within 1 hour · 24/7",
+          "cta": "Open WhatsApp",
+          "whatsappMessage": "Hi, I have a question about your chauffeur service."
+        },
+        "email": {
+          "meta": "FOR BOOKINGS",
+          "title": "Email",
+          "body": "For formal bookings, long-distance quotes, billing requests.",
+          "detail": "the.driver@hotmail.com",
+          "availability": "Reply within 1 hour",
+          "cta": "Send an email",
+          "subject": "Inquiry"
+        },
+        "form": {
+          "meta": "LIVE QUOTE",
+          "title": "Online form",
+          "body": "Get your price instantly and book in 2 minutes.",
+          "detail": "Fixed price shown before you submit",
+          "availability": "Available 24/7",
+          "cta": "Open the form"
+        }
+      },
+      "service": {
+        "eyebrow": "PRACTICAL INFO",
+        "heading": "What you need to know.",
+        "rows": [
+          { "icon": "clock", "label": "Hours", "value": "24/7, every day" },
+          { "icon": "calendar", "label": "Lead time", "value": "Ideally 24h in advance, last-minute requests subject to availability" },
+          { "icon": "globe", "label": "Languages", "value": "French, English, Spanish, Italian" },
+          { "icon": "credit-card", "label": "Payment methods", "value": "Cash or card on arrival · Online deposit to lock in round-trip discount" }
+        ]
+      },
+      "faq": {
+        "eyebrow": "FREQUENT QUESTIONS",
+        "heading": "Everything we answer before you even ask.",
+        "categories": [
+          {
+            "title": "Before your trip",
+            "items": [
+              { "q": "How far in advance should I book?", "a": "Ideally 24 hours. Last-minute requests accepted based on availability — WhatsApp for an instant reply." },
+              { "q": "Can I change or cancel my booking?", "a": "Yes, free up to 24h before. WhatsApp or email — we adjust right away." },
+              { "q": "How do I pay?", "a": "Cash or card to the driver on arrival. No deposit required by default." },
+              { "q": "Is there a deposit?", "a": "Not by default. Optional deposit to lock in the round-trip discount." },
+              { "q": "Can I pay by card?", "a": "Yes. Visa, Mastercard, Amex — terminal in every vehicle." }
+            ]
+          },
+          {
+            "title": "At the airport",
+            "items": [
+              { "q": "Where does my driver meet me?", "a": "In the arrivals hall, past customs, with a sign bearing your name. Photo and WhatsApp number sent 24h before." },
+              { "q": "What if my flight is delayed?", "a": "We track your flight. Free waiting up to 60 minutes after landing." },
+              { "q": "What if I can't find my driver?", "a": "Call or WhatsApp +33 6 28 65 81 27. We'll find you right away." },
+              { "q": "What if I have more luggage than expected?", "a": "Switched to the van at no extra cost if you'd been offered the sedan." }
+            ]
+          },
+          {
+            "title": "During the trip",
+            "items": [
+              { "q": "Can we make a stop along the way?", "a": "Yes. Price confirmed on WhatsApp depending on the detour. Short stops often free." },
+              { "q": "Can I change destination mid-trip?", "a": "Yes, within reason. The driver adjusts the rate with you." },
+              { "q": "Is there Wi-Fi and charging?", "a": "USB chargers in every vehicle. Wi-Fi available on request in the Tesla." },
+              { "q": "Can we smoke in the car?", "a": "No. 100% non-smoking vehicles, including vapes." }
+            ]
+          },
+          {
+            "title": "Special requests",
+            "items": [
+              { "q": "Do you have child seats?", "a": "Yes, free. Infant carrier (0–1 yr), child seat (1–3 yr), booster (3–10 yr). Tell us the ages." },
+              { "q": "Can we travel with a pet?", "a": "Small dogs in a carrier or travel bag, yes. WhatsApp for larger animals." },
+              { "q": "Do you offer accessible transfers?", "a": "Yes. WhatsApp with your needs — we adapt vehicle and assistance." },
+              { "q": "Can I book for someone else?", "a": "Yes. Provide the passenger's name and WhatsApp at booking." }
+            ]
+          },
+          {
+            "title": "Pricing and extras",
+            "items": [
+              { "q": "Are there night or weekend surcharges?", "a": "No. Flat pricing 24/7, every day of the week." },
+              { "q": "Are tolls included?", "a": "Yes, everything included. Nothing to add on arrival." },
+              { "q": "And tipping?", "a": "Never expected. Always appreciated if the service pleased you." }
+            ]
+          }
+        ]
+      },
+      "form": {
+        "eyebrow": "ANOTHER QUESTION?",
+        "heading": "Write to us.",
+        "sub": "For anything that doesn't fit elsewhere.",
+        "fields": {
+          "firstName": "First name",
+          "email": "Email",
+          "language": "Preferred language",
+          "message": "Message"
+        },
+        "languageOptions": {
+          "fr": "Français",
+          "en": "English",
+          "es": "Español",
+          "it": "Italiano"
+        },
+        "submit": "Send",
+        "sending": "Sending…",
+        "subjectPrefix": "Question from the website",
+        "success": {
+          "title": "Message sent.",
+          "body": "We'll reply within the hour."
+        },
+        "error": "Sending failed. Message us directly:",
+        "waFallback": "WhatsApp +33 6 28 65 81 27"
+      },
+      "nudge": {
+        "body": "Rather chat right now?",
+        "cta": "Write on WhatsApp"
+      }
+    }
+  }
+}

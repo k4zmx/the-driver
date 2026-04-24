@@ -1,0 +1,352 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+  vehicle: 'car' | 'van';
+  bg?: 'cream' | 'paper';
+  imageSide?: 'left' | 'right';
+}
+
+const { locale, vehicle, bg = 'paper', imageSide = 'left' } = Astro.props;
+const v = t(locale).pages.fleet[vehicle];
+const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
+---
+
+<section
+  class:list={['fv section-y', bg === 'cream' && 'fv-cream has-grain', bg === 'paper' && 'fv-paper']}
+>
+  <div class="page-x mx-auto max-w-[1200px]">
+    <div class="fv-grid">
+
+      {/* Image side */}
+      <div class:list={['fv-image-wrap', imageSide === 'right' && 'fv-image-right']}>
+        <div class="fv-image" data-reveal data-reveal-dir={imageSide} data-reveal-delay="1">
+          <span class="fv-image-glow" aria-hidden="true"></span>
+          <Icon name={silhouetteName} size={80} strokeWidth={1.2} class="fv-silhouette placeholder-shimmer" />
+        </div>
+      </div>
+
+      {/* Content side */}
+      <div class="fv-copy" data-reveal data-reveal-delay="2">
+        <p class="fv-eyebrow">{v.eyebrow}</p>
+        <h2 class="fv-title text-balance">{v.title}</h2>
+        <p class="fv-oneliner">{v.oneLiner}</p>
+
+        {/* Specs — chip row (matches home Fleet chips) */}
+        <ul class="fv-specs">
+          {v.specs.map((spec: { icon: string; label: string }) => (
+            <li class="fv-spec">
+              <Icon name={spec.icon} size={14} strokeWidth={1.6} class="fv-spec-icon" />
+              <span>{spec.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Features — accent-bar list */}
+        <ul class="fv-features accent-bar">
+          {v.features.map((feat: string, fi: number) => (
+            <li class="fv-feature" style={`--fi: ${fi}`}>
+              <Icon name="check" size={16} strokeWidth={2.2} class="fv-feature-check" />
+              <span>{feat}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Best for — distinct callout block */}
+        <div class="fv-bestfor">
+          <p class="fv-bestfor-head">{v.bestForHeading}</p>
+          <ul class="fv-bestfor-list">
+            {v.bestFor.map((item: string) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Footer — price + CTA */}
+        <div class="fv-footer">
+          <p class="fv-price">{v.priceNote}</p>
+          <button
+            type="button"
+            class="fv-cta"
+            data-fleet-book
+            data-vehicle={vehicle}
+            data-press
+          >
+            <span>{v.cta}</span>
+            <Icon name="arrow-right" size={16} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .fv-cream { background: var(--color-cream); }
+  .fv-paper { background: var(--color-paper); }
+
+  .fv-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    .fv-grid { grid-template-columns: 1fr 1fr; gap: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .fv-grid { gap: 80px; }
+  }
+
+  .fv-image-right { order: 1; }
+  @media (min-width: 768px) {
+    .fv-image-right { order: 2; }
+  }
+
+  /* Image block — same gradient + hover-glow recipe as home Fleet cards */
+  .fv-image {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-card);
+    background:
+      radial-gradient(
+        ellipse at 30% 30%,
+        color-mix(in oklab, var(--color-cream) 80%, var(--color-paper)) 0%,
+        var(--color-cream) 55%
+      );
+    border: 1px solid color-mix(in oklab, var(--color-smoke) 80%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-graphite);
+    overflow: hidden;
+    transition: transform 400ms var(--ease-out);
+  }
+  .fv-image-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 80%, var(--color-accent-glow) 0%, transparent 55%);
+    opacity: 0.4;
+    transition: opacity 420ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .fv-image:hover .fv-image-glow { opacity: 1; }
+  }
+  .fv-silhouette {
+    position: relative;
+    transition: transform 600ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .fv-image:hover .fv-silhouette { transform: translateX(12px); }
+  }
+
+  /* Copy */
+  .fv-eyebrow {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+  .fv-title {
+    margin: 10px 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .fv-title { font-size: 44px; }
+  }
+  .fv-oneliner {
+    margin: 18px 0 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--color-graphite);
+    max-width: 40ch;
+  }
+
+  /* Specs chips */
+  .fv-specs {
+    list-style: none;
+    padding: 0;
+    margin: 22px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fv-spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .fv-cream .fv-spec { background: var(--color-paper); }
+  .fv-paper .fv-spec { background: var(--color-cream); }
+  .fv-spec-icon { color: var(--color-graphite); }
+
+  /* Features */
+  .fv-features {
+    list-style: none;
+    padding: 0 0 0 16px;
+    margin: 24px 0 0;
+    border-left: 2px solid var(--color-smoke);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fv-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-ink);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      opacity 280ms var(--ease-out),
+      transform 280ms var(--ease-out);
+    transition-delay: calc(220ms + var(--fi, 0) * 70ms);
+  }
+  [data-reveal].is-visible .fv-feature,
+  [data-reveal].is-visible.fv-copy .fv-feature {
+    opacity: 1;
+    transform: none;
+  }
+  .fv-feature-check {
+    color: var(--color-accent);
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Best for — accent-tinted callout (distinct from the rest of the card) */
+  .fv-bestfor {
+    margin: 24px 0 0;
+    padding: 16px 18px 18px;
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--color-accent) 6%, var(--color-cream));
+    border: 1px solid color-mix(in oklab, var(--color-accent) 20%, transparent);
+  }
+  .fv-paper .fv-bestfor {
+    background: color-mix(in oklab, var(--color-accent) 6%, var(--color-paper));
+  }
+  .fv-bestfor-head {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .fv-bestfor-head::before {
+    content: '★ ';
+    color: var(--color-accent);
+  }
+  .fv-bestfor-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--color-graphite);
+    line-height: 1.5;
+  }
+  .fv-bestfor-list li::before {
+    content: '— ';
+    color: var(--color-graphite);
+  }
+
+  /* Footer — price + CTA */
+  .fv-footer {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--color-smoke);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  @media (min-width: 640px) {
+    .fv-footer {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .fv-price {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.1;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .fv-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 52px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color 220ms var(--ease-out),
+      transform 180ms var(--ease-out),
+      box-shadow 260ms var(--ease-out);
+  }
+  .fv-cta:hover {
+    background: var(--color-accent);
+    box-shadow: 0 14px 30px -10px color-mix(in oklab, var(--color-accent) 75%, transparent);
+  }
+  .fv-cta:active { transform: scale(0.98); }
+  .fv-cta:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  // Wire each "Réserver cette voiture" to the booking modal.
+  // On home page: fires event, modal opens in place.
+  // On other pages: fires event, but if no modal lives here → navigate to /#booking-form.
+  function run() {
+    document.querySelectorAll<HTMLButtonElement>('[data-fleet-book]').forEach((btn) => {
+      // idempotent — avoid double-wiring if run fires twice
+      if (btn.dataset.wired === 'true') return;
+      btn.dataset.wired = 'true';
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const vehicle = btn.dataset.vehicle || '';
+        if (document.querySelector('[data-booking-modal]')) {
+          window.dispatchEvent(
+            new CustomEvent('thedriver:open-booking', { detail: { vehicle } }),
+          );
+        } else {
+          // Cross-page fallback — modal on home will auto-open from the hash
+          location.assign('/#booking-form');
+        }
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

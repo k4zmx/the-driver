@@ -1,0 +1,307 @@
+---
+import { t, LOCALES, pathForRoute } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+  routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+}
+
+const { locale, routeKey = 'home' } = Astro.props;
+const strings = t(locale);
+const f = strings.footer;
+const year = new Date().getFullYear();
+
+const WA_NUMBER = '33628658127';
+const WA_DISPLAY = '+33 6 28 65 81 27';
+const EMAIL = 'the.driver@hotmail.com';
+
+const homeHref = pathForRoute('home', locale);
+---
+
+<footer class="ft">
+  <div class="page-x mx-auto max-w-[1200px] pt-16 md:pt-20 pb-8">
+    <div class="ft-grid">
+
+      {/* Brand */}
+      <div class="ft-brand">
+        <p class="ft-logo">
+          The Driver<span class="ft-logo-dot">.</span>
+        </p>
+        <p class="ft-tagline">{f.brand.tagline}</p>
+        <p class="ft-rating">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span>{f.brand.rating}</span>
+        </p>
+      </div>
+
+      {/* Links */}
+      <nav class="ft-col" aria-label={f.columns.links}>
+        <p class="ft-col-head">{f.columns.links}</p>
+        <ul class="ft-links">
+          <li><a class="ft-link" href={homeHref}>{f.links.home}</a></li>
+          <li><a class="ft-link" href={pathForRoute('fleet', locale)}>{f.links.fleet}</a></li>
+          <li><a class="ft-link" href={pathForRoute('rates', locale)}>{f.links.routes}</a></li>
+          <li><a class="ft-link" href={`${homeHref}#hourly`}>{f.links.hourly}</a></li>
+          <li><a class="ft-link" href={pathForRoute('faqContact', locale)}>{f.links.faq}</a></li>
+        </ul>
+      </nav>
+
+      {/* Contact */}
+      <div class="ft-col">
+        <p class="ft-col-head">{f.columns.contact}</p>
+        <ul class="ft-contact">
+          <li>
+            <a
+              href={`https://wa.me/${WA_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="ft-contact-link"
+            >
+              <span class="ft-contact-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </span>
+              <span class="ft-contact-label tabular-nums">{WA_DISPLAY}</span>
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${EMAIL}`} class="ft-contact-link">
+              <span class="ft-contact-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="20" height="16" x="2" y="4" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </span>
+              <span class="ft-contact-label break-all">{EMAIL}</span>
+            </a>
+          </li>
+          <li class="ft-hours">{f.contact.hours}</li>
+        </ul>
+      </div>
+
+      {/* Languages */}
+      <nav class="ft-col" aria-label={f.columns.languages}>
+        <p class="ft-col-head">{f.columns.languages}</p>
+        <ul class="ft-langs">
+          {LOCALES.map((l) => {
+            const other = t(l);
+            const isCurrent = l === locale;
+            return (
+              <li>
+                <a
+                  href={pathForRoute(routeKey, l)}
+                  hreflang={l}
+                  aria-current={isCurrent ? 'true' : undefined}
+                  class:list={['ft-lang', isCurrent && 'is-current']}
+                >
+                  <span aria-hidden="true">{other.flag ?? ''}</span>
+                  <span>{other.localeName}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+    </div>
+
+    {/* Legal bar */}
+    <div class="ft-legal mt-12 pt-6">
+      <p class="ft-legal-line">
+        © {year} The Driver
+        <span class="ft-legal-sep">·</span>
+        <span>{f.legalLine.siretLabel} {f.legalLine.siretValue}</span>
+        <span class="ft-legal-sep">·</span>
+        <span>{f.legalLine.licenseLabel} {f.legalLine.licenseValue}</span>
+      </p>
+      <ul class="ft-legal-links">
+        <li><a class="ft-legal-link" href="#">{f.legal}</a></li>
+        <li><a class="ft-legal-link" href="#">{f.terms}</a></li>
+        <li><a class="ft-legal-link" href="#">{f.privacy}</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ft {
+    background: var(--color-night);
+    color: var(--color-cream);
+    border-top: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
+  }
+
+  .ft-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  @media (min-width: 640px) {
+    .ft-grid { grid-template-columns: 1fr 1fr; gap: 40px 32px; }
+  }
+  @media (min-width: 1024px) {
+    .ft-grid { grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 40px; }
+  }
+
+  /* Brand */
+  .ft-logo {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1;
+    margin: 0;
+  }
+  .ft-logo-dot { color: var(--color-accent); }
+  .ft-tagline {
+    margin: 14px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+    max-width: 30ch;
+  }
+  .ft-rating {
+    margin: 14px 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 80%, transparent);
+  }
+  .ft-rating svg {
+    width: 14px; height: 14px;
+    color: var(--color-accent);
+  }
+
+  /* Column heads */
+  .ft-col-head {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-cream) 55%, transparent);
+    margin: 0 0 16px;
+  }
+
+  /* Links */
+  .ft-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .ft-link {
+    display: inline-block;
+    font-size: 14px;
+    color: color-mix(in oklab, var(--color-cream) 82%, transparent);
+    padding: 2px 0;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: color 200ms var(--ease-out), background-size 250ms var(--ease-out);
+    text-decoration: none;
+  }
+  .ft-link:hover {
+    color: var(--color-cream);
+    background-size: 100% 1px;
+  }
+
+  /* Contact column — WhatsApp + email get real actionable treatment */
+  .ft-contact { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .ft-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 14px;
+    color: color-mix(in oklab, var(--color-cream) 88%, transparent);
+    transition: color 200ms var(--ease-out);
+    text-decoration: none;
+  }
+  .ft-contact-link:hover { color: var(--color-cream); }
+  .ft-contact-link:hover .ft-contact-icon {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    border-color: var(--color-accent);
+  }
+  .ft-contact-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-cream) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 18%, transparent);
+    color: color-mix(in oklab, var(--color-cream) 80%, transparent);
+    flex-shrink: 0;
+    transition: background-color 220ms var(--ease-out), border-color 220ms var(--ease-out), color 220ms var(--ease-out);
+  }
+  .ft-contact-icon svg { width: 14px; height: 14px; }
+  .ft-hours {
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 60%, transparent);
+    padding-left: 42px; /* aligns with label text above */
+  }
+
+  /* Languages — pill row, same rhythm as the nav's lang pill */
+  .ft-langs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ft-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-cream) 6%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 14%, transparent);
+    color: color-mix(in oklab, var(--color-cream) 80%, transparent);
+    font-size: 13px;
+    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+    text-decoration: none;
+  }
+  .ft-lang:hover {
+    color: var(--color-cream);
+    background: color-mix(in oklab, var(--color-cream) 12%, transparent);
+  }
+  .ft-lang.is-current {
+    color: var(--color-cream);
+    border-color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 16%, transparent);
+  }
+
+  /* ---------------------------------------------------------------
+     Legal bar — dignified, not cluttered
+     --------------------------------------------------------------- */
+  .ft-legal {
+    border-top: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 55%, transparent);
+  }
+  @media (min-width: 768px) {
+    .ft-legal { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; }
+  }
+  .ft-legal-line { margin: 0; }
+  .ft-legal-sep { padding: 0 8px; color: color-mix(in oklab, var(--color-cream) 25%, transparent); }
+  .ft-legal-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .ft-legal-link {
+    color: inherit;
+    transition: color 200ms var(--ease-out);
+    text-decoration: none;
+  }
+  .ft-legal-link:hover { color: var(--color-cream); }
+</style>

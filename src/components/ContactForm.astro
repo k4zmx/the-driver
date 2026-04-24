@@ -1,0 +1,344 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.faqContact.form;
+
+const uid = 'cf-' + Math.random().toString(36).slice(2, 9);
+
+const config = {
+  accessKey: import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '',
+  subjectPrefix: s.subjectPrefix,
+  labels: {
+    sending: s.sending,
+    submit: s.submit,
+    error: s.error,
+  },
+};
+---
+
+<section class="cf section-y has-grain">
+  <div class="page-x mx-auto max-w-[600px]">
+    <header class="cf-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 class="h2 text-balance">{s.heading}</h2>
+      <p class="body-lg mt-3">{s.sub}</p>
+    </header>
+
+    {/* Success card (hidden by default) */}
+    <div
+      data-role="success"
+      class="cf-success hidden mt-8"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="cf-success-inner">
+        <svg class="cf-success-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <div>
+          <p class="cf-success-title">{s.success.title}</p>
+          <p class="cf-success-body">{s.success.body}</p>
+        </div>
+      </div>
+    </div>
+
+    <form
+      data-contact-form
+      data-form-id={uid}
+      action="https://api.web3forms.com/submit"
+      method="POST"
+      class="cf-form mt-8"
+      data-reveal
+      data-reveal-delay="1"
+      novalidate
+    >
+      <script is:inline type="application/json" data-contact-config={uid} set:html={JSON.stringify(config)} />
+
+      {/* Web3Forms required fields */}
+      <input type="hidden" name="access_key" value={config.accessKey} />
+      <input type="hidden" name="subject" data-role="subject" value={s.subjectPrefix} />
+      <input type="hidden" name="from_name" data-role="from-name" value="" />
+      <input type="hidden" name="page" value="faq-contact" />
+      <input type="hidden" name="site_locale" value={locale} />
+      <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" />
+
+      <div>
+        <label class="meta-label block mb-2" for={`${uid}-name`}>{s.fields.firstName}</label>
+        <input
+          id={`${uid}-name`}
+          name="first_name"
+          type="text"
+          class="field"
+          required
+          autocomplete="given-name"
+          enterkeyhint="next"
+        />
+      </div>
+
+      <div>
+        <label class="meta-label block mb-2" for={`${uid}-email`}>{s.fields.email}</label>
+        <input
+          id={`${uid}-email`}
+          name="email"
+          type="email"
+          class="field"
+          required
+          autocomplete="email"
+          inputmode="email"
+          enterkeyhint="next"
+        />
+      </div>
+
+      <div>
+        <label class="meta-label block mb-2" for={`${uid}-lang`}>{s.fields.language}</label>
+        <select id={`${uid}-lang`} name="preferred_language" class="field field-select">
+          <option value="fr" selected={locale === 'fr'}>{s.languageOptions.fr}</option>
+          <option value="en" selected={locale === 'en'}>{s.languageOptions.en}</option>
+          <option value="es" selected={locale === 'es'}>{s.languageOptions.es}</option>
+          <option value="it" selected={locale === 'it'}>{s.languageOptions.it}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="meta-label block mb-2" for={`${uid}-msg`}>{s.fields.message}</label>
+        <textarea
+          id={`${uid}-msg`}
+          name="message"
+          rows="4"
+          class="field py-3"
+          style="min-height: 128px; line-height: 1.5;"
+          required
+          enterkeyhint="done"
+        />
+      </div>
+
+      <button type="submit" class="cf-submit mt-2" data-role="submit" data-press>
+        <span data-role="submit-label">{s.submit}</span>
+        <svg data-role="submit-spinner" class="cf-submit-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-6.2-8.55" />
+        </svg>
+      </button>
+
+      <div data-role="error-block" class="cf-error hidden">
+        <p class="cf-error-msg" data-role="error-msg">—</p>
+        <a
+          href="https://wa.me/33628658127"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cf-error-cta"
+          data-press
+        >
+          <Icon name="message-circle" size={18} />
+          <span>{s.waFallback}</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .cf {
+    background: var(--color-cream);
+  }
+  .cf-head { max-width: 520px; }
+
+  .cf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 28px 24px 28px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: var(--radius-card);
+    box-shadow: 0 2px 24px -12px rgba(26, 26, 26, 0.08);
+  }
+  @media (min-width: 768px) {
+    .cf-form { padding: 36px 36px 32px; gap: 20px; }
+  }
+
+  .cf-form > div { display: flex; flex-direction: column; }
+
+  .cf-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 28px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow:
+      0 12px 30px -10px color-mix(in oklab, var(--color-accent) 70%, transparent),
+      0 0 0 1px color-mix(in oklab, white 10%, transparent) inset;
+    transition:
+      background-color 220ms var(--ease-out),
+      box-shadow 260ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  .cf-submit:hover {
+    background: var(--color-accent-ink);
+    box-shadow:
+      0 16px 36px -10px color-mix(in oklab, var(--color-accent) 75%, transparent),
+      0 0 0 1px color-mix(in oklab, white 14%, transparent) inset;
+  }
+  .cf-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  .cf-submit-spinner {
+    width: 16px;
+    height: 16px;
+    animation: cf-spin 900ms linear infinite;
+  }
+  @keyframes cf-spin { to { transform: rotate(360deg); } }
+
+  .cf-error {
+    margin-top: 12px;
+    text-align: center;
+  }
+  .cf-error-msg {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-danger);
+  }
+  .cf-error-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    height: 48px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+    border: 1.5px solid var(--color-ink);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out),
+      transform 180ms var(--ease-out);
+  }
+  .cf-error-cta:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .cf-error-cta:active { transform: scale(0.98); }
+
+  /* Success card */
+  .cf-success {
+    padding: 22px 20px;
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    border: 1px solid color-mix(in oklab, var(--color-success) 35%, transparent);
+  }
+  .cf-success-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .cf-success-check {
+    width: 22px;
+    height: 22px;
+    color: var(--color-success);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .cf-success-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+  .cf-success-body {
+    margin: 6px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-graphite);
+  }
+</style>
+
+<script>
+  function init(form: HTMLFormElement) {
+    const id = form.dataset.formId;
+    const cfgEl = document.querySelector<HTMLScriptElement>(`script[data-contact-config="${id}"]`);
+    if (!cfgEl?.textContent) return;
+    const cfg = JSON.parse(cfgEl.textContent) as {
+      accessKey: string;
+      subjectPrefix: string;
+      labels: { sending: string; submit: string; error: string };
+    };
+
+    const $ = <T extends Element = HTMLElement>(sel: string) => form.querySelector<T>(sel)!;
+    const submit = $<HTMLButtonElement>('[data-role="submit"]');
+    const submitLabel = $('[data-role="submit-label"]');
+    const spinner = $('[data-role="submit-spinner"]');
+    const errorBlock = $('[data-role="error-block"]');
+    const errorMsg = $('[data-role="error-msg"]');
+    const successCard = form.parentElement?.querySelector<HTMLElement>('[data-role="success"]') ?? null;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBlock.classList.add('hidden');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
+      (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = first;
+      (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value = `${cfg.subjectPrefix} — ${first}`;
+
+      if (!cfg.accessKey) {
+        errorMsg.textContent = 'Missing form config (PUBLIC_WEB3FORMS_KEY).';
+        errorBlock.classList.remove('hidden');
+        return;
+      }
+
+      submit.disabled = true;
+      submitLabel.textContent = cfg.labels.sending;
+      spinner.classList.remove('hidden');
+
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: new FormData(form),
+        });
+        const out = await res.json().catch(() => ({} as any));
+        if (!res.ok || out.success === false) {
+          throw new Error(out.message || 'submission failed');
+        }
+        if (successCard) {
+          form.hidden = true;
+          successCard.classList.remove('hidden');
+          successCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (err) {
+        errorMsg.textContent = `${cfg.labels.error} ${(err as Error).message || ''}`.trim();
+        errorBlock.classList.remove('hidden');
+      } finally {
+        submit.disabled = false;
+        spinner.classList.add('hidden');
+        submitLabel.textContent = cfg.labels.submit;
+      }
+    });
+  }
+
+  function run() {
+    document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach(init);
+  }
+  document.addEventListener('astro:page-load', run);
+</script>

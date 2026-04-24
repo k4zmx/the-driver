@@ -1,0 +1,98 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
+import { DEFAULT_LOCALE, LOCALES, pathForRoute, ROUTE_KEYS } from '../i18n';
+
+interface Props {
+  locale?: 'fr' | 'en' | 'es' | 'it';
+  title?: string;
+  description?: string;
+  /**
+   * Route identifier for this page — drives canonical URL, hreflang alternates,
+   * and the language switcher. Must match a key in ROUTES.
+   */
+  routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+}
+
+const {
+  locale = DEFAULT_LOCALE,
+  title = 'The Driver — Private chauffeur in Paris',
+  description = 'Private chauffeur and taxi service in Paris. Airport transfers, day tours, Disneyland, Versailles.',
+  routeKey = 'home',
+} = Astro.props;
+
+if (!ROUTE_KEYS.includes(routeKey)) {
+  throw new Error(`BaseLayout: unknown routeKey "${routeKey}". Add it to src/i18n/routes.js.`);
+}
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const canonical = `${siteUrl}${pathForRoute(routeKey, locale)}`;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#F8F5EE" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* hreflang alternates */}
+    {LOCALES.map((l) => (
+      <link rel="alternate" hreflang={l} href={`${siteUrl}${pathForRoute(routeKey, l)}`} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${pathForRoute(routeKey, DEFAULT_LOCALE)}`} />
+
+    {/* Fonts — Inter (body) + Fraunces (display). Preconnect + swap. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Inter:wght@400;500&display=swap"
+    />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale} />
+    <meta property="og:site_name" content="The Driver" />
+    {/* <meta property="og:image" content={`${siteUrl}/images/og.jpg`} /> */}
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {/* Plausible analytics — enable once domain is live.
+        <script defer data-domain="thedriver.example" src="https://plausible.io/js/script.js"></script>
+    */}
+
+    {/* Smooth cross-page fade (falls back to normal navigation in browsers without View Transitions) */}
+    <ClientRouter fallback="none" />
+  </head>
+  <body>
+    <Nav locale={locale} routeKey={routeKey} />
+    <main>
+      <slot />
+    </main>
+    <Footer locale={locale} routeKey={routeKey} />
+
+    {/* Scroll-reveal via Intersection Observer. Re-runs after each ClientRouter navigation. */}
+    <script>
+      import '../scripts/reveal.js';
+    </script>
+  </body>
+</html>

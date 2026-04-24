@@ -1,0 +1,88 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.rates.payment;
+---
+
+<section class="po section-y" aria-labelledby="po-heading">
+  <div class="page-x mx-auto max-w-[820px]">
+    <header class="po-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="po-heading" class="h2 text-balance">{s.heading}</h2>
+    </header>
+
+    <ul class="po-list mt-10 md:mt-12">
+      {s.options.map((opt: { icon: string; label: string; body: string }, i: number) => (
+        <li class="po-row" data-reveal data-reveal-delay={String(i + 1)}>
+          <div class="po-icon" aria-hidden="true">
+            <Icon name={opt.icon} size={22} strokeWidth={1.6} />
+          </div>
+          <div class="po-text">
+            <h3 class="po-label">{opt.label}</h3>
+            <p class="po-body">{opt.body}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .po {
+    background: var(--color-paper);
+  }
+  .po-head { max-width: 640px; }
+
+  .po-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-smoke);
+  }
+  .po-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--color-smoke);
+  }
+  @media (min-width: 768px) {
+    .po-row { padding: 26px 0; gap: 24px; }
+  }
+  .po-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .po-text { min-width: 0; }
+  .po-label {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+  }
+  .po-body {
+    margin: 6px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-graphite);
+  }
+</style>

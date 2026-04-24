@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FleetHero from '../components/FleetHero.astro';
+import FleetVehicle from '../components/FleetVehicle.astro';
+import GroupCombos from '../components/GroupCombos.astro';
+import AlwaysIncluded from '../components/AlwaysIncluded.astro';
+import PageCloseCTA from '../components/PageCloseCTA.astro';
+import { t, pathForRoute } from '../i18n';
+
+const locale = 'fr' as const;
+const cta = t(locale).pages.fleet.finalCta;
+const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
+const waHref = `https://wa.me/33628658127`;
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="fleet"
+  title="Notre flotte — Tesla Model Y et vans Mercedes · The Driver"
+  description="Deux véhicules adaptés à chaque voyage. Tesla Model Y pour les berlines, Mercedes Vito et Renault Trafic pour les groupes. Prix fixes, sièges enfants offerts."
+>
+  <FleetHero locale={locale} />
+  <FleetVehicle locale={locale} vehicle="car" bg="cream" imageSide="left" />
+  <FleetVehicle locale={locale} vehicle="van" bg="paper" imageSide="right" />
+  <GroupCombos locale={locale} />
+  <AlwaysIncluded locale={locale} />
+
+  <PageCloseCTA
+    heading={cta.heading}
+    sub={cta.sub}
+    primaryLabel={cta.primary}
+    primaryFallbackHref={homeBooking}
+    secondaryLabel={cta.whatsapp}
+    secondaryHref={waHref}
+  />
+</BaseLayout>

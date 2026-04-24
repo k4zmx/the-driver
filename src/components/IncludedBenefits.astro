@@ -1,0 +1,172 @@
+---
+import { t } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.rates.included;
+---
+
+<section class="ib section-y has-grain" aria-labelledby="ib-heading">
+  <div class="page-x mx-auto max-w-[1100px]">
+    <header class="ib-head" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="ib-heading" class="h2 text-balance">{s.heading}</h2>
+      {s.sub && <p class="body-lg mt-3 max-w-[56ch]">{s.sub}</p>}
+    </header>
+
+    <ul class="ib-grid mt-10 md:mt-14">
+      {s.items.map((item: { icon: string; label: string; sub: string }, i: number) => (
+        <li class="ib-card" data-reveal data-reveal-delay={String((i % 6) + 1)}>
+          <details class="ib-details" open>
+            <summary class="ib-summary">
+              <span class="ib-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <div class="ib-icon" aria-hidden="true">
+                <Icon name={item.icon} size={20} strokeWidth={1.8} />
+              </div>
+              <h3 class="ib-title">{item.label}</h3>
+              <span class="ib-chev" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </summary>
+            <div class="ib-content">
+              <p class="ib-sub">{item.sub}</p>
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .ib { background: var(--color-cream); }
+  .ib-head { max-width: 640px; }
+
+  .ib-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .ib-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+  }
+  @media (min-width: 1024px) {
+    .ib-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+
+  .ib-card {
+    position: relative;
+    padding: 20px 20px 20px;
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    transition: border-color 240ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .ib-card:hover {
+      border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    }
+  }
+
+  .ib-details summary::-webkit-details-marker { display: none; }
+  .ib-details summary::marker { content: ''; }
+
+  .ib-summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    grid-template-areas:
+      "num icon chev"
+      "title title title";
+    grid-template-columns: auto 1fr auto;
+    column-gap: 12px;
+    row-gap: 10px;
+    align-items: center;
+  }
+  .ib-summary:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 45%, transparent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  .ib-num {
+    grid-area: num;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: color-mix(in oklab, var(--color-accent) 85%, transparent);
+  }
+  .ib-icon {
+    grid-area: icon;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--color-accent) 10%, var(--color-cream));
+    color: var(--color-accent);
+  }
+  .ib-chev {
+    grid-area: chev;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-smoke);
+    color: var(--color-graphite);
+    transition: transform 220ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .ib-chev svg { width: 12px; height: 12px; }
+  .ib-details[open] .ib-chev {
+    transform: rotate(180deg);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  .ib-title {
+    grid-area: title;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.25;
+    color: var(--color-ink);
+  }
+
+  .ib-content { padding-top: 8px; }
+  .ib-sub {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--color-graphite);
+  }
+
+  /* Desktop: statify — content always visible, chevron gone, summary non-interactive */
+  @media (min-width: 768px) {
+    .ib-details > *:not(summary) {
+      display: block !important;
+    }
+    .ib-summary {
+      cursor: default;
+      pointer-events: none;
+      grid-template-areas: "num icon" "title title";
+      grid-template-columns: auto 1fr;
+    }
+    .ib-chev { display: none !important; }
+  }
+</style>

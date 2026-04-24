@@ -1,0 +1,229 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.faqContact.faq;
+---
+
+<section class="ffaq" aria-labelledby="ffaq-heading">
+  <div class="ffaq-top-accent" aria-hidden="true"></div>
+  <div class="ffaq-bg" aria-hidden="true">
+    <div class="ffaq-glow"></div>
+  </div>
+
+  <div class="page-x mx-auto max-w-[800px] relative ffaq-inner section-y">
+    <header class="ffaq-head" data-reveal>
+      <p class="ffaq-eyebrow">{s.eyebrow}</p>
+      <h2 id="ffaq-heading" class="ffaq-heading text-balance">{s.heading}</h2>
+    </header>
+
+    <div class="ffaq-cats mt-10 md:mt-14">
+      {s.categories.map((cat: { title: string; items: { q: string; a: string }[] }, ci: number) => (
+        <section class="ffaq-cat" data-reveal data-reveal-delay={String((ci % 4) + 1)}>
+          <h3 class="ffaq-cat-title">
+            <span class="ffaq-cat-num">{String(ci + 1).padStart(2, '0')}</span>
+            {cat.title}
+          </h3>
+          <ul class="ffaq-list">
+            {cat.items.map((item) => (
+              <li class="ffaq-row">
+                <details class="ffaq-item">
+                  <summary class="ffaq-summary">
+                    <span class="ffaq-question">{item.q}</span>
+                    <span class="ffaq-toggle" aria-hidden="true">
+                      <span class="whyus-bar whyus-bar-h"></span>
+                      <span class="whyus-bar whyus-bar-v"></span>
+                    </span>
+                  </summary>
+                  <div class="ffaq-answer">
+                    <p>{item.a}</p>
+                  </div>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ffaq {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .ffaq-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right, transparent,
+      color-mix(in oklab, var(--color-accent) 45%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+  .ffaq-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .ffaq-glow {
+    position: absolute;
+    top: 30%; left: 50%;
+    width: 800px; height: 500px;
+    margin-left: -400px;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse,
+      color-mix(in oklab, var(--color-accent) 12%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(80px);
+    opacity: 0.7;
+  }
+
+  .ffaq-inner { position: relative; z-index: 1; }
+  .ffaq-head { max-width: 640px; }
+
+  .ffaq-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 14px;
+  }
+  .ffaq-heading { color: var(--color-cream); }
+
+  .ffaq-cats {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  @media (min-width: 768px) {
+    .ffaq-cats { gap: 52px; }
+  }
+
+  .ffaq-cat-title {
+    margin: 0 0 14px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--color-cream);
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  @media (min-width: 768px) {
+    .ffaq-cat-title { font-size: 24px; }
+  }
+  .ffaq-cat-num {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--color-accent);
+  }
+
+  .ffaq-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ffaq-row {
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--color-cream) 5%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 10%, transparent);
+    margin-bottom: 8px;
+    transition: background-color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .ffaq-row:hover {
+      background: color-mix(in oklab, var(--color-cream) 8%, transparent);
+      border-color: color-mix(in oklab, var(--color-accent) 30%, transparent);
+    }
+  }
+
+  .ffaq-item summary::-webkit-details-marker { display: none; }
+  .ffaq-item summary::marker { content: ''; }
+  .ffaq-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    min-height: 56px;
+  }
+  @media (min-width: 768px) {
+    .ffaq-summary { padding: 18px 22px; }
+  }
+  .ffaq-summary:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+  .ffaq-question {
+    flex: 1;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--color-cream);
+    transition: color 200ms var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .ffaq-question { font-size: 16px; }
+  }
+  .ffaq-summary:hover .ffaq-question,
+  .ffaq-item[open] .ffaq-question {
+    color: var(--color-accent);
+  }
+
+  .ffaq-toggle {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--color-cream) 18%, transparent);
+    background: color-mix(in oklab, var(--color-cream) 6%, transparent);
+    color: var(--color-cream);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .ffaq-item[open] .ffaq-toggle {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  .ffaq-item[open] .whyus-bar-v {
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+
+  .ffaq-answer {
+    padding: 0 18px 16px;
+    max-width: 62ch;
+  }
+  @media (min-width: 768px) {
+    .ffaq-answer { padding: 0 22px 20px; }
+  }
+  .ffaq-answer p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  }
+  @media (min-width: 768px) {
+    .ffaq-answer p { font-size: 15px; }
+  }
+</style>

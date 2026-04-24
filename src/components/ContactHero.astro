@@ -1,0 +1,94 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.faqContact.hero;
+---
+
+<section class="ch has-grain" aria-labelledby="ch-heading">
+  <div class="ch-bg" aria-hidden="true">
+    <div class="ch-glow"></div>
+  </div>
+
+  <div class="ch-inner page-x mx-auto max-w-[720px] text-center">
+    <p class="ch-eyebrow" data-reveal>{s.eyebrow}</p>
+    <h1 id="ch-heading" class="ch-heading text-balance" data-reveal data-reveal-delay="1">{s.heading}</h1>
+    <p class="ch-sub" data-reveal data-reveal-delay="2">{s.sub}</p>
+  </div>
+</section>
+
+<style>
+  .ch {
+    position: relative;
+    background: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 768px) {
+    .ch { padding-top: 96px; padding-bottom: 104px; }
+  }
+
+  .ch-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .ch-glow {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    width: 700px;
+    height: 700px;
+    margin-left: -350px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--color-accent-glow) 0%,
+      transparent 60%
+    );
+    filter: blur(70px);
+    opacity: 0.6;
+  }
+
+  .ch-inner { position: relative; z-index: 1; }
+
+  .ch-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 14px;
+  }
+  .ch-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (min-width: 768px) {
+    .ch-heading { font-size: 52px; }
+  }
+  @media (min-width: 1024px) {
+    .ch-heading { font-size: 60px; }
+  }
+  .ch-sub {
+    margin: 22px auto 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-graphite);
+  }
+  @media (min-width: 768px) {
+    .ch-sub { font-size: 17px; }
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FleetHero from '../../components/FleetHero.astro';
+import FleetVehicle from '../../components/FleetVehicle.astro';
+import GroupCombos from '../../components/GroupCombos.astro';
+import AlwaysIncluded from '../../components/AlwaysIncluded.astro';
+import PageCloseCTA from '../../components/PageCloseCTA.astro';
+import { t, pathForRoute } from '../../i18n';
+
+const locale = 'en' as const;
+const cta = t(locale).pages.fleet.finalCta;
+const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
+const waHref = `https://wa.me/33628658127`;
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="fleet"
+  title="Our fleet — Tesla Model Y and Mercedes vans · The Driver"
+  description="Two vehicles for every kind of trip. Tesla Model Y sedan or Mercedes Vito / Renault Trafic van. Fixed prices, free child seats."
+>
+  <FleetHero locale={locale} />
+  <FleetVehicle locale={locale} vehicle="car" bg="cream" imageSide="left" />
+  <FleetVehicle locale={locale} vehicle="van" bg="paper" imageSide="right" />
+  <GroupCombos locale={locale} />
+  <AlwaysIncluded locale={locale} />
+
+  <PageCloseCTA
+    heading={cta.heading}
+    sub={cta.sub}
+    primaryLabel={cta.primary}
+    primaryFallbackHref={homeBooking}
+    secondaryLabel={cta.whatsapp}
+    secondaryHref={waHref}
+  />
+</BaseLayout>

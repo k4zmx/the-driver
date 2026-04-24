@@ -1,0 +1,211 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).howItWorks;
+const steps: { title: string; body: string }[] = s.steps;
+---
+
+<section class="hiw section-y has-grain" aria-labelledby="hiw-heading">
+  <div class="page-x mx-auto max-w-[1200px]">
+    <header class="max-w-[620px]" data-reveal>
+      <p class="meta-label mb-3">{s.eyebrow}</p>
+      <h2 id="hiw-heading" class="h2 text-balance">{s.heading}</h2>
+    </header>
+
+    <ol class="hiw-steps mt-14 md:mt-20 relative grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8" data-reveal>
+      {steps.map((step, i) => (
+        <li class="hiw-step relative flex gap-5 md:block md:pr-4" style={`--i: ${i}`}>
+          <div class="hiw-badge-wrap">
+            <span class="hiw-badge-halo" aria-hidden="true"></span>
+            <span class="hiw-badge-ring" aria-hidden="true"></span>
+            <div class="hiw-badge">
+              <span class="hiw-badge-num">{i + 1}</span>
+            </div>
+          </div>
+          <div class="hiw-copy">
+            <h3 class="hiw-step-title">{step.title}</h3>
+            <p class="hiw-step-body">{step.body}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .hiw {
+    background: var(--color-cream);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ---------------------------------------------------------------
+     Timeline line — draws behind the badges when the <ol> enters view.
+     Mobile: vertical along left edge of badge row. Desktop: horizontal.
+     --------------------------------------------------------------- */
+  .hiw-steps::before {
+    content: '';
+    position: absolute;
+    background: var(--color-smoke);
+    transition: transform 1000ms var(--ease-out);
+    z-index: 0;
+  }
+  @media (max-width: 767px) {
+    .hiw-steps::before {
+      top: 28px; bottom: 28px;
+      left: 27px;
+      width: 1px;
+      transform: scaleY(0);
+      transform-origin: center top;
+    }
+    .hiw-steps.is-visible::before { transform: scaleY(1); }
+  }
+  @media (min-width: 768px) {
+    .hiw-steps::before {
+      top: 27px;
+      left: 28px; right: 28px;
+      height: 1px;
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+    .hiw-steps.is-visible::before { transform: scaleX(1); }
+  }
+
+  /* Step container fades in, staggered after the line starts drawing */
+  .hiw-step {
+    opacity: 0;
+    transition: opacity var(--dur-med) var(--ease-out);
+    transition-delay: calc(400ms + var(--i, 0) * 140ms);
+  }
+  .hiw-steps.is-visible .hiw-step { opacity: 1; }
+
+  /* Badge — bigger, bolder, with a halo glow and a one-shot accent ring */
+  .hiw-badge-wrap {
+    position: relative;
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .hiw-badge {
+    position: relative;
+    z-index: 1;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    background: var(--color-paper);
+    border: 1.5px solid var(--color-smoke);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.5);
+    box-shadow: 0 4px 14px -6px rgba(26, 26, 26, 0.1);
+    transition:
+      transform 550ms cubic-bezier(0.3, 1.5, 0.4, 1),
+      border-color 300ms var(--ease-out),
+      background-color 300ms var(--ease-out),
+      color 300ms var(--ease-out),
+      box-shadow 300ms var(--ease-out);
+    transition-delay: calc(600ms + var(--i, 0) * 140ms);
+  }
+  .hiw-steps.is-visible .hiw-badge {
+    transform: scale(1);
+    border-color: var(--color-ink);
+    box-shadow: 0 8px 20px -8px rgba(26, 26, 26, 0.18);
+  }
+  /* Step 1 — the active "you are here" marker: accent fill with inner highlight */
+  .hiw-steps.is-visible .hiw-step:first-child .hiw-badge {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-paper);
+    box-shadow:
+      0 12px 28px -8px color-mix(in oklab, var(--color-accent) 55%, transparent),
+      0 0 0 1px color-mix(in oklab, white 15%, transparent) inset;
+  }
+
+  .hiw-badge-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Halo — soft accent glow behind each badge, only visible on step 1 */
+  .hiw-badge-halo {
+    position: absolute;
+    inset: -8px;
+    border-radius: 999px;
+    background: var(--color-accent-glow);
+    filter: blur(14px);
+    opacity: 0;
+    transition: opacity 500ms var(--ease-out);
+    transition-delay: calc(800ms + var(--i, 0) * 140ms);
+  }
+  .hiw-steps.is-visible .hiw-step:first-child .hiw-badge-halo {
+    opacity: 0.9;
+  }
+
+  /* Accent ring — one-shot pulse when the badge "plants" */
+  .hiw-badge-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 2px solid var(--color-accent);
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  .hiw-steps.is-visible .hiw-badge-ring {
+    animation: hiw-ring 1100ms var(--ease-out) forwards;
+    animation-delay: calc(720ms + var(--i, 0) * 140ms);
+  }
+  @keyframes hiw-ring {
+    0%   { opacity: 0.7; transform: scale(0.6); }
+    100% { opacity: 0;   transform: scale(1.8); }
+  }
+
+  /* Copy — sits to the right of badge on mobile, below on desktop */
+  .hiw-copy {
+    padding-top: 4px;
+  }
+  @media (min-width: 768px) {
+    .hiw-copy { padding-top: 24px; }
+  }
+  .hiw-step-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    .hiw-step-title { font-size: 22px; }
+  }
+  .hiw-step-body {
+    margin-top: 8px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-graphite);
+  }
+  @media (min-width: 768px) {
+    .hiw-step-body { font-size: 16px; }
+  }
+
+  /* Subtle hover desktop — heading tints accent */
+  @media (hover: hover) {
+    .hiw-step:hover .hiw-step-title {
+      color: var(--color-accent);
+      transition: color 200ms var(--ease-out);
+    }
+  }
+</style>

@@ -1,0 +1,272 @@
+---
+import { t, pathForRoute } from '../i18n';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.faqContact.cards;
+
+const WA_NUMBER = '33628658127';
+const EMAIL = 'the.driver@hotmail.com';
+const bookHref = `${pathForRoute('home', locale)}#booking-form`;
+const waHref = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(s.whatsapp.whatsappMessage)}`;
+const mailHref = `mailto:${EMAIL}?subject=${encodeURIComponent(s.email.subject)}`;
+---
+
+<section class="cc" aria-labelledby="cc-heading">
+  <div class="cc-top-accent" aria-hidden="true"></div>
+  <div class="cc-bg" aria-hidden="true">
+    <div class="cc-glow"></div>
+  </div>
+
+  <div class="page-x mx-auto max-w-[1100px] cc-inner section-y">
+    <h2 id="cc-heading" class="sr-only">Contact options</h2>
+    <ul class="cc-grid">
+      {/* 1 — WhatsApp (PRIMARY) */}
+      <li
+        class="cc-card cc-card-primary card-recommended"
+        data-reveal
+        data-reveal-delay="1"
+      >
+        <div class="cc-icon cc-icon-primary" aria-hidden="true">
+          <Icon name="message-circle" size={28} strokeWidth={1.5} />
+        </div>
+        <p class="cc-meta cc-meta-accent">{s.whatsapp.meta}</p>
+        <h3 class="cc-title">{s.whatsapp.title}</h3>
+        <p class="cc-body">{s.whatsapp.body}</p>
+        <p class="cc-detail tabular-nums">{s.whatsapp.detail}</p>
+        <p class="cc-avail">{s.whatsapp.availability}</p>
+        <a href={waHref} target="_blank" rel="noopener noreferrer" class="cc-cta cc-cta-primary" data-press>
+          <svg class="cc-cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          <span>{s.whatsapp.cta}</span>
+        </a>
+      </li>
+
+      {/* 2 — Email */}
+      <li class="cc-card cc-card-secondary" data-reveal data-reveal-delay="2">
+        <div class="cc-icon" aria-hidden="true">
+          <Icon name="mail" size={26} strokeWidth={1.5} />
+        </div>
+        <p class="cc-meta">{s.email.meta}</p>
+        <h3 class="cc-title">{s.email.title}</h3>
+        <p class="cc-body">{s.email.body}</p>
+        <p class="cc-detail break-all">{s.email.detail}</p>
+        <p class="cc-avail">{s.email.availability}</p>
+        <a href={mailHref} class="cc-cta cc-cta-secondary" data-press>
+          <span>{s.email.cta}</span>
+          <Icon name="arrow-right" size={16} strokeWidth={2} />
+        </a>
+      </li>
+
+      {/* 3 — Booking form */}
+      <li class="cc-card cc-card-secondary" data-reveal data-reveal-delay="3">
+        <div class="cc-icon" aria-hidden="true">
+          <Icon name="calendar-check" size={26} strokeWidth={1.5} />
+        </div>
+        <p class="cc-meta">{s.form.meta}</p>
+        <h3 class="cc-title">{s.form.title}</h3>
+        <p class="cc-body">{s.form.body}</p>
+        <p class="cc-detail">{s.form.detail}</p>
+        <p class="cc-avail">{s.form.availability}</p>
+        <a href={bookHref} class="cc-cta cc-cta-secondary" data-press>
+          <span>{s.form.cta}</span>
+          <Icon name="arrow-right" size={16} strokeWidth={2} />
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cc {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .cc-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right, transparent,
+      color-mix(in oklab, var(--color-accent) 45%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+  .cc-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .cc-glow {
+    position: absolute;
+    top: 30%;
+    left: 20%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 18%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(80px);
+    opacity: 0.8;
+  }
+
+  .cc-inner { position: relative; z-index: 1; }
+
+  .cc-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .cc-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  }
+
+  .cc-card {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px 24px;
+    border-radius: var(--radius-card);
+    background: color-mix(in oklab, var(--color-cream) 5%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 10%, transparent);
+    transition: background-color 260ms var(--ease-out), border-color 260ms var(--ease-out), transform 260ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .cc-card:hover {
+      background: color-mix(in oklab, var(--color-cream) 9%, transparent);
+      border-color: color-mix(in oklab, var(--color-cream) 20%, transparent);
+      transform: translateY(-2px);
+    }
+  }
+
+  /* PRIMARY WhatsApp card — stronger border, subtle slow pulse (via global card-recommended) */
+  .cc-card-primary {
+    border: 2px solid var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 10%, transparent);
+  }
+  @media (hover: hover) {
+    .cc-card-primary:hover {
+      background: color-mix(in oklab, var(--color-accent) 14%, transparent);
+      border-color: var(--color-accent);
+    }
+  }
+
+  .cc-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: color-mix(in oklab, var(--color-cream) 10%, transparent);
+    color: var(--color-cream);
+    margin-bottom: 20px;
+  }
+  .cc-icon-primary {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    box-shadow:
+      0 10px 24px -8px color-mix(in oklab, var(--color-accent) 80%, transparent),
+      0 0 0 1px color-mix(in oklab, white 14%, transparent) inset;
+  }
+
+  .cc-meta {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: color-mix(in oklab, var(--color-cream) 60%, transparent);
+  }
+  .cc-meta-accent { color: var(--color-accent); }
+
+  .cc-title {
+    margin: 6px 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.15;
+    color: var(--color-cream);
+  }
+  .cc-body {
+    margin: 14px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-cream) 70%, transparent);
+    flex: 1;
+  }
+  .cc-detail {
+    margin: 18px 0 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-cream);
+  }
+  .cc-card-primary .cc-detail {
+    font-size: 18px;
+  }
+  .cc-avail {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: color-mix(in oklab, var(--color-cream) 55%, transparent);
+  }
+
+  /* CTAs — primary accent-filled on WhatsApp card, outlined on email + form */
+  .cc-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    margin-top: 22px;
+    padding: 0 22px;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+      background-color 220ms var(--ease-out),
+      color 220ms var(--ease-out),
+      border-color 220ms var(--ease-out),
+      box-shadow 260ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  .cc-cta:active { transform: scale(0.98); }
+  .cc-cta-icon {
+    width: 18px; height: 18px; flex-shrink: 0;
+  }
+
+  .cc-cta-primary {
+    background: var(--color-accent);
+    color: var(--color-paper);
+    box-shadow:
+      0 12px 30px -10px color-mix(in oklab, var(--color-accent) 80%, transparent),
+      0 0 0 1px color-mix(in oklab, white 10%, transparent) inset;
+  }
+  .cc-cta-primary:hover {
+    background: var(--color-accent-ink);
+    box-shadow:
+      0 16px 36px -10px color-mix(in oklab, var(--color-accent) 85%, transparent),
+      0 0 0 1px color-mix(in oklab, white 16%, transparent) inset;
+  }
+
+  .cc-cta-secondary {
+    background: transparent;
+    color: var(--color-cream);
+    border: 1.5px solid color-mix(in oklab, var(--color-cream) 30%, transparent);
+  }
+  .cc-cta-secondary:hover {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    border-color: var(--color-cream);
+  }
+</style>

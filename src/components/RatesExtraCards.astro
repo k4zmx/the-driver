@@ -1,0 +1,238 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).pages.rates;
+
+const WA_NUMBER = '33628658127';
+const cards = [
+  { key: 'hourly',       data: s.hourly,       waHref: `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(s.hourly.whatsappMessage)}` },
+  { key: 'longDistance', data: s.longDistance, waHref: `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(s.longDistance.whatsappMessage)}` },
+];
+---
+
+<section class="rx" aria-labelledby="rx-heading">
+  <div class="rx-top-accent" aria-hidden="true"></div>
+  <div class="rx-bg" aria-hidden="true">
+    <div class="rx-glow"></div>
+  </div>
+
+  <div class="page-x mx-auto max-w-[1200px] relative rx-inner">
+    <div class="rx-grid">
+      {cards.map((card, i) => (
+        <article
+          id={card.key === 'longDistance' ? 'long-distance' : card.key}
+          class="rx-card"
+          data-reveal
+          data-reveal-delay={String(i + 1)}
+        >
+          <span class="rx-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <p class="rx-card-eyebrow">{card.data.eyebrow}</p>
+          <p class="rx-card-price tabular-nums">{card.data.price}</p>
+          <p class="rx-card-body">{card.data.sub}</p>
+
+          <ul class="rx-bullets">
+            {card.data.bullets.map((b: string) => (
+              <li class="rx-bullet">
+                <svg class="rx-bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+
+          <a href={card.waHref} target="_blank" rel="noopener noreferrer" class="rx-cta" data-press>
+            <svg class="rx-cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <span>{card.data.cta}</span>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Shares the MoreServices night pattern — rhymes with the home mid-page dark chapter */
+  .rx {
+    position: relative;
+    background: var(--color-night);
+    color: var(--color-cream);
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+  @media (min-width: 768px) {
+    .rx { padding-top: 96px; padding-bottom: 96px; }
+  }
+  @media (min-width: 1024px) {
+    .rx { padding-top: 128px; padding-bottom: 128px; }
+  }
+
+  .rx-top-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right, transparent,
+      color-mix(in oklab, var(--color-accent) 45%, transparent),
+      transparent
+    );
+    z-index: 2;
+  }
+  .rx-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .rx-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 900px; height: 600px;
+    margin: -300px 0 0 -450px;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse,
+      color-mix(in oklab, var(--color-accent) 14%, transparent) 0%,
+      transparent 60%
+    );
+    filter: blur(80px);
+    opacity: 0.8;
+  }
+
+  .rx-inner { z-index: 1; }
+
+  .rx-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .rx-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  }
+
+  .rx-card {
+    position: relative;
+    padding: 32px 28px 28px;
+    border-radius: var(--radius-card);
+    background: color-mix(in oklab, var(--color-cream) 5%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-cream) 10%, transparent);
+    display: flex;
+    flex-direction: column;
+    transition:
+      background-color 260ms var(--ease-out),
+      border-color 260ms var(--ease-out),
+      transform 260ms var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .rx-card { padding: 40px 36px 36px; }
+  }
+  @media (hover: hover) {
+    .rx-card:hover {
+      background: color-mix(in oklab, var(--color-cream) 9%, transparent);
+      border-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+      transform: translateY(-2px);
+    }
+  }
+
+  .rx-num {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: color-mix(in oklab, var(--color-accent) 85%, transparent);
+    margin-bottom: 18px;
+  }
+  .rx-card-eyebrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: color-mix(in oklab, var(--color-cream) 55%, transparent);
+  }
+  .rx-card-price {
+    margin: 14px 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--color-cream);
+  }
+  @media (min-width: 768px) {
+    .rx-card-price { font-size: 48px; }
+  }
+  .rx-card-body {
+    margin: 20px 0 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  }
+
+  .rx-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rx-bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: color-mix(in oklab, var(--color-cream) 85%, transparent);
+  }
+  .rx-bullet-icon {
+    width: 16px; height: 16px;
+    color: var(--color-accent);
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  /* WhatsApp CTA — accent pill matching home's MoreServices */
+  .rx-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 22px;
+    margin-top: 28px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    align-self: stretch;
+    box-shadow:
+      0 10px 26px -10px color-mix(in oklab, var(--color-accent) 80%, transparent),
+      0 0 0 1px color-mix(in oklab, white 10%, transparent) inset;
+    transition:
+      background-color 220ms var(--ease-out),
+      box-shadow 260ms var(--ease-out),
+      transform 200ms var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .rx-cta { align-self: flex-start; }
+  }
+  .rx-cta:hover {
+    background: var(--color-accent-ink);
+    box-shadow:
+      0 14px 34px -10px color-mix(in oklab, var(--color-accent) 85%, transparent),
+      0 0 0 1px color-mix(in oklab, white 14%, transparent) inset;
+  }
+  .rx-cta:active { transform: scale(0.98); }
+  .rx-cta-icon { width: 18px; height: 18px; flex-shrink: 0; }
+</style>
