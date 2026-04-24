@@ -14,13 +14,19 @@ interface Props {
    * and the language switcher. Must match a key in ROUTES.
    */
   routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+  /**
+   * Optional extra JSON-LD to inject below the LocalBusiness block (used by
+   * e.g. the FAQ page to ship FAQPage schema, Tarifs for Service schema).
+   */
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   locale = DEFAULT_LOCALE,
-  title = 'The Driver — Private chauffeur in Paris',
+  title = 'Driver Services — Private chauffeur in Paris',
   description = 'Private chauffeur and taxi service in Paris. Airport transfers, day tours, Disneyland, Versailles.',
   routeKey = 'home',
+  structuredData,
 } = Astro.props;
 
 if (!ROUTE_KEYS.includes(routeKey)) {
@@ -29,6 +35,32 @@ if (!ROUTE_KEYS.includes(routeKey)) {
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
 const canonical = `${siteUrl}${pathForRoute(routeKey, locale)}`;
+const ogImage = `${siteUrl}/images/og-default.jpg`;
+
+// LocalBusiness / TaxiService structured data — every page ships this so
+// Google can associate the business across all URLs.
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TaxiService',
+  name: 'Driver Services',
+  url: siteUrl || undefined,
+  telephone: '+33628658127',
+  email: 'the.driver@hotmail.com',
+  image: ogImage,
+  areaServed: ['Paris', 'Île-de-France'],
+  priceRange: '€€',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '5.0',
+    reviewCount: '17',
+  },
+};
+
+const extraSchemas = Array.isArray(structuredData)
+  ? structuredData
+  : structuredData
+    ? [structuredData]
+    : [];
 ---
 
 <!doctype html>
@@ -68,13 +100,25 @@ const canonical = `${siteUrl}${pathForRoute(routeKey, locale)}`;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={locale} />
-    <meta property="og:site_name" content="The Driver" />
-    {/* <meta property="og:image" content={`${siteUrl}/images/og.jpg`} /> */}
+    <meta property="og:site_name" content="Driver Services" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Driver Services — Private chauffeur in Paris" />
 
     {/* Twitter */}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    {/* Structured data — LocalBusiness on every page, plus any page-specific
+        schema (FAQPage on /faq-contact, Service on /tarifs) passed via prop.
+        `is:inline` keeps the script element in the <head> verbatim (no bundling). */}
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(localBusinessSchema)} />
+    {extraSchemas.map((schema) => (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
 
     {/* Plausible analytics — enable once domain is live.
         <script defer data-domain="thedriver.example" src="https://plausible.io/js/script.js"></script>

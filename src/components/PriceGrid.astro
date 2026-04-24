@@ -8,19 +8,28 @@ interface Props {
 
 const { locale } = Astro.props;
 const s = t(locale).pages.rates.grid;
+const tierLabels = t(locale).pricing.tier;
 
-type Cell = { car?: number; van?: number } | null;
+type Cell = { tier_1_3?: number; tier_4_6?: number; tier_7_8?: number } | null;
+type TierRow = { t13: string; t46: string; t78: string };
 
 function cellAt(from: string, to: string): Cell {
   if (from === to) return null;
   return (PRICES as any)[from]?.[to] ?? null;
 }
 
-function fmt(cell: Cell): { car: string; van: string } | null {
-  if (!cell || (typeof cell.car !== 'number' && typeof cell.van !== 'number')) return null;
-  const car = typeof cell.car === 'number' ? `${cell.car}€` : '—';
-  const van = typeof cell.van === 'number' ? `${cell.van}€` : '—';
-  return { car, van };
+function fmt(cell: Cell): TierRow | null {
+  if (!cell) return null;
+  const any =
+    typeof cell.tier_1_3 === 'number' ||
+    typeof cell.tier_4_6 === 'number' ||
+    typeof cell.tier_7_8 === 'number';
+  if (!any) return null;
+  return {
+    t13: typeof cell.tier_1_3 === 'number' ? `${cell.tier_1_3}€` : '—',
+    t46: typeof cell.tier_4_6 === 'number' ? `${cell.tier_4_6}€` : '—',
+    t78: typeof cell.tier_7_8 === 'number' ? `${cell.tier_7_8}€` : '—',
+  };
 }
 
 const WA = `https://wa.me/33628658127`;
@@ -36,8 +45,9 @@ const fromToHeader = `${s.fromLabel} →`;
     </header>
 
     <p class="pg-legend" data-reveal>
-      <span class="pg-legend-chip"><span class="pg-legend-dot is-car"></span> {s.colCar}</span>
-      <span class="pg-legend-chip"><span class="pg-legend-dot is-van"></span> {s.colVan}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-t13"></span> {tierLabels['1_3']}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-t46"></span> {tierLabels['4_6']}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-t78"></span> {tierLabels['7_8']}</span>
     </p>
 
     {/* Mobile: accordion per pickup */}
@@ -68,11 +78,11 @@ const fromToHeader = `${s.fromLabel} →`;
                     <li class="pg-mobile-leg">
                       <span class="pg-mobile-leg-to">{r.to}</span>
                       {p ? (
-                        <span class="pg-mobile-leg-price">
-                          <span class="pg-price-car">{p.car}</span>
-                          <span class="pg-price-sep" aria-hidden="true">/</span>
-                          <span class="pg-price-van">{p.van}</span>
-                        </span>
+                        <ul class="pg-mobile-tiers">
+                          <li><span class="pg-mobile-tier-label">{tierLabels['1_3']}</span><span class="pg-mobile-tier-price pg-price-t13">{p.t13}</span></li>
+                          <li><span class="pg-mobile-tier-label">{tierLabels['4_6']}</span><span class="pg-mobile-tier-price pg-price-t46">{p.t46}</span></li>
+                          <li><span class="pg-mobile-tier-label">{tierLabels['7_8']}</span><span class="pg-mobile-tier-price pg-price-t78">{p.t78}</span></li>
+                        </ul>
                       ) : (
                         <span class="pg-mobile-leg-price pg-td-miss">{s.unpriced}</span>
                       )}
@@ -122,9 +132,11 @@ const fromToHeader = `${s.fromLabel} →`;
                       {empty ? <span class="pg-td-empty">·</span>
                         : p ? (
                           <span class="pg-price">
-                            <span class="pg-price-car">{p.car}</span>
-                            <span class="pg-price-sep" aria-hidden="true">/</span>
-                            <span class="pg-price-van">{p.van}</span>
+                            <span class="pg-price-t13">{p.t13}</span>
+                            <span class="pg-price-sep" aria-hidden="true">·</span>
+                            <span class="pg-price-t46">{p.t46}</span>
+                            <span class="pg-price-sep" aria-hidden="true">·</span>
+                            <span class="pg-price-t78">{p.t78}</span>
                           </span>
                         ) : <span class="pg-td-miss">—</span>}
                     </td>
@@ -177,8 +189,9 @@ const fromToHeader = `${s.fromLabel} →`;
     height: 8px;
     border-radius: 999px;
   }
-  .pg-legend-dot.is-car { background: var(--color-accent); }
-  .pg-legend-dot.is-van { background: var(--color-ink); }
+  .pg-legend-dot.is-t13 { background: var(--color-accent); }
+  .pg-legend-dot.is-t46 { background: var(--color-ink); }
+  .pg-legend-dot.is-t78 { background: color-mix(in oklab, var(--color-ink) 70%, var(--color-graphite)); }
 
   /* ---------------------------------------------------------------
      Mobile accordion — matches home FAQ / WhyUs visual language.
@@ -330,29 +343,59 @@ const fromToHeader = `${s.fromLabel} →`;
     transition: background-color 160ms var(--ease-out);
   }
 
-  /* Car prices tinted accent, van prices tinted ink — matches the section's
-     colour key. The separator stays neutral so the eye pairs the two values. */
+  /* Tier-tinted prices: tier_1_3 (car) in accent; higher tiers stay in ink
+     with a subtle step-down so the eye scans them as "higher, higher still". */
   .pg-price {
     display: inline-flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 6px;
   }
-  .pg-price-car { color: var(--color-accent); }
-  .pg-price-van { color: var(--color-ink); }
+  .pg-price-t13 { color: var(--color-accent); }
+  .pg-price-t46 { color: var(--color-ink); }
+  .pg-price-t78 { color: color-mix(in oklab, var(--color-ink) 78%, var(--color-graphite)); }
   .pg-price-sep {
     color: color-mix(in oklab, var(--color-graphite) 50%, transparent);
     font-weight: 400;
   }
 
-  /* Mobile variant — same treatment in the accordion rows */
-  .pg-mobile-leg-price {
+  /* Mobile accordion: each route expands to a 3-row mini-table of tiers */
+  .pg-mobile-leg {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pg-mobile-leg-to {
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: 17px;
-    font-variant-numeric: tabular-nums;
-    display: inline-flex;
+    font-size: 16px;
+    color: var(--color-ink);
+  }
+  .pg-mobile-tiers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pg-mobile-tiers li {
+    display: flex;
     align-items: baseline;
-    gap: 4px;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--color-cream) 40%, var(--color-paper));
+  }
+  .pg-mobile-tier-label {
+    font-size: 13px;
+    color: var(--color-graphite);
+  }
+  .pg-mobile-tier-price {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
   }
   .pg-mobile-leg-price.pg-td-miss {
     font-family: var(--font-sans);

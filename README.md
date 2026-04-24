@@ -1,6 +1,6 @@
-# The Driver
+# Driver Services
 
-Multilingual landing page for **The Driver**, a private chauffeur / taxi service for tourists in Paris.
+Multilingual landing page for **Driver Services**, a private chauffeur / taxi service for tourists in Paris.
 
 ## Stack
 
@@ -32,9 +32,44 @@ npm run dev        # http://localhost:4321
 Other commands:
 
 ```sh
-npm run build      # output to ./dist
-npm run preview    # preview the built site
+npm run build              # output to ./dist
+npm run preview            # preview the built site
+npm run optimize-images    # regenerate .jpg/.webp/.avif variants (see below)
 ```
+
+## Image pipeline
+
+Real photos live in `public/images/fleet/` and `public/images/routes/`.
+
+Components dynamically scan these folders at build time and match filenames to
+card slots by keyword (see [src/utils/images.js](src/utils/images.js)):
+
+| Folder | Filename hint | Used by |
+| --- | --- | --- |
+| `fleet/` | `tesla*` | Car card (Tesla Model Y) |
+| `fleet/` | `vito*` / `trafic*` / `traffic*` / `van*` / `mercedes*` | Van card |
+| `routes/` | `hotel*` / `hotels*` / `paris*` | Destinations → Paris hotels |
+| `routes/` | `disney*` / `disneyland*` | Destinations → Disneyland Paris |
+| `routes/` | `versailles*` | Destinations → Château de Versailles |
+| `routes/` | `gare*` / `train*` | Destinations → Paris train stations |
+| `routes/` | `aeroport*` / `airport*` / `cdg*` / `orly*` / `beauvais*` | Destinations → Between airports |
+| `routes/` | `eiffel*` / `tour*` | Destinations → Paris à l'heure |
+
+Missing files fall back to the silhouette placeholder and log a `[images]` warning in the build output.
+
+**Format fallbacks.** Each card renders `<picture>` with `avif → webp → jpg`
+sources (whichever exist on disk). To generate missing variants:
+
+```sh
+npm install --save-dev sharp    # one-time
+npm run optimize-images         # run whenever you add a new raw photo
+```
+
+The optimizer resizes to 1200px (fleet) / 800px (routes), strips metadata, and
+writes `.jpg` (q85), `.webp` (q80), and `.avif` (q55) siblings beside each
+source. It skips outputs that are already up-to-date, so re-running it is
+cheap. Do NOT wire it into the normal build — it's an author-side step; the
+generated files are committed alongside the sources.
 
 ## Deploy to Cloudflare Pages
 

@@ -6,15 +6,19 @@ import ServiceDetails from '../components/ServiceDetails.astro';
 import FullFAQ from '../components/FullFAQ.astro';
 import ContactForm from '../components/ContactForm.astro';
 import ContactNudge from '../components/ContactNudge.astro';
+import { t } from '../i18n';
+import { buildFaqPageSchema } from '../utils/schema.js';
 
 const locale = 'fr' as const;
+const faqSchema = buildFaqPageSchema(t(locale).pages.faqContact.faq);
 ---
 
 <BaseLayout
   locale={locale}
   routeKey="faqContact"
-  title="FAQ & Contact — Une question ? On répond vite · The Driver"
+  title="FAQ & Contact — Une question ? On répond vite · Driver Services"
   description="Toutes les réponses aux questions fréquentes, contacts WhatsApp et email, formulaire de contact. Disponible 24h/24, 7j/7."
+  structuredData={faqSchema}
 >
   <ContactHero locale={locale} />
   <ContactCards locale={locale} />

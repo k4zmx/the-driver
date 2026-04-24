@@ -287,7 +287,11 @@ const headingWords: string[] = heading.split(/\s+/).filter(Boolean);
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         if (document.querySelector('[data-booking-modal]')) {
-          window.dispatchEvent(new CustomEvent('thedriver:open-booking'));
+          window.dispatchEvent(
+            new CustomEvent('thedriver:open-booking', {
+              detail: { source: 'page-close-cta' },
+            }),
+          );
         } else {
           const fallback = btn.dataset.fallbackHref || '/#booking-form';
           location.assign(fallback);

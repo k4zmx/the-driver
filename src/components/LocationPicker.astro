@@ -126,8 +126,8 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     aria-labelledby={labelId}
     hidden
   >
-    <div class="lp-sheet-head" aria-hidden="true">
-      <span class="lp-grip"></span>
+    <div class="lp-sheet-head" data-lp-drag-zone>
+      <span class="lp-grip" aria-hidden="true"></span>
       <p class="lp-sheet-title" id={sheetHeaderId}>{sheetTitle ?? label}</p>
       <button
         type="button"
@@ -310,8 +310,11 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
     pointer-events: none;
     z-index: 60;
-    max-height: 320px;
+    max-height: 360px;
     overflow-y: auto;
+    /* Keep finger-scroll trapped inside the dropdown; no page scroll chaining. */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
   .lp-menu[data-open="true"] {
     opacity: 1;
@@ -331,13 +334,22 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       max-height: 72vh;
       border-radius: 20px 20px 0 0;
       padding: 0 0 16px;
-      transform: translateY(16px);
-      transition: opacity 220ms var(--ease-out), transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform: translateY(100%);
+      transition: opacity 220ms var(--ease-out), transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
       box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.2);
+      touch-action: pan-y;
     }
     .lp-menu[data-open="true"] {
       transform: translateY(0);
     }
+    /* Follow finger during active drag */
+    .lp[data-lp-dragging="true"] .lp-menu {
+      transition: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lp-menu { transition: opacity 0.01ms linear; transform: none; }
+    .lp-backdrop { transition: opacity 0.01ms linear; }
   }
 
   /* Sheet header — hidden on desktop, visible on mobile */
@@ -349,20 +361,25 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      padding: 8px 16px 12px;
+      padding: 18px 16px 12px;
       border-bottom: 1px solid var(--color-smoke);
       position: relative;
+      touch-action: none;
+      cursor: grab;
     }
+    .lp-sheet-head:active { cursor: grabbing; }
     .lp-grip {
       position: absolute;
       top: 8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 36px;
+      width: 44px;
       height: 4px;
       border-radius: 999px;
       background: var(--color-smoke);
+      transition: background-color 180ms var(--ease-out), width 180ms var(--ease-out);
     }
+    .lp-sheet-head:active .lp-grip { background: var(--color-graphite); width: 52px; }
     .lp-sheet-title {
       margin: 14px 0 0;
       font-family: var(--font-sans);
@@ -400,6 +417,8 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       padding: 8px 8px 0;
       overflow-y: auto;
       max-height: calc(72vh - 64px);
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
   }
 
@@ -615,6 +634,62 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     // Listen for external changes to native select (e.g. URL prefill, event-driven
     // applySelection from BookingForm) and sync the display.
     native.addEventListener('change', syncFromNative);
+
+    // ---- Mobile drag-to-close -----------------------------------------
+    // Gesture engages from the sheet header (grip + title) only, so
+    // scrolling the options list below is never hijacked. Skipped on
+    // reduced-motion and on desktop.
+    const dragZone = menu.querySelector<HTMLElement>('[data-lp-drag-zone]');
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+    let dragStartY = 0;
+    let dragCurrentY = 0;
+    let dragActive = false;
+    let dragAccepted = false;
+    let sheetHeight = 0;
+
+    function onDragStart(e: TouchEvent) {
+      if (!isOpen || !isMobile() || reduceMotion) return;
+      const t = e.touches[0];
+      if (!t) return;
+      dragStartY = t.clientY;
+      dragCurrentY = t.clientY;
+      dragActive = true;
+      dragAccepted = false;
+      sheetHeight = menu!.getBoundingClientRect().height;
+    }
+    function onDragMove(e: TouchEvent) {
+      if (!dragActive) return;
+      const t = e.touches[0];
+      if (!t) return;
+      const dy = t.clientY - dragStartY;
+      if (!dragAccepted) {
+        if (dy > 6) {
+          dragAccepted = true;
+          lp.dataset.lpDragging = 'true';
+        } else return;
+      }
+      e.preventDefault();
+      dragCurrentY = t.clientY;
+      const d = Math.max(0, dy);
+      menu!.style.transform = `translateY(${d}px)`;
+      if (backdrop) backdrop.style.opacity = String(Math.max(0, 1 - d / sheetHeight));
+    }
+    function onDragEnd() {
+      if (!dragActive) return;
+      dragActive = false;
+      lp.dataset.lpDragging = 'false';
+      if (!dragAccepted) return;
+      const dy = Math.max(0, dragCurrentY - dragStartY);
+      menu!.style.transform = '';
+      if (backdrop) backdrop.style.opacity = '';
+      if (dy >= sheetHeight * 0.30) setOpen(false);
+    }
+
+    dragZone?.addEventListener('touchstart', onDragStart, { passive: true });
+    dragZone?.addEventListener('touchmove', onDragMove, { passive: false });
+    dragZone?.addEventListener('touchend', onDragEnd, { passive: true });
+    dragZone?.addEventListener('touchcancel', onDragEnd, { passive: true });
 
     // Initial render
     syncFromNative();

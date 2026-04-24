@@ -246,6 +246,18 @@
     padding-right: 40px;
   }
 
+  /* Country-code picker — ISO-2 badge + phone code aligned in tabular numerals.
+     We kept an emoji-capable font stack in case we ever reintroduce flag
+     glyphs; on Windows desktop where regional indicators render as letter
+     pairs, the ISO badge is already the primary content so the UI is clean. */
+  .country-code-select {
+    font-family:
+      "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+      "Twemoji Mozilla", var(--font-sans), system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
   /* Type scale — apply via class to keep markup semantic */
   .h1 {
     font-family: var(--font-display);

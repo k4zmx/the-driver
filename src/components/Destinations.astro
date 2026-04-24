@@ -1,7 +1,8 @@
 ---
 import { t, localizedPath } from '../i18n';
 import { PRICES } from '../data/routes.js';
-import { getRoutePrice } from '../utils/pricing.js';
+import { getStartingPrice } from '../utils/pricing.js';
+import { findImageByKeywords, logImageMatch } from '../utils/images.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
@@ -10,10 +11,12 @@ interface Props {
 const { locale } = Astro.props;
 const s = t(locale).destinations;
 
-function minCarAcross(legs: [string, string][]) {
+// "À partir de €X" for a destination = cheapest starting price (tier_1_3)
+// across any of the supplied pickup legs.
+function minStartingAcross(legs: [string, string][]) {
   let min: number | null = null;
   for (const [from, to] of legs) {
-    const p = getRoutePrice(from, to, 'car');
+    const p = getStartingPrice(from, to);
     if (typeof p === 'number' && (min === null || p < min)) min = p;
   }
   return min;
@@ -25,41 +28,64 @@ function cardLink(dropoff?: string, anchor = 'booking-form') {
   return `${base}${q}#${anchor}`;
 }
 
+// --- Image matching -------------------------------------------------------
+// Dynamic folder scan: match each card to a photo by keyword in filename.
+const imageConfig = [
+  { key: 'parisHotels', keywords: ['hotel', 'hotels', 'paris'] },
+  { key: 'disneyland', keywords: ['disney', 'disneyland'] },
+  { key: 'versailles', keywords: ['versailles'] },
+  { key: 'trainStations', keywords: ['gare', 'train'] },
+  { key: 'betweenAirports', keywords: ['aeroport', 'airport', 'cdg', 'orly', 'beauvais'] },
+  { key: 'hourly', keywords: ['eiffel', 'tour'] },
+];
+const imagesByKey = Object.fromEntries(
+  imageConfig.map((c) => {
+    const img = findImageByKeywords('images/routes', c.keywords);
+    logImageMatch('Destinations', c.key, img, c.keywords);
+    return [c.key, img];
+  }),
+);
+
 const cards = [
   {
     key: 'parisHotels',
     title: s.cards.parisHotels,
-    price: minCarAcross([['CDG', 'Paris'], ['Orly', 'Paris'], ['Beauvais', 'Paris']]),
+    price: minStartingAcross([['CDG', 'Paris'], ['Orly', 'Paris'], ['Beauvais', 'Paris']]),
     dropoff: 'Paris',
     href: cardLink('Paris'),
+    image: imagesByKey.parisHotels,
   },
   {
     key: 'disneyland',
     title: s.cards.disneyland,
-    price: minCarAcross([['CDG', 'Disneyland'], ['Orly', 'Disneyland'], ['Beauvais', 'Disneyland']]),
+    price: minStartingAcross([['CDG', 'Disneyland'], ['Orly', 'Disneyland'], ['Beauvais', 'Disneyland']]),
     dropoff: 'Disneyland',
     href: cardLink('Disneyland'),
+    image: imagesByKey.disneyland,
   },
   {
     key: 'versailles',
     title: s.cards.versailles,
-    price: minCarAcross([['CDG', 'Versailles'], ['Orly', 'Versailles'], ['Beauvais', 'Versailles']]),
+    price: minStartingAcross([['CDG', 'Versailles'], ['Orly', 'Versailles'], ['Beauvais', 'Versailles']]),
     dropoff: 'Versailles',
     href: cardLink('Versailles'),
+    image: imagesByKey.versailles,
   },
   {
     key: 'trainStations',
     title: s.cards.trainStations,
-    price: minCarAcross([['CDG', 'Paris Train Station'], ['Orly', 'Paris Train Station'], ['Beauvais', 'Paris Train Station']]),
+    price: minStartingAcross([['CDG', 'Paris Train Station'], ['Orly', 'Paris Train Station'], ['Beauvais', 'Paris Train Station']]),
     dropoff: 'Paris Train Station',
     href: cardLink('Paris Train Station'),
+    image: imagesByKey.trainStations,
   },
   {
     key: 'betweenAirports',
     title: s.cards.betweenAirports,
-    price: minCarAcross([['CDG', 'Orly'], ['CDG', 'Beauvais'], ['Orly', 'CDG'], ['Beauvais', 'CDG']]),
+    price: minStartingAcross([['CDG', 'Orly'], ['CDG', 'Beauvais'], ['Orly', 'CDG'], ['Beauvais', 'CDG']]),
     dropoff: '',
     href: cardLink(),
+    image: imagesByKey.betweenAirports,
   },
   {
     key: 'hourly',
@@ -67,6 +93,7 @@ const cards = [
     special: s.cards.hourlyPrice,
     dropoff: '',
     href: `${base}#hourly`,
+    image: imagesByKey.hourly,
   },
 ];
 // Keep PRICES import reachable so bundler includes it.
@@ -108,10 +135,25 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
               class="dest-card group"
             >
               <div class="dest-card-image">
-                <svg class="dest-card-svg placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
+                {card.image.missing || !(card.image.jpg || card.image.avif || card.image.webp) ? (
+                  <svg class="dest-card-svg placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                ) : (
+                  <picture class="dest-card-photo">
+                    {card.image.avif && <source srcset={card.image.avif} type="image/avif" />}
+                    {card.image.webp && <source srcset={card.image.webp} type="image/webp" />}
+                    <img
+                      src={card.image.jpg || card.image.avif || card.image.webp}
+                      alt={card.title}
+                      width="800"
+                      height="1000"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                )}
               </div>
               <div class="dest-card-body">
                 <h3 class="dest-card-title">{card.title}</h3>
@@ -302,6 +344,7 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
   .dest-card:active { opacity: 0.92; }
 
   .dest-card-image {
+    position: relative;
     aspect-ratio: 4 / 5;
     background:
       linear-gradient(
@@ -320,6 +363,22 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
     transition: transform 400ms var(--ease-out);
   }
   .dest-card:hover .dest-card-svg { transform: scale(1.08); }
+  /* Real photo fill — curated filter, gentle zoom on hover */
+  .dest-card-photo {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .dest-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.95) contrast(1.02);
+    transition: transform 500ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .dest-card:hover .dest-card-photo img { transform: scale(1.04); }
+  }
 
   .dest-card-body {
     padding: 18px 18px 20px;
@@ -471,6 +530,9 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
         // Cross-page link? Let it navigate.
         if (url.pathname !== location.pathname) return;
         e.preventDefault();
+        // Stop the document-level #booking-form click handler from also
+        // firing an empty-prefill open() and wiping this dropoff.
+        e.stopPropagation();
         if (dropoff) {
           const newUrl = new URL(location.href);
           newUrl.searchParams.set('dropoff', dropoff);
@@ -479,7 +541,9 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
         }
         // Always dispatch — BookingModal picks it up and opens on home.
         window.dispatchEvent(
-          new CustomEvent('thedriver:open-booking', { detail: { dropoff } }),
+          new CustomEvent('thedriver:open-booking', {
+            detail: { source: 'destination-card', dropoff },
+          }),
         );
         // If no modal (e.g. Tarifs page), fall back to smooth-scroll anchor.
         if (!document.querySelector('[data-booking-modal]')) {

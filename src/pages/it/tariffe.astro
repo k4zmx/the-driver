@@ -8,18 +8,21 @@ import IncludedBenefits from '../../components/IncludedBenefits.astro';
 import PaymentOptions from '../../components/PaymentOptions.astro';
 import PageCloseCTA from '../../components/PageCloseCTA.astro';
 import { t, pathForRoute } from '../../i18n';
+import { buildRatesServiceSchema } from '../../utils/schema.js';
 
 const locale = 'it' as const;
 const cta = t(locale).pages.rates.finalCta;
 const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
 const waHref = 'https://wa.me/33628658127';
+const serviceSchema = buildRatesServiceSchema({ locale, siteUrl: Astro.site?.toString() ?? '' });
 ---
 
 <BaseLayout
   locale={locale}
   routeKey="rates"
-  title="Tariffe — Tutti i prezzi, nessuna sorpresa · The Driver"
+  title="Tariffe — Tutti i prezzi, nessuna sorpresa · Driver Services"
   description="Tariffe fisse per veicolo per tutte le nostre tratte a Parigi. CDG, Orly, Beauvais, Disneyland, Versailles. Pedaggi, tasse e bagagli inclusi."
+  structuredData={serviceSchema}
 >
   <TarifsHero locale={locale} />
   <TarifsCalculator locale={locale} />

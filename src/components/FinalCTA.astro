@@ -302,7 +302,11 @@ const headingWords: string[] = s.heading.split(/\s+/).filter(Boolean);
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         if (document.querySelector('[data-booking-modal]')) {
-          window.dispatchEvent(new CustomEvent('thedriver:open-booking'));
+          window.dispatchEvent(
+            new CustomEvent('thedriver:open-booking', {
+              detail: { source: 'final-cta' },
+            }),
+          );
         } else {
           // Fallback on pages without the modal: navigate home with the hash.
           location.assign('/#booking-form');

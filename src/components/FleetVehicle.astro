@@ -1,6 +1,8 @@
 ---
 import { t } from '../i18n';
 import Icon from './Icon.astro';
+import { findImageByKeywords, logImageMatch } from '../utils/images.js';
+import { minCarStarting, minVanStarting } from '../utils/pricing.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
@@ -12,6 +14,27 @@ interface Props {
 const { locale, vehicle, bg = 'paper', imageSide = 'left' } = Astro.props;
 const v = t(locale).pages.fleet[vehicle];
 const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
+
+// "À partir de €X" — derived from the real price matrix (tier_1_3 for car,
+// tier_4_6 for van). The existing i18n `priceNote` is discarded in favor of
+// this single source of truth; "trajet fixe" suffix from the locale file is
+// preserved as a subtitle.
+const fromPrefix = t(locale).destinations.fromPrefix;
+const unavailable = t(locale).hero.price.unavailable;
+const minPrice = vehicle === 'car' ? minCarStarting() : minVanStarting();
+const fixedTripSuffix =
+  locale === 'fr' ? 'trajet fixe'
+  : locale === 'es' ? 'tarifa fija'
+  : locale === 'it' ? 'tariffa fissa'
+  : 'flat rate';
+const priceLine = minPrice != null
+  ? `${fromPrefix} €${minPrice} — ${fixedTripSuffix}`
+  : unavailable;
+
+const image = vehicle === 'car'
+  ? findImageByKeywords('images/fleet', ['tesla'])
+  : findImageByKeywords('images/fleet', ['vito', 'trafic', 'traffic', 'van', 'mercedes']);
+logImageMatch('FleetVehicle', vehicle === 'car' ? 'Tesla Model Y' : 'Vito / Trafic', image, vehicle === 'car' ? ['tesla'] : ['vito', 'trafic', 'van']);
 ---
 
 <section
@@ -22,9 +45,24 @@ const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
 
       {/* Image side */}
       <div class:list={['fv-image-wrap', imageSide === 'right' && 'fv-image-right']}>
-        <div class="fv-image" data-reveal data-reveal-dir={imageSide} data-reveal-delay="1">
+        <div class:list={['fv-image', `fv-image--${vehicle}`]} data-reveal data-reveal-dir={imageSide} data-reveal-delay="1">
           <span class="fv-image-glow" aria-hidden="true"></span>
-          <Icon name={silhouetteName} size={80} strokeWidth={1.2} class="fv-silhouette placeholder-shimmer" />
+          {image.missing || !(image.jpg || image.avif || image.webp) ? (
+            <Icon name={silhouetteName} size={80} strokeWidth={1.2} class="fv-silhouette placeholder-shimmer" />
+          ) : (
+            <picture class="fv-photo">
+              {image.avif && <source srcset={image.avif} type="image/avif" />}
+              {image.webp && <source srcset={image.webp} type="image/webp" />}
+              <img
+                src={image.jpg || image.avif || image.webp}
+                alt={v.title}
+                width="1200"
+                height="900"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          )}
         </div>
       </div>
 
@@ -66,7 +104,7 @@ const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
 
         {/* Footer — price + CTA */}
         <div class="fv-footer">
-          <p class="fv-price">{v.priceNote}</p>
+          <p class="fv-price">{priceLine}</p>
           <button
             type="button"
             class="fv-cta"
@@ -140,6 +178,29 @@ const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
   }
   @media (hover: hover) {
     .fv-image:hover .fv-silhouette { transform: translateX(12px); }
+  }
+  /* Real photo — fills the card, curated filter */
+  .fv-photo {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .fv-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.95) contrast(1.02);
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 600ms var(--ease-out);
+  }
+  /* Tesla photo only — zoom 20% to crop out the stock watermark. */
+  .fv-image--car .fv-photo img {
+    transform: scale(1.2);
+  }
+  @media (hover: hover) {
+    .fv-image:hover .fv-photo img { transform: scale(1.04); }
+    .fv-image--car:hover .fv-photo img { transform: scale(1.24); }
   }
 
   /* Copy */
@@ -339,7 +400,9 @@ const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
         const vehicle = btn.dataset.vehicle || '';
         if (document.querySelector('[data-booking-modal]')) {
           window.dispatchEvent(
-            new CustomEvent('thedriver:open-booking', { detail: { vehicle } }),
+            new CustomEvent('thedriver:open-booking', {
+              detail: { source: 'fleet', vehicle },
+            }),
           );
         } else {
           // Cross-page fallback — modal on home will auto-open from the hash

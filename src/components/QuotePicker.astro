@@ -160,7 +160,10 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
   //  - on submit: scroll to #booking-form and broadcast selection
   // Without JS: form still GET-submits to #booking-form with pickup/dropoff params.
 
-  type PriceCell = { car?: number; van?: number };
+  // Tier-based pricing. The hero picker always shows the cheapest starting
+  // price (tier_1_3) since it doesn't ask for a passenger count — the real
+  // full quote is computed in BookingForm once pax is entered.
+  type PriceCell = { tier_1_3?: number; tier_4_6?: number; tier_7_8?: number };
   type PriceMatrix = Record<string, Record<string, PriceCell>>;
   type Labels = { from: string; empty: string; unavailable: string };
 
@@ -242,9 +245,15 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
       }
 
       const cell = prices[from]?.[to];
-      const carPrice = cell?.car;
+      // "From €X" = cheapest tier. Tiers are walked in order so we surface
+      // tier_1_3 if priced, then tier_4_6, then tier_7_8 as a last resort.
+      const startingPrice =
+        typeof cell?.tier_1_3 === 'number' ? cell.tier_1_3
+        : typeof cell?.tier_4_6 === 'number' ? cell.tier_4_6
+        : typeof cell?.tier_7_8 === 'number' ? cell.tier_7_8
+        : null;
 
-      if (typeof carPrice !== 'number') {
+      if (startingPrice === null) {
         priceEl.textContent = '—';
         labelEl.textContent = labels.unavailable;
         submit.setAttribute('aria-disabled', 'true');
@@ -259,10 +268,10 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
       submit.disabled = false;
 
       if (reduceMotion) {
-        priceEl.textContent = `€${carPrice}`;
-        currentPrice = carPrice;
+        priceEl.textContent = `€${startingPrice}`;
+        currentPrice = startingPrice;
       } else {
-        animatePrice(carPrice);
+        animatePrice(startingPrice);
       }
 
       // Card lifts once, the first moment a real price lands.
@@ -278,7 +287,7 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
         e.preventDefault();
         return;
       }
-      const detail = { pickup: pickup.value, dropoff: dropoff.value };
+      const detail = { source: 'hero-picker', pickup: pickup.value, dropoff: dropoff.value };
 
       // Same-page case: a BookingModal is listening; open it + prefill, no navigation.
       const modalHere = document.querySelector('[data-booking-modal]');
@@ -286,7 +295,6 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
         e.preventDefault();
         const url = new URL(window.location.href);
         url.searchParams.set('pickup', pickup.value);
-        url.searchParams.set('dropoff', pickup.value ? pickup.value : '');
         url.searchParams.set('dropoff', dropoff.value);
         history.replaceState(null, '', url.toString());
         window.dispatchEvent(new CustomEvent('thedriver:open-booking', { detail }));

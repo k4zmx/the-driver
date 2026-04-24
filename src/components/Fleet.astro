@@ -1,5 +1,7 @@
 ---
 import { t } from '../i18n';
+import { findImageByKeywords, logImageMatch } from '../utils/images.js';
+import { minCarStarting, minVanStarting } from '../utils/pricing.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
@@ -7,17 +9,37 @@ interface Props {
 
 const { locale } = Astro.props;
 const s = t(locale).fleet;
+const fromPrefix = t(locale).destinations.fromPrefix;
+const unavailable = t(locale).hero.price.unavailable;
+
+const carImg = findImageByKeywords('images/fleet', ['tesla']);
+const vanImg = findImageByKeywords('images/fleet', ['vito', 'trafic', 'traffic', 'van', 'mercedes']);
+logImageMatch('Fleet', 'Car (Tesla Model Y)', carImg, ['tesla']);
+logImageMatch('Fleet', 'Van (Vito / Trafic)', vanImg, ['vito', 'trafic', 'van', 'mercedes']);
+
+// "À partir de €X" — derived from the real price matrix. Falls back to
+// locale-specific "On request" copy if a tier is entirely unpriced.
+const carMin = minCarStarting();
+const vanMin = minVanStarting();
+const carPrice = carMin != null ? `${fromPrefix} €${carMin}` : unavailable;
+const vanPrice = vanMin != null ? `${fromPrefix} €${vanMin}` : unavailable;
 
 const vehicles = [
   {
     key: 'car',
     data: s.berline,
     silhouette: `<path d="M19 17h2l.64-2.54c.24-.959.24-1.962 0-2.92l-1.07-4.27A3 3 0 0 0 17.66 5H6.34a3 3 0 0 0-2.91 2.27L2.36 11.54c-.24.958-.24 1.961 0 2.92L3 17h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17h10"/>`,
+    image: carImg,
+    alt: s.berline.model,
+    dynamicPrice: carPrice,
   },
   {
     key: 'van',
     data: s.van,
     silhouette: `<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>`,
+    image: vanImg,
+    alt: s.van.model,
+    dynamicPrice: vanPrice,
   },
 ];
 ---
@@ -33,14 +55,29 @@ const vehicles = [
     <div class="fleet-grid mt-12 md:mt-16">
       {vehicles.map((v, i) => (
         <article
-          class="fleet-card group"
+          class:list={['fleet-card group', `fleet-card--${v.key}`]}
           data-reveal
           data-reveal-dir={i === 0 ? 'left' : 'right'}
           data-reveal-delay="1"
         >
           <div class="fleet-image">
             <span class="fleet-image-glow" aria-hidden="true"></span>
-            <svg class="fleet-silhouette placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={v.silhouette} />
+            {v.image.missing || !(v.image.jpg || v.image.avif || v.image.webp) ? (
+              <svg class="fleet-silhouette placeholder-shimmer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={v.silhouette} />
+            ) : (
+              <picture class="fleet-photo">
+                {v.image.avif && <source srcset={v.image.avif} type="image/avif" />}
+                {v.image.webp && <source srcset={v.image.webp} type="image/webp" />}
+                <img
+                  src={v.image.jpg || v.image.avif || v.image.webp}
+                  alt={v.alt}
+                  width="1200"
+                  height="750"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            )}
           </div>
 
           <div class="fleet-body">
@@ -72,12 +109,19 @@ const vehicles = [
               ))}
             </ul>
 
-            <div class="fleet-bestfor">
-              <p class="fleet-bestfor-label">{s.berline?.bestForHeading ?? 'Idéal pour'}</p>
-            </div>
+            {v.data.bestFor && v.data.bestFor.length > 0 && (
+              <div class="fleet-bestfor">
+                <p class="fleet-bestfor-label">{v.data.bestForHeading ?? 'Idéal pour :'}</p>
+                <ul class="fleet-bestfor-list">
+                  {v.data.bestFor.map((item: string) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div class="fleet-footer">
-              <p class="fleet-price">{v.data.price}</p>
+              <p class="fleet-price">{v.dynamicPrice}</p>
               <button
                 type="button"
                 class="fleet-cta"
@@ -201,6 +245,29 @@ const vehicles = [
   @media (hover: hover) {
     .fleet-card:hover .fleet-silhouette { transform: translateX(12px); }
   }
+  /* Real photo — fills the image container, curated filter, subtle parallax on hover */
+  .fleet-photo {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .fleet-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.95) contrast(1.02);
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 600ms var(--ease-out);
+  }
+  /* Tesla photo — scaled 20% to crop out the stock watermark on the lower right. */
+  .fleet-card--car .fleet-photo img {
+    transform: scale(1.2);
+  }
+  @media (hover: hover) {
+    .fleet-card:hover .fleet-photo img { transform: scale(1.035); }
+    .fleet-card--car:hover .fleet-photo img { transform: scale(1.24); }
+  }
 
   .fleet-body {
     padding: 28px 24px 24px;
@@ -270,23 +337,35 @@ const vehicles = [
     color: var(--color-graphite);
   }
 
-  /* "Best for" row — styled as a distinct tag-like block */
+  /* "Best for" block — accent left-border quote, em-dash bullets */
   .fleet-bestfor {
     margin-top: 18px;
-    padding: 12px 16px;
+    padding: 14px 20px;
     background: color-mix(in oklab, var(--color-accent) 6%, var(--color-cream));
     border-radius: 10px;
-    border: 1px solid color-mix(in oklab, var(--color-accent) 20%, transparent);
+    border-left: 2px solid var(--color-accent);
   }
   .fleet-bestfor-label {
     font-size: 13px;
     font-weight: 500;
+    letter-spacing: 0.02em;
     color: var(--color-ink);
     margin: 0;
   }
-  .fleet-bestfor-label::before {
-    content: '★ ';
-    color: var(--color-accent);
+  .fleet-bestfor-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-graphite);
+  }
+  .fleet-bestfor-list li::before {
+    content: '— ';
+    color: var(--color-graphite);
   }
 
   /* Footer row — price + CTA side-by-side on desktop, stacked on mobile */
@@ -454,7 +533,9 @@ const vehicles = [
         const hasModal = !!document.querySelector('[data-booking-modal]');
         if (hasModal) {
           window.dispatchEvent(
-            new CustomEvent('thedriver:open-booking', { detail: { vehicle } }),
+            new CustomEvent('thedriver:open-booking', {
+              detail: { source: 'fleet', vehicle },
+            }),
           );
         } else {
           // Cross-page fallback: navigate home with the hash; modal auto-opens there.

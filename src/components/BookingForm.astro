@@ -12,7 +12,7 @@ const strings = t(locale);
 const f = strings.form;
 
 // Subset of pickup/dropoff that should reveal a free-form address field.
-const CITY_PICKUPS = ['Disneyland', 'Versailles'];
+const CITY_PICKUPS = ['Paris', 'Disneyland', 'Versailles'];
 const AIRPORT_PICKUPS = ['CDG', 'Orly', 'Beauvais'];
 const STATION_PICKUPS = ['Paris Train Station'];
 const CITY_DROPOFFS = ['Paris', 'Disneyland', 'Versailles'];
@@ -37,19 +37,83 @@ const configBlob = {
   whatsapp: '33628658127',
 };
 
+// Country codes — France default, then EU, then UK/US/CA, then Gulf/NA,
+// then Asia/Oceania/Americas. Kept alphabetical inside each region group.
+//
+// We ship a 2-letter ISO code instead of an emoji flag because Windows + most
+// desktop browsers don't render regional-indicator flags (they show letter
+// pairs). Clean, consistent everywhere — and screen readers read it.
 const countryCodes = [
-  { cc: '+33', flag: '🇫🇷', label: 'France' },
-  { cc: '+44', flag: '🇬🇧', label: 'UK' },
-  { cc: '+1',  flag: '🇺🇸', label: 'US / CA' },
-  { cc: '+34', flag: '🇪🇸', label: 'España' },
-  { cc: '+39', flag: '🇮🇹', label: 'Italia' },
-  { cc: '+49', flag: '🇩🇪', label: 'Deutschland' },
-  { cc: '+41', flag: '🇨🇭', label: 'Suisse' },
-  { cc: '+32', flag: '🇧🇪', label: 'België' },
-  { cc: '+31', flag: '🇳🇱', label: 'Nederland' },
-  { cc: '+351', flag: '🇵🇹', label: 'Portugal' },
-  { cc: '+86', flag: '🇨🇳', label: '中国' },
-  { cc: '+81', flag: '🇯🇵', label: '日本' },
+  // Default
+  { cc: '+33', iso: 'FR', label: 'France' },
+
+  // EU
+  { cc: '+49',  iso: 'DE', label: 'Deutschland' },
+  { cc: '+34',  iso: 'ES', label: 'España' },
+  { cc: '+39',  iso: 'IT', label: 'Italia' },
+  { cc: '+41',  iso: 'CH', label: 'Suisse' },
+  { cc: '+32',  iso: 'BE', label: 'België' },
+  { cc: '+31',  iso: 'NL', label: 'Nederland' },
+  { cc: '+351', iso: 'PT', label: 'Portugal' },
+  { cc: '+352', iso: 'LU', label: 'Luxembourg' },
+  { cc: '+353', iso: 'IE', label: 'Ireland' },
+  { cc: '+43',  iso: 'AT', label: 'Österreich' },
+  { cc: '+45',  iso: 'DK', label: 'Danmark' },
+  { cc: '+46',  iso: 'SE', label: 'Sverige' },
+  { cc: '+47',  iso: 'NO', label: 'Norge' },
+  { cc: '+358', iso: 'FI', label: 'Suomi' },
+  { cc: '+354', iso: 'IS', label: 'Ísland' },
+  { cc: '+48',  iso: 'PL', label: 'Polska' },
+  { cc: '+420', iso: 'CZ', label: 'Česko' },
+  { cc: '+36',  iso: 'HU', label: 'Magyarország' },
+  { cc: '+40',  iso: 'RO', label: 'România' },
+  { cc: '+30',  iso: 'GR', label: 'Ελλάδα' },
+
+  // UK / US / CA
+  { cc: '+44', iso: 'GB', label: 'United Kingdom' },
+  { cc: '+1',  iso: 'US', label: 'United States' },
+  { cc: '+1',  iso: 'CA', label: 'Canada' },
+
+  // East / Central Europe + rest
+  { cc: '+90',  iso: 'TR', label: 'Türkiye' },
+  { cc: '+7',   iso: 'RU', label: 'Россия' },
+  { cc: '+380', iso: 'UA', label: 'Україна' },
+
+  // Gulf / North Africa
+  { cc: '+971', iso: 'AE', label: 'الإمارات' },
+  { cc: '+966', iso: 'SA', label: 'السعودية' },
+  { cc: '+972', iso: 'IL', label: 'ישראל' },
+  { cc: '+974', iso: 'QA', label: 'قطر' },
+  { cc: '+965', iso: 'KW', label: 'الكويت' },
+  { cc: '+973', iso: 'BH', label: 'البحرين' },
+  { cc: '+20',  iso: 'EG', label: 'مصر' },
+  { cc: '+212', iso: 'MA', label: 'المغرب' },
+  { cc: '+213', iso: 'DZ', label: 'الجزائر' },
+  { cc: '+216', iso: 'TN', label: 'تونس' },
+
+  // Asia / Oceania
+  { cc: '+86', iso: 'CN', label: '中国' },
+  { cc: '+81', iso: 'JP', label: '日本' },
+  { cc: '+82', iso: 'KR', label: '대한민국' },
+  { cc: '+91', iso: 'IN', label: 'India' },
+  { cc: '+66', iso: 'TH', label: 'ไทย' },
+  { cc: '+65', iso: 'SG', label: 'Singapore' },
+  { cc: '+60', iso: 'MY', label: 'Malaysia' },
+  { cc: '+62', iso: 'ID', label: 'Indonesia' },
+  { cc: '+63', iso: 'PH', label: 'Philippines' },
+  { cc: '+84', iso: 'VN', label: 'Việt Nam' },
+  { cc: '+61', iso: 'AU', label: 'Australia' },
+  { cc: '+64', iso: 'NZ', label: 'New Zealand' },
+
+  // Americas
+  { cc: '+55', iso: 'BR', label: 'Brasil' },
+  { cc: '+54', iso: 'AR', label: 'Argentina' },
+  { cc: '+52', iso: 'MX', label: 'México' },
+  { cc: '+56', iso: 'CL', label: 'Chile' },
+  { cc: '+57', iso: 'CO', label: 'Colombia' },
+
+  // Africa
+  { cc: '+27', iso: 'ZA', label: 'South Africa' },
 ];
 
 const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
@@ -299,24 +363,55 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
           </summary>
 
           <div class="mt-4 space-y-5">
-            {/* Child seats */}
+            {/* Child seats — one +/- quantity stepper per type */}
             <div>
-              <span class="meta-label block mb-2">{f.options.childSeats}</span>
+              <span class="meta-label block mb-1">{f.options.childSeats}</span>
+              <p class="text-[13px] text-[color:var(--color-graphite)] mb-3">{f.options.childSeatsHelp}</p>
               <div class="space-y-2">
                 {[
                   { key: 'cosy', label: f.options.seatCosy, hint: f.options.seatCosyHint },
                   { key: 'baby', label: f.options.seatBaby, hint: f.options.seatBabyHint },
                   { key: 'booster', label: f.options.seatBooster, hint: f.options.seatBoosterHint },
                 ].map((seat) => (
-                  <label class="flex items-start gap-3 min-h-[48px] px-4 py-3 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
-                    <input type="checkbox" name={`seat_${seat.key}`} value="1" class="mt-1 accent-[color:var(--color-accent)]" />
-                    <span class="flex-1">
+                  <div class="flex items-center gap-3 min-h-[56px] px-4 py-2 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)]">
+                    <div class="flex-1 min-w-0">
                       <span class="block text-[15px] text-[color:var(--color-ink)]">{seat.label}</span>
                       <span class="block text-[13px] text-[color:var(--color-graphite)]">{seat.hint}</span>
-                    </span>
-                  </label>
+                    </div>
+                    <div class="inline-flex items-center rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-cream)] shrink-0" data-role="seat-stepper" data-seat-key={seat.key}>
+                      <button
+                        type="button"
+                        data-role="seat-dec"
+                        class="h-11 w-11 inline-flex items-center justify-center text-[color:var(--color-ink)] disabled:opacity-30"
+                        aria-label={`${f.when.passengersDecrease} — ${seat.label}`}
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                      <input
+                        id={`${uid}-seat-${seat.key}`}
+                        name={`seat_${seat.key}`}
+                        type="number"
+                        min="0"
+                        max="4"
+                        value="0"
+                        inputmode="numeric"
+                        class="w-10 text-center bg-transparent border-0 text-[16px] font-medium focus:outline-none tabular-nums"
+                        data-role="seat-qty"
+                        data-seat-label={seat.label}
+                      />
+                      <button
+                        type="button"
+                        data-role="seat-inc"
+                        class="h-11 w-11 inline-flex items-center justify-center text-[color:var(--color-ink)] disabled:opacity-30"
+                        aria-label={`${f.when.passengersIncrease} — ${seat.label}`}
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
+              <input type="hidden" name="child_seats" data-role="child-seats-summary" value="" />
             </div>
 
             {/* Extra stop */}
@@ -380,12 +475,16 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
           <div class="flex gap-2">
             <select
               name="country_code"
-              class="field field-select !w-[120px] shrink-0"
+              class="field field-select country-code-select !w-[128px] shrink-0"
               autocomplete="tel-country-code"
               aria-label={f.you.countryCode}
             >
               {countryCodes.map((c) => (
-                <option value={c.cc} selected={c.cc === '+33'}>{c.flag} {c.cc}</option>
+                <option
+                  value={c.cc}
+                  selected={c.cc === '+33' && c.iso === 'FR'}
+                  aria-label={`${c.label} ${c.cc}`}
+                >{c.iso}  {c.cc}</option>
               ))}
             </select>
             <input
@@ -436,6 +535,10 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
             <dt class="text-[color:var(--color-graphite)]">{f.summary.type}</dt>
             <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-type">{f.trip.oneWay}</dd>
           </div>
+          <div class="flex justify-between gap-4" data-role="summary-seats-row" hidden>
+            <dt class="text-[color:var(--color-graphite)]">{f.summary.seats}</dt>
+            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-seats">—</dd>
+          </div>
         </dl>
         <div class="mt-4 pt-4 border-t border-[color:var(--color-smoke)] flex justify-between items-baseline">
           <span class="meta-label">{f.summary.total}</span>
@@ -480,8 +583,10 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
 </section>
 
 <script>
+  type TierKey = 'tier_1_3' | 'tier_4_6' | 'tier_7_8';
+  type PriceCell = { tier_1_3?: number; tier_4_6?: number; tier_7_8?: number };
   type Config = {
-    prices: Record<string, Record<string, { car?: number; van?: number }>>;
+    prices: Record<string, Record<string, PriceCell>>;
     vehicle: { car: { max: number; model: string }; van: { max: number; model: string } };
     roundTripDiscount: number;
     airportPickups: string[];
@@ -493,6 +598,18 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     accessKey: string;
     whatsapp: string;
   };
+
+  // Keep the client-side combo solver in lockstep with src/utils/pricing.js.
+  // Duplication is deliberate: the form runs inline without a module import.
+  function tierForSize(size: number): TierKey | null {
+    if (size >= 1 && size <= 3) return 'tier_1_3';
+    if (size >= 4 && size <= 6) return 'tier_4_6';
+    if (size >= 7 && size <= 8) return 'tier_7_8';
+    return null;
+  }
+  function vehicleForTier(tier: TierKey): 'car' | 'van' {
+    return tier === 'tier_1_3' ? 'car' : 'van';
+  }
 
   function initForm(form: HTMLFormElement) {
     const id = form.dataset.formId;
@@ -521,9 +638,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const sPax = $('[data-role="summary-pax"]');
     const sType = $('[data-role="summary-type"]');
     const sTotal = $('[data-role="summary-total"]');
-
-    const CAR_SEATS = cfg.vehicle.car.max;
-    const VAN_SEATS = cfg.vehicle.van.max;
 
     // ---- Conditional reveals -----------------------------------------
     function setReveal(name: string, show: boolean) {
@@ -559,32 +673,74 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     }
 
     // ---- Pricing + summary -------------------------------------------
-    function computeCombo(pax: number, carPrice?: number, vanPrice?: number) {
-      if (pax <= CAR_SEATS) {
-        if (typeof carPrice !== 'number') return null;
-        return { combo: [['car', 1]] as [string, number][], total: carPrice };
+    type ComboEntry = { vehicle: 'car' | 'van'; pax: number; tier: TierKey; price: number };
+
+    /**
+     * Tier-based cheapest-combo solver.
+     *   pax ≤ 8 → single vehicle, look up tier price directly.
+     *   pax ≥ 9 → memoised DP over integer partitions into parts ∈ [1, 8].
+     *             Each part maps to a tier (1–3 car, 4–6 / 7–8 van); total is
+     *             minimised across all partitions.
+     */
+    function computeCombo(pax: number, cell?: PriceCell): { combo: ComboEntry[]; total: number } | null {
+      if (!pax || pax < 1 || !cell) return null;
+
+      const priceAt = (t: TierKey): number | null => {
+        const p = cell[t];
+        return typeof p === 'number' ? p : null;
+      };
+
+      if (pax <= 8) {
+        const tier = tierForSize(pax)!;
+        const price = priceAt(tier);
+        if (price === null) return null;
+        return {
+          combo: [{ vehicle: vehicleForTier(tier), pax, tier, price }],
+          total: price,
+        };
       }
-      if (pax <= VAN_SEATS) {
-        if (typeof vanPrice !== 'number') return null;
-        return { combo: [['van', 1]] as [string, number][], total: vanPrice };
+
+      const p1 = priceAt('tier_1_3');
+      const p2 = priceAt('tier_4_6');
+      const p3 = priceAt('tier_7_8');
+      if (p1 === null || p2 === null || p3 === null) return null;
+      const forSize = (size: number) => (size <= 3 ? p1 : size <= 6 ? p2 : p3);
+
+      const memo = new Map<number, { total: number; parts: number[] } | null>();
+      function solve(n: number): { total: number; parts: number[] } | null {
+        if (n <= 0) return { total: 0, parts: [] };
+        if (memo.has(n)) return memo.get(n) ?? null;
+        let best: { total: number; parts: number[] } | null = null;
+        for (let size = 1; size <= Math.min(n, 8); size++) {
+          const sub = solve(n - size);
+          if (!sub) continue;
+          const total = sub.total + forSize(size);
+          if (!best || total < best.total) best = { total, parts: [size, ...sub.parts] };
+        }
+        memo.set(n, best);
+        return best;
       }
-      if (typeof carPrice !== 'number' || typeof vanPrice !== 'number') return null;
-      let best: { combo: [string, number][]; total: number } | null = null;
-      const maxVans = Math.ceil(pax / VAN_SEATS) + 1;
-      for (let v = 0; v <= maxVans; v++) {
-        const remaining = Math.max(0, pax - v * VAN_SEATS);
-        const c = Math.ceil(remaining / CAR_SEATS);
-        if (v * VAN_SEATS + c * CAR_SEATS < pax) continue;
-        const total = v * vanPrice + c * carPrice;
-        const combo = [['van', v], ['car', c]].filter(([, n]) => (n as number) > 0) as [string, number][];
-        if (!best || total < best.total) best = { combo, total };
-      }
-      return best;
+
+      const solved = solve(pax);
+      if (!solved) return null;
+
+      const combo: ComboEntry[] = solved.parts
+        .slice()
+        .sort((a, b) => b - a)
+        .map((size) => {
+          const tier = tierForSize(size)!;
+          return { vehicle: vehicleForTier(tier), pax: size, tier, price: forSize(size) };
+        });
+
+      return { combo, total: solved.total };
     }
 
-    function vehicleSummaryLabel(combo: [string, number][]) {
-      return combo
-        .map(([type, n]) => `${n}× ${cfg.vehicle[type as 'car' | 'van'].model}`)
+    // "2× Mercedes Vito / Renault Trafic + 1× Tesla Model Y"
+    function vehicleSummaryLabel(combo: ComboEntry[]): string {
+      const counts = new Map<'car' | 'van', number>();
+      for (const e of combo) counts.set(e.vehicle, (counts.get(e.vehicle) ?? 0) + 1);
+      return [...counts.entries()]
+        .map(([v, n]) => `${n}× ${cfg.vehicle[v].model}`)
         .join(' + ');
     }
 
@@ -599,7 +755,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       sType.textContent = tripType === 'round-trip' ? cfg.labels.tripRoundTrip : cfg.labels.tripOneWay;
 
       const cell = pu && dr ? cfg.prices[pu]?.[dr] : undefined;
-      const computed = computeCombo(pax, cell?.car, cell?.van);
+      const computed = computeCombo(pax, cell);
       if (!computed) {
         sVehicle.textContent = '—';
         sTotal.textContent = pu && dr ? cfg.labels.unavailable : '—';
@@ -627,6 +783,54 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     paxInc.addEventListener('click', () => setPax(parseInt(paxInput.value || '1', 10) + 1));
     paxDec.addEventListener('click', () => setPax(parseInt(paxInput.value || '1', 10) - 1));
     paxInput.addEventListener('input', () => setPax(parseInt(paxInput.value || '1', 10) || 1));
+
+    // ---- Child seat steppers ----------------------------------------
+    const seatSummaryHidden = form.querySelector<HTMLInputElement>('[data-role="child-seats-summary"]');
+    const seatsRow = form.querySelector<HTMLElement>('[data-role="summary-seats-row"]');
+    const seatsCell = form.querySelector<HTMLElement>('[data-role="summary-seats"]');
+    const seatSteppers = form.querySelectorAll<HTMLElement>('[data-role="seat-stepper"]');
+
+    function refreshSeatSummary() {
+      const parts: string[] = [];
+      seatSteppers.forEach((stepper) => {
+        const qtyInput = stepper.querySelector<HTMLInputElement>('[data-role="seat-qty"]')!;
+        const n = Math.max(0, Math.min(4, parseInt(qtyInput.value || '0', 10) || 0));
+        const label = qtyInput.dataset.seatLabel ?? '';
+        if (n > 0) parts.push(`${n} ${label}`);
+      });
+      const summary = parts.join(', ');
+      if (seatSummaryHidden) seatSummaryHidden.value = summary;
+      if (seatsRow && seatsCell) {
+        if (parts.length === 0) {
+          seatsRow.hidden = true;
+          seatsCell.textContent = '—';
+        } else {
+          seatsRow.hidden = false;
+          seatsCell.textContent = parts.join(' + ');
+        }
+      }
+    }
+
+    function setSeatQty(stepper: HTMLElement, n: number) {
+      const qtyInput = stepper.querySelector<HTMLInputElement>('[data-role="seat-qty"]')!;
+      const dec = stepper.querySelector<HTMLButtonElement>('[data-role="seat-dec"]')!;
+      const inc = stepper.querySelector<HTMLButtonElement>('[data-role="seat-inc"]')!;
+      const clamped = Math.max(0, Math.min(4, Math.floor(n)));
+      qtyInput.value = String(clamped);
+      dec.disabled = clamped <= 0;
+      inc.disabled = clamped >= 4;
+      refreshSeatSummary();
+    }
+
+    seatSteppers.forEach((stepper) => {
+      const qtyInput = stepper.querySelector<HTMLInputElement>('[data-role="seat-qty"]')!;
+      const dec = stepper.querySelector<HTMLButtonElement>('[data-role="seat-dec"]')!;
+      const inc = stepper.querySelector<HTMLButtonElement>('[data-role="seat-inc"]')!;
+      dec.addEventListener('click', () => setSeatQty(stepper, parseInt(qtyInput.value || '0', 10) - 1));
+      inc.addEventListener('click', () => setSeatQty(stepper, parseInt(qtyInput.value || '0', 10) + 1));
+      qtyInput.addEventListener('input', () => setSeatQty(stepper, parseInt(qtyInput.value || '0', 10) || 0));
+      setSeatQty(stepper, parseInt(qtyInput.value || '0', 10) || 0);
+    });
 
     // ---- Date min = today --------------------------------------------
     const today = new Date().toISOString().slice(0, 10);
@@ -659,9 +863,20 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     form.addEventListener('input', updateWhatsApp);
 
     // ---- Prefill from URL / hero event -------------------------------
+    // `undefined` means "don't touch", empty string means "clear", non-empty
+    // means "set to this value". The hidden native select drives the custom
+    // combobox UI via a change event, so we dispatch one after each write.
     function applySelection(pu?: string, dr?: string) {
-      if (pu && [...pickup.options].some((o) => o.value === pu)) pickup.value = pu;
-      if (dr && [...dropoff.options].some((o) => o.value === dr)) dropoff.value = dr;
+      if (pu !== undefined) {
+        const valid = pu && [...pickup.options].some((o) => o.value === pu);
+        pickup.value = valid ? pu : '';
+        pickup.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (dr !== undefined) {
+        const valid = dr && [...dropoff.options].some((o) => o.value === dr);
+        dropoff.value = valid ? dr : '';
+        dropoff.dispatchEvent(new Event('change', { bubbles: true }));
+      }
       refreshConditionals();
       refreshSummary();
       updateWhatsApp();
@@ -669,7 +884,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const params = new URLSearchParams(window.location.search);
     applySelection(params.get('pickup') ?? undefined, params.get('dropoff') ?? undefined);
     window.addEventListener('thedriver:quote-selected', (e: Event) => {
-      const { pickup: p, dropoff: d } = (e as CustomEvent).detail;
+      const { pickup: p, dropoff: d } = (e as CustomEvent).detail ?? {};
       applySelection(p, d);
       // Focus first empty required field
       const firstEmpty = form.querySelector<HTMLInputElement>(

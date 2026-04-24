@@ -1,32 +1,73 @@
 ---
 import { t } from '../i18n';
+import { REVIEWS, REVIEW_TOTAL_COUNT, REVIEW_AVERAGE } from '../data/reviews.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
 }
 
+type Review = {
+  text: string;
+  name: string;
+  flag: string;
+  lang: 'fr' | 'en' | 'es' | 'it' | 'da' | string;
+  rating: number;
+  date: { year: number; month: number };
+  reviewsCount: number;
+  photosCount: number;
+  localGuide: boolean;
+};
+
 const { locale } = Astro.props;
 const s = t(locale).reviews;
 
-// Google-ish avatar palette — muted solid circles, deliberately NOT terracotta
-// so the accent stays precious. Deterministic by first letter.
+// Accent-free avatar palette — muted solids picked from the site's neutral family.
+// Deterministic from the first letter so each card is stable across reloads.
 const avatarPalette: Record<string, string> = {
-  P: '#7B8060', // olive
   S: '#4B8B8E', // teal
-  M: '#8F5B7E', // plum
-  E: '#6B8F6E', // sage
-  A: '#A6845A', // sand
-  J: '#A06B6B', // dusty rose
+  L: '#7B8060', // olive
   C: '#4A6885', // navy
+  B: '#A6845A', // sand
+  E: '#8F5B7E', // plum
+  A: '#6B8F6E', // sage
+  O: '#A06B6B', // dusty rose
 };
 
 function stars(rating: number) {
   return (Math.max(0, Math.min(5, rating)) / 5) * 100;
 }
 
-// Interpolate the "reviewCount" template for the aggregate badge.
-const totalReviews = s.items.length;
-const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalReviews));
+// Build a per-locale relative-date label (e.g. "il y a 2 mois").
+// Uses Intl.RelativeTimeFormat — anchored to today's year+month.
+const todayD = new Date();
+const todayY = todayD.getFullYear();
+const todayM = todayD.getMonth() + 1;
+const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+function relativeDate(year: number, month: number): string {
+  const diffMonths = (todayY - year) * 12 + (todayM - month);
+  if (diffMonths <= 0) return rtf.format(0, 'month'); // "this month" / "ce mois-ci"
+  if (diffMonths < 12) return rtf.format(-diffMonths, 'month');
+  const years = Math.round(diffMonths / 12);
+  return rtf.format(-years, 'year');
+}
+
+const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(REVIEW_TOTAL_COUNT));
+const averageText = REVIEW_AVERAGE.toFixed(1).replace('.', locale === 'en' ? '.' : ',');
+const reviews: Review[] = REVIEWS as Review[];
+
+// Compose an author meta line like "Local Guide · 24 reviews · 22 photos"
+// out of the per-locale templates. Parts are only included when > 0.
+function authorMetaLine(r: Review): string {
+  const parts: string[] = [];
+  if (r.localGuide) parts.push(s.localGuide ?? 'Local Guide');
+  if (r.reviewsCount > 0) {
+    parts.push((s.reviewCount ?? '{n} reviews').replace('{n}', String(r.reviewsCount)));
+  }
+  if (r.photosCount > 0) {
+    parts.push((s.photosCount ?? '{n} photos').replace('{n}', String(r.photosCount)));
+  }
+  return parts.join(' · ');
+}
 ---
 
 <section class="rv section-y" aria-labelledby="rv-heading">
@@ -46,8 +87,8 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
         <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.1 5.6l6.2 5.2C41.4 35.7 44 30.2 44 24c0-1.3-.1-2.6-.4-3.9z"/>
       </svg>
       <div class="rv-agg-score">
-        <span class="rv-agg-num tabular-nums">{s.badges.googleScore}</span>
-        <span class="rv-stars" style={`--pct: ${stars(4.5)}%`} aria-label={`${s.badges.googleScore} / 5`}>
+        <span class="rv-agg-num tabular-nums">{averageText}</span>
+        <span class="rv-stars" style={`--pct: ${stars(REVIEW_AVERAGE)}%`} aria-label={`${averageText} / 5`}>
           <span class="rv-stars-empty">
             {Array.from({ length: 5 }).map(() => (
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -68,7 +109,7 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
 
     {/* Scroller with arrow buttons — identical pattern on mobile + desktop */}
     <div class="rv-scroller mt-10 md:mt-12" data-reveal data-reveal-delay="2">
-      <button type="button" class="rv-arrow rv-arrow-prev" data-rv-prev aria-label="Previous review">
+      <button type="button" class="rv-arrow rv-arrow-prev" data-rv-prev aria-label={s.prevLabel ?? 'Previous review'}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="15 18 9 12 15 6"/>
@@ -76,15 +117,14 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
       </button>
 
       <ul class="rv-track" data-rv-track>
-        {s.items.map((r: {
-          text: string; name: string; flag: string; trip: string;
-          rating?: number; date?: string; authorMeta?: string;
-        }, i: number) => {
+        {reviews.map((r, i) => {
           const rating = typeof r.rating === 'number' ? r.rating : 5;
           const avatarColor = avatarPalette[r.name[0]] ?? '#7B8060';
+          const needsTranslation = r.lang !== locale;
+          const dateLabel = relativeDate(r.date.year, r.date.month);
           return (
             <li class="rv-slot" data-review-index={String(i)}>
-              <article class="rv-card">
+              <article class="rv-card" lang={r.lang}>
                 {/* Top row: avatar + name + date */}
                 <header class="rv-card-head">
                   <div class="rv-avatar" style={`background:${avatarColor}`} aria-hidden="true">
@@ -94,12 +134,15 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
                     <p class="rv-author-name">
                       {r.name} <span class="rv-author-flag" aria-hidden="true">{r.flag}</span>
                     </p>
-                    {r.authorMeta && <p class="rv-author-meta">{r.authorMeta}</p>}
+                    {(() => {
+                      const meta = authorMetaLine(r);
+                      return meta ? <p class="rv-author-meta">{meta}</p> : null;
+                    })()}
                   </div>
-                  {r.date && <p class="rv-date">{r.date}</p>}
+                  <p class="rv-date">{dateLabel}</p>
                 </header>
 
-                {/* Star row — Google amber, half-star support via clipped overlay */}
+                {/* Star row — Google amber */}
                 <span class="rv-stars rv-stars-inline" style={`--pct: ${stars(rating)}%`} aria-label={`${rating}/5`}>
                   <span class="rv-stars-empty">
                     {Array.from({ length: 5 }).map(() => (
@@ -113,7 +156,7 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
                   </span>
                 </span>
 
-                {/* Review body — 4-line clamp w/ fade + See more toggle (JS only if overflow) */}
+                {/* Review body — 4-line clamp + See more toggle */}
                 <div class="rv-body">
                   <p class="rv-text" data-rv-text>{r.text}</p>
                   <button
@@ -128,22 +171,27 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
                   </button>
                 </div>
 
-                {/* Trip pill */}
-                <p class="rv-trip">
-                  <svg class="rv-trip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  <span>{r.trip}</span>
-                </p>
+                {/* Google-style translation hint — shown when review lang != site locale */}
+                {needsTranslation && (
+                  <p class="rv-translated">
+                    <svg class="rv-translated-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m5 8 6 6"/>
+                      <path d="m4 14 6-6 2-3"/>
+                      <path d="M2 5h12"/>
+                      <path d="M7 2h1"/>
+                      <path d="m22 22-5-10-5 10"/>
+                      <path d="M14 18h6"/>
+                    </svg>
+                    <span>{s.translated ?? 'Translated by Google'}</span>
+                  </p>
+                )}
               </article>
             </li>
           );
         })}
       </ul>
 
-      <button type="button" class="rv-arrow rv-arrow-next" data-rv-next aria-label="Next review">
+      <button type="button" class="rv-arrow rv-arrow-next" data-rv-next aria-label={s.nextLabel ?? 'Next review'}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="9 18 15 12 9 6"/>
@@ -153,7 +201,7 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
 
     {/* Dot indicators — mobile only, tracks which card is snapped-in */}
     <ol class="rv-dots md:hidden mt-5 flex items-center justify-center gap-2" aria-hidden="true" data-rv-dots>
-      {s.items.map((_r: unknown, i: number) => (
+      {reviews.map((_r, i) => (
         <li class="rv-dot" data-dot-index={String(i)} />
       ))}
     </ol>
@@ -424,27 +472,22 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(totalRevi
   }
   .rv-more:hover { color: var(--color-accent); text-decoration-color: var(--color-accent); }
 
-  /* Trip pill */
-  .rv-trip {
+  /* Translated-by-Google hint — small, subtle, matches real Google UI */
+  .rv-translated {
     margin: auto 0 0;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    align-self: flex-start;
-    padding: 6px 12px;
-    background: var(--color-paper);
-    border: 1px solid var(--color-smoke);
-    border-radius: 999px;
+    gap: 5px;
     font-size: 12px;
     color: var(--color-graphite);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
   }
-  .rv-trip-icon {
+  .rv-translated-icon {
     width: 12px;
     height: 12px;
-    color: var(--color-accent);
+    color: var(--color-graphite);
     flex-shrink: 0;
+    opacity: 0.75;
   }
 
   /* Mobile dot indicators */

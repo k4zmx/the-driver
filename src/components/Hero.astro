@@ -1,6 +1,7 @@
 ---
 import { t } from '../i18n';
 import QuotePicker from './QuotePicker.astro';
+import { findImageByKeywords, logImageMatch } from '../utils/images.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
@@ -9,6 +10,12 @@ interface Props {
 const { locale } = Astro.props;
 const strings = t(locale);
 const hero = strings.hero;
+
+// Eiffel Tower background — above-the-fold, fetched eager.
+// Falls back to the Paris map SVG if no matching photo is found.
+const eiffel = findImageByKeywords('images/routes', ['eiffel', 'tour']);
+logImageMatch('Hero', 'Eiffel background', eiffel, ['eiffel', 'tour']);
+const hasEiffel = !eiffel.missing && (eiffel.avif || eiffel.webp || eiffel.jpg);
 
 // H1 accent-word split — underline the last word in the display headline.
 // Handles all four locales without special-casing by language.
@@ -24,29 +31,51 @@ const availableLabel =
   : 'Disponible maintenant';
 ---
 
-<section class="hero has-grain" data-hero>
-  {/* Decorative layer — aura + Paris map + secondary drift. Desktop animates the second glow; mobile stays minimal. */}
+<section class:list={['hero has-grain', hasEiffel && 'hero--eiffel']} data-hero>
+  {/* Decorative layer — aura + (Eiffel OR Paris map) + secondary drift. */}
   <div class="hero-bg" aria-hidden="true">
+    {hasEiffel && (
+      <picture class="hero-eiffel">
+        {eiffel.avif && <source srcset={eiffel.avif} type="image/avif" />}
+        {eiffel.webp && <source srcset={eiffel.webp} type="image/webp" />}
+        <img
+          src={eiffel.jpg || eiffel.avif || eiffel.webp}
+          alt=""
+          width="800"
+          height="1000"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
+    )}
+    {/* Cream tint + accent gradient — pushes the photo back behind the headline. */}
+    {hasEiffel && <span class="hero-eiffel-overlay"></span>}
     <div class="hero-aura"></div>
     <div class="hero-aura-secondary"></div>
-    <svg
-      data-paris-map
-      class="hero-map"
-      viewBox="0 0 640 640"
-      fill="none" stroke="currentColor" stroke-width="1"
-      stroke-linecap="round" stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M0 340 C 90 300, 150 360, 220 320 S 360 270, 430 310 S 560 370, 640 330" />
-      <ellipse cx="320" cy="320" rx="220" ry="180" />
-      <line x1="320" y1="140" x2="320" y2="500" />
-      <line x1="120" y1="320" x2="520" y2="320" />
-      <line x1="260" y1="200" x2="380" y2="440" />
-      <line x1="380" y1="200" x2="260" y2="440" />
-      <circle cx="320" cy="320" r="4" />
-      <circle cx="280" cy="260" r="3" />
-      <circle cx="360" cy="360" r="3" />
-    </svg>
+    {/* One-shot horizontal streak — evokes motion on page load, plays once. */}
+    <span class="hero-streak" aria-hidden="true"></span>
+
+    {!hasEiffel && (
+      <svg
+        data-paris-map
+        class="hero-map"
+        viewBox="0 0 640 640"
+        fill="none" stroke="currentColor" stroke-width="1"
+        stroke-linecap="round" stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M0 340 C 90 300, 150 360, 220 320 S 360 270, 430 310 S 560 370, 640 330" />
+        <ellipse cx="320" cy="320" rx="220" ry="180" />
+        <line x1="320" y1="140" x2="320" y2="500" />
+        <line x1="120" y1="320" x2="520" y2="320" />
+        <line x1="260" y1="200" x2="380" y2="440" />
+        <line x1="380" y1="200" x2="260" y2="440" />
+        <circle cx="320" cy="320" r="4" />
+        <circle cx="280" cy="260" r="3" />
+        <circle cx="360" cy="360" r="3" />
+      </svg>
+    )}
   </div>
 
   <div class="hero-inner page-x mx-auto max-w-[1200px]">
@@ -126,6 +155,45 @@ const availableLabel =
     pointer-events: none;
     z-index: 0;
   }
+
+  /* One-shot motion streak — thin horizontal line sweeps left→right, once.
+     Evokes speed/transit without being cartoonish. Skipped on reduced-motion. */
+  .hero-streak {
+    position: absolute;
+    top: 34%;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      color-mix(in oklab, var(--color-accent) 35%, transparent) 28%,
+      color-mix(in oklab, var(--color-accent) 55%, transparent) 50%,
+      color-mix(in oklab, var(--color-accent) 35%, transparent) 72%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    filter: blur(0.4px);
+    animation: hero-streak-sweep 1.5s cubic-bezier(0.22, 1, 0.36, 1) 160ms 1 both;
+  }
+  @media (max-width: 767px) {
+    .hero-streak {
+      top: 38%;
+      animation-duration: 800ms;
+      height: 1px;
+    }
+  }
+  @keyframes hero-streak-sweep {
+    0% { transform: translateX(-100%); opacity: 0; }
+    15% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-streak { animation: none; opacity: 0; }
+  }
   .hero-aura {
     position: absolute;
     top: -25%;
@@ -194,6 +262,66 @@ const availableLabel =
   }
   @media (min-width: 768px) {
     .hero-map { display: block; }
+  }
+
+  /* ---------------------------------------------------------------
+     Eiffel Tower background — photo sits above the aura but below
+     content. Desaturated + brightness-cut, cream overlay gradient on
+     top so the headline and booking card stay dominant.
+     --------------------------------------------------------------- */
+  .hero-eiffel {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    pointer-events: none;
+    /* Desktop: show the tower anchored to the right so the left column of
+       copy sits in open cream space. Mobile: centered, further dimmed. */
+    mask-image: linear-gradient(to right, transparent 0%, black 35%, black 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 35%, black 100%);
+  }
+  .hero-eiffel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 72% center;
+    filter: saturate(0.7) brightness(0.92) contrast(1.02);
+    opacity: 0.85;
+  }
+  .hero-eiffel-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        105deg,
+        var(--color-cream) 0%,
+        color-mix(in oklab, var(--color-cream) 92%, transparent) 45%,
+        color-mix(in oklab, var(--color-cream) 70%, transparent) 72%,
+        color-mix(in oklab, var(--color-cream) 55%, transparent) 100%
+      );
+  }
+  /* Mobile: push the tower further back so the booking card takes focus. */
+  @media (max-width: 767px) {
+    .hero-eiffel {
+      mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 62%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 62%, transparent 100%);
+    }
+    .hero-eiffel img {
+      object-position: center 30%;
+      opacity: 0.65;
+      filter: saturate(0.65) brightness(0.92) contrast(1.02);
+    }
+    .hero-eiffel-overlay {
+      background:
+        linear-gradient(
+          180deg,
+          color-mix(in oklab, var(--color-cream) 85%, transparent) 0%,
+          color-mix(in oklab, var(--color-cream) 70%, transparent) 45%,
+          color-mix(in oklab, var(--color-cream) 95%, transparent) 100%
+        );
+    }
   }
   @media (max-width: 767px) {
     .hero-aura {

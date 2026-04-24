@@ -29,7 +29,7 @@ const currentLocale = t(locale);
       href={homeHref}
       class="brand inline-flex items-baseline gap-1 font-display text-[20px] md:text-[22px] leading-none tracking-[-0.01em]"
     >
-      <span class="font-medium">The Driver</span>
+      <span class="font-medium">Driver Services</span>
       <span class="brand-dot leading-none" aria-hidden="true">.</span>
     </a>
 
@@ -263,6 +263,10 @@ const currentLocale = t(locale);
     top: calc(100% + 8px);
     right: 0;
     min-width: 180px;
+    max-height: 360px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding: 6px;
     margin: 0;
     list-style: none;
