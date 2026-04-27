@@ -127,11 +127,15 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
   {/* Backdrop — rendered always, shown only on mobile when menu is open */}
   <div class="lp-backdrop" data-lp-backdrop aria-hidden="true"></div>
 
-  {/* Listbox menu */}
+  {/* Listbox menu — `data-lp-mobile-variant` is also stamped on this element
+      so the centered-variant CSS keeps applying after the menu is portaled
+      out to <body> (escaping any transformed ancestor that would otherwise
+      break `position: fixed`). */}
   <div
     id={menuId}
     class="lp-menu"
     data-lp-menu
+    data-lp-mobile-variant={mobileVariant}
     role="listbox"
     aria-labelledby={labelId}
     hidden
@@ -372,7 +376,7 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     .lp[data-lp-mobile-variant="centered"] .lp-backdrop {
       display: none !important;
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-menu {
+    .lp-menu[data-lp-mobile-variant="centered"] {
       position: fixed;
       inset: auto;
       top: 50%;
@@ -396,24 +400,24 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       /* Outer container clips; the .lp-options child does the scrolling. */
       overflow: hidden;
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-menu[data-open="true"] {
+    .lp-menu[data-lp-mobile-variant="centered"][data-open="true"] {
       transform: translate(-50%, -50%);
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-sheet-head {
+    .lp-menu[data-lp-mobile-variant="centered"] .lp-sheet-head {
       grid-template-columns: 1fr auto;
       padding: 12px 12px 10px 16px;
       cursor: default;
       touch-action: auto;
       flex: 0 0 auto;
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-grip { display: none; }
-    .lp[data-lp-mobile-variant="centered"] .lp-sheet-title {
+    .lp-menu[data-lp-mobile-variant="centered"] .lp-grip { display: none; }
+    .lp-menu[data-lp-mobile-variant="centered"] .lp-sheet-title {
       margin: 0;
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-sheet-close {
+    .lp-menu[data-lp-mobile-variant="centered"] .lp-sheet-close {
       margin-top: 0;
     }
-    .lp[data-lp-mobile-variant="centered"] .lp-options {
+    .lp-menu[data-lp-mobile-variant="centered"] .lp-options {
       /* Critical: min-height:0 lets this flex child shrink below its content
          size, which is what enables overflow-y to actually kick in. */
       flex: 1 1 auto;
@@ -568,6 +572,38 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     let isOpen = false;
     let lastFocused: HTMLElement | null = null;
 
+    // ---- Portaling for the mobile "centered" variant ------------------
+    // Ancestors of `.lp` may have `transform`, `filter`, or `will-change:
+    // transform` set (e.g. the hero's [data-reveal] wrapper). Any of those
+    // creates a containing block, which makes `position: fixed` resolve
+    // against that ancestor instead of the viewport — the popup ends up
+    // anchored to the booking card, not the screen center. Solution: while
+    // the menu is open, append it to <body> so nothing sits between it and
+    // the viewport. On close, return it to its original slot.
+    const menuOriginalParent = menu!.parentElement;
+    const menuOriginalNextSibling = menu!.nextSibling;
+
+    function shouldPortal() {
+      return (
+        lp.dataset.lpMobileVariant === 'centered' &&
+        window.matchMedia('(max-width: 767px)').matches
+      );
+    }
+    function portalMenuToBody() {
+      if (menu!.parentElement !== document.body) {
+        document.body.appendChild(menu!);
+      }
+    }
+    function returnMenuToOriginalParent() {
+      if (!menuOriginalParent) return;
+      if (menu!.parentElement === menuOriginalParent) return;
+      if (menuOriginalNextSibling && menuOriginalNextSibling.parentNode === menuOriginalParent) {
+        menuOriginalParent.insertBefore(menu!, menuOriginalNextSibling);
+      } else {
+        menuOriginalParent.appendChild(menu!);
+      }
+    }
+
     function syncFromNative() {
       const val = native!.value;
       const placeholder = display!.dataset.placeholder || '';
@@ -607,6 +643,9 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
         lastFocused = document.activeElement as HTMLElement;
         syncDisabledState();
         menu!.hidden = false;
+        // Centered variant on mobile: portal to body BEFORE animating in,
+        // so the slide/fade plays from the final viewport-centered position.
+        if (shouldPortal()) portalMenuToBody();
         // Close any other open LocationPickers on the page
         document.querySelectorAll<HTMLElement>('[data-lp]').forEach((other) => {
           if (other !== lp && other.dataset.lpOpen === 'true') {
@@ -617,7 +656,7 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
         requestAnimationFrame(() => {
           menu!.dataset.open = 'true';
         });
-        // Mobile: lock body scroll when bottom sheet is open
+        // Mobile: lock body scroll when sheet/popup is open
         if (window.matchMedia('(max-width: 767px)').matches) {
           document.body.style.overflow = 'hidden';
         }
@@ -630,13 +669,19 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       } else {
         menu!.dataset.open = 'false';
         document.body.style.overflow = '';
-        setTimeout(() => {
-          if (lp.dataset.lpOpen === 'false') menu!.hidden = true;
-        }, 240);
         // Restore focus to trigger only if focus was inside the menu
         if (document.activeElement && menu!.contains(document.activeElement)) {
           trigger!.focus();
         }
+        setTimeout(() => {
+          if (lp.dataset.lpOpen === 'false') {
+            menu!.hidden = true;
+            // After the close animation, return the portaled menu to its
+            // original parent so subsequent opens still find it via the
+            // captured handle (and outside-click detection still works).
+            returnMenuToOriginalParent();
+          }
+        }, 240);
       }
     }
 
@@ -695,9 +740,15 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       });
     });
 
-    // Click outside to close (desktop)
+    // Click outside to close (also handles tap-on-empty-area when the menu
+    // has been portaled to <body> for the centered variant — `menu.contains`
+    // catches clicks on the options/header that are no longer descendants of
+    // `lp`).
     document.addEventListener('click', (e) => {
-      if (!lp.contains(e.target as Node) && isOpen) setOpen(false);
+      if (!isOpen) return;
+      const target = e.target as Node;
+      if (lp.contains(target) || menu!.contains(target)) return;
+      setOpen(false);
     });
 
     // Escape anywhere → close
