@@ -385,7 +385,11 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       bottom: auto;
       width: calc(100% - 32px);
       max-width: 360px;
-      max-height: 70vh;
+      /* Fixed popup size — content NEVER changes the popup's footprint;
+         the inner options list scrolls when there are more routes. clamp()
+         keeps it sane on tiny phones (down to 320px) and on tablets in
+         portrait (capped at 480px). */
+      height: clamp(320px, 60vh, 480px);
       border-radius: 16px;
       padding: 0;
       transform: translate(-50%, calc(-50% + 12px));
