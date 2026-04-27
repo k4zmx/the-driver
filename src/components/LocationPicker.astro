@@ -28,6 +28,15 @@ interface Props {
   iconType: 'from' | 'to';
   /** Mobile bottom-sheet header (defaults to `label`). */
   sheetTitle?: string;
+  /**
+   * How the menu is presented on mobile (<768px).
+   * - `sheet` (default): full-width bottom sheet with backdrop, drag-to-close.
+   *   Used by the booking modal and Tarifs calculator.
+   * - `centered`: small popover floated centre of the screen, no backdrop dim,
+   *   internal scroll. Used by the hero booking card.
+   * Desktop layout (inline dropdown) is identical for both variants.
+   */
+  mobileVariant?: 'sheet' | 'centered';
 }
 
 const {
@@ -39,6 +48,7 @@ const {
   options,
   iconType,
   sheetTitle,
+  mobileVariant = 'sheet',
 } = Astro.props;
 
 const triggerId = `${uid}-trigger`;
@@ -51,7 +61,7 @@ const toPath = `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`;
 const iconSvg = iconType === 'from' ? fromPath : toPath;
 ---
 
-<div class="lp" data-lp data-lp-role={dataRole}>
+<div class="lp" data-lp data-lp-role={dataRole} data-lp-mobile-variant={mobileVariant}>
   {/* Native select — hidden from users but drives form state + existing scripts */}
   <select
     id={`${uid}-native`}
@@ -352,6 +362,56 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     .lp-backdrop { transition: opacity 0.01ms linear; }
   }
 
+  /* ---------------------------------------------------------------
+     Mobile "centered" variant — used by the hero booking card.
+     Floats a small popover in the centre of the screen with no backdrop
+     dim. Internal scroll if the option list overflows. The bottom-sheet
+     header (drag grip + title) collapses to just an X close button.
+     --------------------------------------------------------------- */
+  @media (max-width: 767px) {
+    .lp[data-lp-mobile-variant="centered"] .lp-backdrop {
+      display: none !important;
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-menu {
+      position: fixed;
+      inset: auto;
+      top: 50%;
+      left: 50%;
+      bottom: auto;
+      width: calc(100% - 32px);
+      max-width: 360px;
+      max-height: 70vh;
+      border-radius: 16px;
+      padding: 0 0 8px;
+      transform: translate(-50%, calc(-50% + 12px));
+      transition: opacity 180ms var(--ease-out), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow:
+        0 24px 60px -12px rgba(0, 0, 0, 0.32),
+        0 4px 12px -4px rgba(0, 0, 0, 0.16);
+      touch-action: auto;
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-menu[data-open="true"] {
+      transform: translate(-50%, -50%);
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-sheet-head {
+      grid-template-columns: 1fr auto;
+      padding: 12px 12px 10px 16px;
+      cursor: default;
+      touch-action: auto;
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-grip { display: none; }
+    .lp[data-lp-mobile-variant="centered"] .lp-sheet-title {
+      margin: 0;
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-sheet-close {
+      margin-top: 0;
+    }
+    .lp[data-lp-mobile-variant="centered"] .lp-options {
+      max-height: calc(70vh - 56px);
+      padding: 6px 6px 0;
+    }
+  }
+
   /* Sheet header — hidden on desktop, visible on mobile */
   .lp-sheet-head {
     display: none;
@@ -650,6 +710,9 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
 
     function onDragStart(e: TouchEvent) {
       if (!isOpen || !isMobile() || reduceMotion) return;
+      // Centered variant has no drag-to-close gesture (no drag handle, popup
+      // is small + uses tap-outside / X / option-tap to close).
+      if (lp.dataset.lpMobileVariant === 'centered') return;
       const t = e.touches[0];
       if (!t) return;
       dragStartY = t.clientY;
