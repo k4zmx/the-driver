@@ -47,8 +47,7 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
   <script is:inline type="application/json" data-picker-data={uid} set:html={JSON.stringify(dataBlob)} />
 
   {/* Pickup — custom combobox (hidden native select inside drives form state).
-      The hero variant uses a centered popup on mobile (no backdrop dim);
-      the compact variant (Tarifs calculator) keeps the bottom sheet. */}
+      Mobile: bottom sheet with backdrop + drag-to-close (default variant). */}
   <LocationPicker
     uid={`${uid}-pickup`}
     name="pickup"
@@ -57,7 +56,7 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
     placeholder={hero.pickup.placeholder}
     options={PICKUP_POINTS}
     iconType="from"
-    mobileVariant={variant === 'hero' ? 'centered' : 'sheet'}
+    mobileVariant="sheet"
   />
 
   {/* Connector — soft dashed line with centered arrow dot */}
@@ -81,7 +80,7 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
     placeholder={hero.dropoff.placeholder}
     options={DROP_POINTS}
     iconType="to"
-    mobileVariant={variant === 'hero' ? 'centered' : 'sheet'}
+    mobileVariant="sheet"
   />
 
   {/* Divider + price */}

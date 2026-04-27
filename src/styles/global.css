@@ -339,6 +339,11 @@
   [data-reveal].is-visible {
     opacity: 1;
     transform: none;
+    /* Clear will-change once the reveal animation has settled. Leaving
+       will-change:transform on permanently creates a containing block,
+       which traps `position: fixed` descendants (e.g. the LocationPicker
+       bottom sheet) inside the revealed element instead of the viewport. */
+    will-change: auto;
   }
 
   [data-reveal-delay="1"] { transition-delay: 80ms; }
