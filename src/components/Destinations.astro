@@ -533,13 +533,9 @@ const waLink = `https://wa.me/33628658127?text=${encodeURIComponent('Bonjour, je
         // Stop the document-level #booking-form click handler from also
         // firing an empty-prefill open() and wiping this dropoff.
         e.stopPropagation();
-        if (dropoff) {
-          const newUrl = new URL(location.href);
-          newUrl.searchParams.set('dropoff', dropoff);
-          if (hash) newUrl.hash = hash;
-          history.replaceState(null, '', newUrl.toString());
-        }
-        // Always dispatch — BookingModal picks it up and opens on home.
+        // Same-page click: dispatch the open event with the dropoff in the
+        // detail. We do NOT write the selection to the URL — that just
+        // makes refresh re-trigger the modal with stale state.
         window.dispatchEvent(
           new CustomEvent('thedriver:open-booking', {
             detail: { source: 'destination-card', dropoff },

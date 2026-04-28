@@ -288,10 +288,30 @@ const dragHandleLabel =
       );
     }
 
+    // Strip pickup/dropoff query params + #booking-form hash from the URL
+    // once they've been consumed. Without this, refreshing the page would
+    // re-trigger the modal auto-open AND re-prefill the hero picker with
+    // stale data from the previous session.
+    function cleanUrlState() {
+      try {
+        const url = new URL(location.href);
+        let dirty = false;
+        if (url.searchParams.has('pickup')) { url.searchParams.delete('pickup'); dirty = true; }
+        if (url.searchParams.has('dropoff')) { url.searchParams.delete('dropoff'); dirty = true; }
+        if (url.hash === '#booking-form') { dirty = true; }
+        if (!dirty) return;
+        const cleanHash = url.hash === '#booking-form' ? '' : url.hash;
+        history.replaceState(null, '', url.pathname + url.search + cleanHash);
+      } catch {
+        /* noop — replaceState can throw on file:// or sandboxed contexts */
+      }
+    }
+
     function open(detail?: OpenDetail) {
       if (modal.getAttribute('aria-hidden') === 'false') {
         // Already open — just re-apply the prefill for this source.
         dispatchPrefill(detail);
+        cleanUrlState();
         return;
       }
       lastFocus = document.activeElement as HTMLElement | null;
@@ -307,6 +327,8 @@ const dragHandleLabel =
 
       // Apply prefill (or clear) for this source
       dispatchPrefill(detail);
+      // Consume the URL state so refresh doesn't replay the open.
+      cleanUrlState();
 
       // Focus first focusable inside (close button or first input)
       setTimeout(() => {
@@ -381,9 +403,13 @@ const dragHandleLabel =
     });
 
     // Auto-open on arrival if the URL signals a booking intent.
-    // source='url' honors whichever params were actually present.
-    const params = new URLSearchParams(location.search);
-    if (location.hash === '#booking-form' || params.get('pickup') || params.get('dropoff')) {
+    // We REQUIRE the explicit `#booking-form` hash — lone `?pickup=`/
+    // `?dropoff=` query params don't force the modal open. This way, a
+    // share/refresh of `/?pickup=CDG&dropoff=Paris` simply pre-fills the
+    // hero picker (via QuotePicker's own URL-read) without springing the
+    // modal open every time the page loads.
+    if (location.hash === '#booking-form') {
+      const params = new URLSearchParams(location.search);
       const detail: OpenDetail = { source: 'url' };
       const p = params.get('pickup');
       const d = params.get('dropoff');

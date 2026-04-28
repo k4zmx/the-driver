@@ -292,14 +292,13 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
       }
       const detail = { source: 'hero-picker', pickup: pickup.value, dropoff: dropoff.value };
 
-      // Same-page case: a BookingModal is listening; open it + prefill, no navigation.
+      // Same-page case: a BookingModal is listening; open it + prefill via
+      // the event detail. We deliberately DO NOT write the selection into
+      // the URL — keeping ?pickup/?dropoff out of the address bar means a
+      // refresh doesn't replay the modal or repopulate stale data.
       const modalHere = document.querySelector('[data-booking-modal]');
       if (modalHere) {
         e.preventDefault();
-        const url = new URL(window.location.href);
-        url.searchParams.set('pickup', pickup.value);
-        url.searchParams.set('dropoff', dropoff.value);
-        history.replaceState(null, '', url.toString());
         window.dispatchEvent(new CustomEvent('thedriver:open-booking', { detail }));
         return;
       }
