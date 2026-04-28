@@ -60,6 +60,21 @@ export function getVehicleSummary(pax) {
 }
 
 /**
+ * Icon set for the booking-summary vehicle row. Each entry is 'car' (Tesla)
+ * or 'van' (Vito) and matches the assignment in `getVehicleSummary`.
+ */
+export function getVehicleIcons(pax) {
+  if (pax <= 0) return [];
+  if (pax <= 3)  return ['car'];
+  if (pax <= 8)  return ['van'];
+  if (pax <= 11) return ['van', 'car'];
+  if (pax <= 16) return ['van', 'van'];
+  if (pax <= 20) return ['van', 'van', 'car'];
+  if (pax <= 24) return ['van', 'van', 'van'];
+  return [];
+}
+
+/**
  * Cheapest-combination solver for in-between pax counts.
  *
  * For pax ≥ 9, exhaustively partition `pax` into sub-groups whose sizes are

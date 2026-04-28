@@ -525,7 +525,10 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
           </div>
           <div class="flex justify-between gap-4">
             <dt class="text-[color:var(--color-graphite)]">{f.summary.vehicle}</dt>
-            <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-vehicle">—</dd>
+            <dd class="text-[color:var(--color-ink)] bf-vehicle-cell">
+              <span class="bf-vehicle-icons" data-role="vehicle-icons" aria-hidden="true"></span>
+              <span data-role="summary-vehicle">—</span>
+            </dd>
           </div>
           <div class="flex justify-between gap-4">
             <dt class="text-[color:var(--color-graphite)]">{f.summary.passengers}</dt>
@@ -656,6 +659,38 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const sPax = $('[data-role="summary-pax"]');
     const sType = $('[data-role="summary-type"]');
     const sTotal = $('[data-role="summary-total"]');
+    const sVehicleIcons = $('[data-role="vehicle-icons"]');
+
+    // Inline Lucide-style SVG paths. Stroke + sizing handled by the parent
+    // CSS — these strings are just the inner <path>/<circle> content.
+    const ICON_INNER = {
+      car:
+        '<path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>' +
+        '<circle cx="6.5" cy="16.5" r="2.5"/>' +
+        '<circle cx="16.5" cy="16.5" r="2.5"/>',
+      van:
+        '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/>' +
+        '<path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>' +
+        '<circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>',
+    };
+    function iconsForPax(pax: number): Array<'car' | 'van'> {
+      if (pax <= 0)  return [];
+      if (pax <= 3)  return ['car'];
+      if (pax <= 8)  return ['van'];
+      if (pax <= 11) return ['van', 'car'];
+      if (pax <= 16) return ['van', 'van'];
+      if (pax <= 20) return ['van', 'van', 'car'];
+      if (pax <= 24) return ['van', 'van', 'van'];
+      return [];
+    }
+    function renderVehicleIcons(pax: number) {
+      const icons = iconsForPax(pax);
+      sVehicleIcons.innerHTML = icons
+        .map((kind) =>
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_INNER[kind]}</svg>`,
+        )
+        .join('');
+    }
 
     // ---- Conditional reveals -----------------------------------------
     function setReveal(name: string, show: boolean) {
@@ -743,6 +778,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
         sTotal.textContent = pu && dr ? cfg.labels.unavailable : '—';
         (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = '';
         (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = '';
+        renderVehicleIcons(0);
         return;
       }
       const total = tripType === 'round-trip'
@@ -753,6 +789,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       sTotal.textContent = `€${total}`;
       (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = veh;
       (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = String(total);
+      renderVehicleIcons(pax);
     }
 
     // ---- Passenger stepper -------------------------------------------
@@ -947,3 +984,30 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
   // binds the form's own logic (fields, submit, conditional reveals, prefill).
   document.addEventListener('astro:page-load', run);
 </script>
+
+<style>
+  /* Booking summary "Véhicule" row — small Lucide-style vehicle icons
+     before the text. Decorative; the text itself is the source of truth
+     for screen readers (icons are aria-hidden). */
+  .bf-vehicle-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    text-align: right;
+  }
+  .bf-vehicle-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-graphite);
+    flex-shrink: 0;
+  }
+  .bf-vehicle-icons:empty { display: none; }
+  .bf-vehicle-icons svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+</style>
