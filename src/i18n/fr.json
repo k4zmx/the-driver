@@ -111,8 +111,7 @@
       "passengers": "Passagers",
       "type": "Type",
       "seats": "Sièges",
-      "total": "TOTAL",
-      "preview": "VOTRE VÉHICULE"
+      "total": "TOTAL"
     },
     "submit": {
       "cta": "Confirmer ma réservation",

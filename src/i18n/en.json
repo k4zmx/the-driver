@@ -111,8 +111,7 @@
       "passengers": "Passengers",
       "type": "Type",
       "seats": "Child seats",
-      "total": "TOTAL",
-      "preview": "YOUR VEHICLE"
+      "total": "TOTAL"
     },
     "submit": {
       "cta": "Confirm my booking",

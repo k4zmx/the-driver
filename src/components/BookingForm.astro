@@ -2,7 +2,6 @@
 import { PICKUP_POINTS, DROP_POINTS, PRICES, VEHICLE_CAPACITY, ROUND_TRIP_DISCOUNT } from '../data/routes.js';
 import { t } from '../i18n';
 import LocationPicker from './LocationPicker.astro';
-import { findImageByKeywords } from '../utils/images.js';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
@@ -18,11 +17,6 @@ const AIRPORT_PICKUPS = ['CDG', 'Orly', 'Beauvais'];
 const STATION_PICKUPS = ['Paris Train Station'];
 const CITY_DROPOFFS = ['Paris', 'Disneyland', 'Versailles'];
 
-// Fleet thumbnails for the summary preview — same matched files the Fleet
-// cards use, shipped to the inline script via configBlob.
-const carImg = findImageByKeywords('images/fleet', ['tesla']);
-const vanImg = findImageByKeywords('images/fleet', ['vito', 'trafic', 'traffic', 'van', 'mercedes']);
-
 const configBlob = {
   prices: PRICES,
   vehicle: VEHICLE_CAPACITY,
@@ -36,10 +30,6 @@ const configBlob = {
     tripRoundTrip: f.trip.roundTrip,
     unavailable: strings.hero.price.unavailable,
     empty: strings.hero.price.empty,
-  },
-  vehicleImages: {
-    car: { avif: carImg.avif, webp: carImg.webp, jpg: carImg.jpg },
-    van: { avif: vanImg.avif, webp: vanImg.webp, jpg: vanImg.jpg },
   },
   locale,
   // Web3Forms public access key — filled at runtime from `.env` via import.meta.env
@@ -554,13 +544,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
           <span class="meta-label">{f.summary.total}</span>
           <span class="font-display text-[32px] leading-none tabular-nums" data-role="summary-total">—</span>
         </div>
-
-        {/* Vehicle preview — small fleet thumbnails populated by JS based on
-            the combo solver's output. Hidden until a real quote is computed. */}
-        <div class="bf-preview" data-role="vehicle-preview" hidden>
-          <p class="bf-preview-label">{f.summary.preview}</p>
-          <div class="bf-preview-grid" data-role="vehicle-preview-grid"></div>
-        </div>
       </div>
 
       <div class="space-y-3" data-role="error-container">
@@ -611,10 +594,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     cityPickups: string[];
     cityDropoffs: string[];
     labels: { tripOneWay: string; tripRoundTrip: string; unavailable: string; empty: string };
-    vehicleImages: {
-      car: { avif: string | null; webp: string | null; jpg: string | null };
-      van: { avif: string | null; webp: string | null; jpg: string | null };
-    };
     locale: string;
     accessKey: string;
     whatsapp: string;
@@ -659,8 +638,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const sPax = $('[data-role="summary-pax"]');
     const sType = $('[data-role="summary-type"]');
     const sTotal = $('[data-role="summary-total"]');
-    const previewBlock = form.querySelector<HTMLElement>('[data-role="vehicle-preview"]');
-    const previewGrid = form.querySelector<HTMLElement>('[data-role="vehicle-preview-grid"]');
 
     // ---- Conditional reveals -----------------------------------------
     function setReveal(name: string, show: boolean) {
@@ -767,47 +744,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
         .join(' + ');
     }
 
-    /**
-     * Render fleet thumbnails inside the recap card based on the combo
-     * solver's output. One card per vehicle assigned (so 12 pax → two van
-     * cards, 20 pax → three van cards, etc.). Hidden if no quote yet.
-     */
-    function renderVehiclePreview(combo: ComboEntry[] | null) {
-      if (!previewBlock || !previewGrid) return;
-      if (!combo || combo.length === 0) {
-        previewBlock.hidden = true;
-        previewGrid.innerHTML = '';
-        return;
-      }
-      const frag = document.createDocumentFragment();
-      for (const entry of combo) {
-        const img = cfg.vehicleImages[entry.vehicle];
-        const src = img.jpg || img.webp || img.avif;
-        if (!src) continue;
-        const card = document.createElement('div');
-        card.className = 'bf-preview-card';
-        card.dataset.vehicle = entry.vehicle;
-        const sources = [];
-        if (img.avif) sources.push(`<source srcset="${img.avif}" type="image/avif">`);
-        if (img.webp) sources.push(`<source srcset="${img.webp}" type="image/webp">`);
-        const alt = cfg.vehicle[entry.vehicle].model;
-        card.innerHTML = `
-          <div class="bf-preview-thumb">
-            <picture>
-              ${sources.join('')}
-              <img src="${src}" alt="${alt}" loading="lazy" decoding="async" width="96" height="60" />
-            </picture>
-            <span class="bf-preview-thumb-pax">${entry.pax}p</span>
-          </div>
-          <p class="bf-preview-name">${cfg.vehicle[entry.vehicle].model.split(' / ')[0].split(' ').slice(-1)[0]}</p>
-        `;
-        frag.appendChild(card);
-      }
-      previewGrid.innerHTML = '';
-      previewGrid.appendChild(frag);
-      previewBlock.hidden = false;
-    }
-
     function refreshSummary() {
       const pu = pickup.value;
       const dr = dropoff.value;
@@ -825,7 +761,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
         sTotal.textContent = pu && dr ? cfg.labels.unavailable : '—';
         (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = '';
         (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = '';
-        renderVehiclePreview(null);
         return;
       }
       let total = computed.total;
@@ -835,7 +770,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       sTotal.textContent = `€${total}`;
       (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = veh;
       (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value = String(total);
-      renderVehiclePreview(computed.combo);
     }
 
     // ---- Passenger stepper -------------------------------------------
@@ -1030,101 +964,3 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
   // binds the form's own logic (fields, submit, conditional reveals, prefill).
   document.addEventListener('astro:page-load', run);
 </script>
-
-<style>
-  /* Vehicle preview — fleet thumbnails populated from the combo solver.
-     Sits inside the recap card, after the TOTAL row. Hidden when no
-     valid quote has been computed yet. */
-  .bf-preview {
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--color-smoke);
-  }
-  .bf-preview-label {
-    margin: 0 0 10px;
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-graphite);
-  }
-  .bf-preview-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .bf-preview-card {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 96px;
-    flex-shrink: 0;
-    opacity: 0;
-    transform: translateY(4px);
-    animation: bf-preview-in 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-  .bf-preview-card:nth-child(2) { animation-delay: 60ms; }
-  .bf-preview-card:nth-child(3) { animation-delay: 120ms; }
-  .bf-preview-card:nth-child(4) { animation-delay: 180ms; }
-  .bf-preview-card:nth-child(5) { animation-delay: 240ms; }
-
-  @keyframes bf-preview-in {
-    to { opacity: 1; transform: none; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bf-preview-card { animation: none; opacity: 1; transform: none; }
-  }
-
-  .bf-preview-thumb {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--color-cream);
-    border: 1px solid var(--color-smoke);
-  }
-  .bf-preview-thumb picture,
-  .bf-preview-thumb img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform-origin: center center;
-    filter: saturate(0.95) contrast(1.02);
-  }
-  /* Match the Tesla zoom treatment used by the Fleet card so the watermark
-     stays cropped out at thumbnail size too. */
-  .bf-preview-card[data-vehicle="car"] .bf-preview-thumb img {
-    transform: scale(1.2);
-  }
-  .bf-preview-thumb-pax {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    min-width: 22px;
-    height: 18px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: color-mix(in oklab, var(--color-ink) 78%, transparent);
-    color: var(--color-paper);
-    font-family: var(--font-sans);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 18px;
-    text-align: center;
-    backdrop-filter: blur(4px);
-  }
-  .bf-preview-name {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--color-ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-</style>
