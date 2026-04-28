@@ -15,10 +15,9 @@ const { locale, vehicle, bg = 'paper', imageSide = 'left' } = Astro.props;
 const v = t(locale).pages.fleet[vehicle];
 const silhouetteName = vehicle === 'van' ? 'bus-silhouette' : 'car-silhouette';
 
-// "À partir de €X" — derived from the real price matrix (tier_1_3 for car,
-// tier_4_6 for van). The existing i18n `priceNote` is discarded in favor of
-// this single source of truth; "trajet fixe" suffix from the locale file is
-// preserved as a subtitle.
+// "À partir de €X" — derived from the real price matrix (1–3 pax baseline
+// for car, 4 pax baseline for van). Single source of truth; "trajet fixe"
+// suffix is appended in the locale's own phrasing.
 const fromPrefix = t(locale).destinations.fromPrefix;
 const unavailable = t(locale).hero.price.unavailable;
 const minPrice = vehicle === 'car' ? minCarStarting() : minVanStarting();

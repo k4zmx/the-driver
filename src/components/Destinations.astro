@@ -11,7 +11,7 @@ interface Props {
 const { locale } = Astro.props;
 const s = t(locale).destinations;
 
-// "À partir de €X" for a destination = cheapest starting price (tier_1_3)
+// "À partir de €X" for a destination = cheapest 1–3 pax starting price
 // across any of the supplied pickup legs.
 function minStartingAcross(legs: [string, string][]) {
   let min: number | null = null;

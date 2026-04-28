@@ -8,36 +8,48 @@ interface Props {
 
 const { locale } = Astro.props;
 const s = t(locale).pages.rates.grid;
-const tierLabels = t(locale).pricing.tier;
+const paxLabels = t(locale).pricing.pax;
 
-type Cell = { tier_1_3?: number; tier_4_6?: number; tier_7_8?: number } | null;
-type TierRow = { t13: string; t46: string; t78: string };
+// Per-pax columns shown across the matrix. The 1–3 column is the "starting"
+// price (Tesla Model Y). 4–8 are single-van prices. 12/16/20/24 are explicit
+// multi-vehicle group rates from the client's table.
+const PAX_COLS = [
+  { key: 'p1to3', label: paxLabels['1_3'], short: '1–3', tone: 'car'   as const },
+  { key: 'p4',    label: paxLabels['4'],   short: '4',   tone: 'van'   as const },
+  { key: 'p5',    label: paxLabels['5'],   short: '5',   tone: 'van'   as const },
+  { key: 'p6',    label: paxLabels['6'],   short: '6',   tone: 'van'   as const },
+  { key: 'p7',    label: paxLabels['7'],   short: '7',   tone: 'van'   as const },
+  { key: 'p8',    label: paxLabels['8'],   short: '8',   tone: 'van'   as const },
+  { key: 'p12',   label: paxLabels['12'],  short: '12',  tone: 'combo' as const },
+  { key: 'p16',   label: paxLabels['16'],  short: '16',  tone: 'combo' as const },
+  { key: 'p20',   label: paxLabels['20'],  short: '20',  tone: 'combo' as const },
+  { key: 'p24',   label: paxLabels['24'],  short: '24',  tone: 'combo' as const },
+];
+
+type Cell = Record<string, number> | null;
+type DesktopRow = { from: string; to: string; cell: Record<string, number> };
 
 function cellAt(from: string, to: string): Cell {
   if (from === to) return null;
-  return (PRICES as any)[from]?.[to] ?? null;
+  return ((PRICES as any)[from]?.[to] ?? null) as Cell;
 }
 
-function fmt(cell: Cell): TierRow | null {
-  if (!cell) return null;
-  const any =
-    typeof cell.tier_1_3 === 'number' ||
-    typeof cell.tier_4_6 === 'number' ||
-    typeof cell.tier_7_8 === 'number';
-  if (!any) return null;
-  return {
-    t13: typeof cell.tier_1_3 === 'number' ? `${cell.tier_1_3}€` : '—',
-    t46: typeof cell.tier_4_6 === 'number' ? `${cell.tier_4_6}€` : '—',
-    t78: typeof cell.tier_7_8 === 'number' ? `${cell.tier_7_8}€` : '—',
-  };
+// Flatten the matrix to desktop rows ahead of time so the JSX block stays
+// declarative. Routes with no priced cell are skipped.
+const desktopRows: DesktopRow[] = [];
+for (const from of PICKUP_POINTS) {
+  for (const to of DROP_POINTS) {
+    if (to === from) continue;
+    const cell = cellAt(from, to);
+    if (cell) desktopRows.push({ from, to, cell });
+  }
 }
 
 const WA = `https://wa.me/33628658127`;
-const fromToHeader = `${s.fromLabel} →`;
 ---
 
 <section class="pg section-y has-grain" aria-labelledby="pg-heading">
-  <div class="page-x mx-auto max-w-[1100px]">
+  <div class="page-x mx-auto max-w-[1200px]">
     <header class="pg-head" data-reveal>
       <p class="meta-label mb-3">{s.eyebrow}</p>
       <h2 id="pg-heading" class="h2 text-balance">{s.heading}</h2>
@@ -45,19 +57,19 @@ const fromToHeader = `${s.fromLabel} →`;
     </header>
 
     <p class="pg-legend" data-reveal>
-      <span class="pg-legend-chip"><span class="pg-legend-dot is-t13"></span> {tierLabels['1_3']}</span>
-      <span class="pg-legend-chip"><span class="pg-legend-dot is-t46"></span> {tierLabels['4_6']}</span>
-      <span class="pg-legend-chip"><span class="pg-legend-dot is-t78"></span> {tierLabels['7_8']}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-car"></span> {s.legendCar}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-van"></span> {s.legendVan}</span>
+      <span class="pg-legend-chip"><span class="pg-legend-dot is-combo"></span> {s.legendCombo}</span>
     </p>
 
-    {/* Mobile: accordion per pickup */}
+    {/* Mobile: per-pickup accordion → per-destination block → 10 pax rows */}
     <ul class="pg-mobile md:hidden mt-6 border-t border-[color:var(--color-smoke)]">
       {PICKUP_POINTS.map((from) => {
-        const rows = DROP_POINTS
+        const legs = DROP_POINTS
           .filter((to) => to !== from)
           .map((to) => ({ to, cell: cellAt(from, to) }))
-          .filter((r) => r.cell);
-        if (rows.length === 0) return null;
+          .filter((leg) => leg.cell);
+        if (legs.length === 0) return null;
         return (
           <li class="pg-mobile-row">
             <details class="pg-mobile-item">
@@ -71,24 +83,26 @@ const fromToHeader = `${s.fromLabel} →`;
                   <span class="whyus-bar whyus-bar-v"></span>
                 </span>
               </summary>
-              <ul class="pg-mobile-list">
-                {rows.map((r) => {
-                  const p = fmt(r.cell);
-                  return (
-                    <li class="pg-mobile-leg">
-                      <span class="pg-mobile-leg-to">{r.to}</span>
-                      {p ? (
-                        <ul class="pg-mobile-tiers">
-                          <li><span class="pg-mobile-tier-label">{tierLabels['1_3']}</span><span class="pg-mobile-tier-price pg-price-t13">{p.t13}</span></li>
-                          <li><span class="pg-mobile-tier-label">{tierLabels['4_6']}</span><span class="pg-mobile-tier-price pg-price-t46">{p.t46}</span></li>
-                          <li><span class="pg-mobile-tier-label">{tierLabels['7_8']}</span><span class="pg-mobile-tier-price pg-price-t78">{p.t78}</span></li>
-                        </ul>
-                      ) : (
-                        <span class="pg-mobile-leg-price pg-td-miss">{s.unpriced}</span>
-                      )}
-                    </li>
-                  );
-                })}
+
+              <ul class="pg-mobile-legs">
+                {legs.map((leg) => (
+                  <li class="pg-mobile-leg">
+                    <p class="pg-mobile-leg-to">{leg.to}</p>
+                    <ul class="pg-mobile-pax">
+                      {PAX_COLS.map((col) => {
+                        const v = leg.cell?.[col.key];
+                        return (
+                          <li class:list={['pg-mobile-pax-row', `pg-tone-${col.tone}`]}>
+                            <span class="pg-mobile-pax-label">{col.label}</span>
+                            <span class="pg-mobile-pax-price">
+                              {typeof v === 'number' ? `€${v}` : '—'}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
               </ul>
             </details>
           </li>
@@ -96,49 +110,44 @@ const fromToHeader = `${s.fromLabel} →`;
       })}
     </ul>
 
-    {/* Desktop: matrix table */}
+    {/* Desktop: horizontal-scroll matrix — route in column 1, 10 pax cols. */}
     <div class="pg-desktop hidden md:block mt-8" data-reveal data-reveal-delay="1">
       <div class="pg-table-wrap">
         <table class="price-matrix pg-table" data-price-matrix>
           <thead>
             <tr>
-              <th scope="col" class="pg-th pg-th-corner" data-col="_">
-                {fromToHeader}
-              </th>
-              {DROP_POINTS.map((d, idx) => (
-                <th scope="col" class="pg-th" data-col={String(idx)}>
-                  {d}
+              <th scope="col" class="pg-th pg-th-corner" data-col="_">{s.routeHeader}</th>
+              {PAX_COLS.map((col, idx) => (
+                <th
+                  scope="col"
+                  class:list={['pg-th', `pg-tone-${col.tone}`]}
+                  data-col={String(idx)}
+                >
+                  <span class="pg-th-num">{col.short}</span>
+                  <span class="pg-th-unit">{s.paxUnit}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {PICKUP_POINTS.map((from, i) => (
+            {desktopRows.map((row, i) => (
               <tr
                 class:list={['matrix-row', i % 2 === 0 ? 'pg-row-paper' : 'pg-row-cream']}
                 style={`--i: ${i}`}
               >
-                <th scope="row" class="pg-row-head">{from}</th>
-                {DROP_POINTS.map((to, idx) => {
-                  const cell = cellAt(from, to);
-                  const p = fmt(cell);
-                  const empty = from === to;
+                <th scope="row" class="pg-row-head">
+                  <span class="pg-row-from">{row.from}</span>
+                  <span class="pg-row-arrow" aria-hidden="true">→</span>
+                  <span class="pg-row-to">{row.to}</span>
+                </th>
+                {PAX_COLS.map((col, idx) => {
+                  const v = row.cell[col.key];
                   return (
                     <td
-                      class="pg-td"
-                      title={!p && !empty ? s.unpriced : undefined}
+                      class:list={['pg-td', `pg-tone-${col.tone}`]}
                       data-col={String(idx)}
                     >
-                      {empty ? <span class="pg-td-empty">·</span>
-                        : p ? (
-                          <span class="pg-price">
-                            <span class="pg-price-t13">{p.t13}</span>
-                            <span class="pg-price-sep" aria-hidden="true">·</span>
-                            <span class="pg-price-t46">{p.t46}</span>
-                            <span class="pg-price-sep" aria-hidden="true">·</span>
-                            <span class="pg-price-t78">{p.t78}</span>
-                          </span>
-                        ) : <span class="pg-td-miss">—</span>}
+                      {typeof v === 'number' ? `€${v}` : <span class="pg-td-miss">—</span>}
                     </td>
                   );
                 })}
@@ -157,12 +166,10 @@ const fromToHeader = `${s.fromLabel} →`;
 </section>
 
 <style>
-  .pg {
-    background: var(--color-cream);
-  }
+  .pg { background: var(--color-cream); }
   .pg-head { max-width: 640px; }
 
-  /* Legend — two chips explaining the X€ / Y€ columns (car / van) */
+  /* Legend — three groupings: 1–3 (car), 4–8 (van), 12+ (combo). */
   .pg-legend {
     margin-top: 22px;
     display: inline-flex;
@@ -189,21 +196,25 @@ const fromToHeader = `${s.fromLabel} →`;
     height: 8px;
     border-radius: 999px;
   }
-  .pg-legend-dot.is-t13 { background: var(--color-accent); }
-  .pg-legend-dot.is-t46 { background: var(--color-ink); }
-  .pg-legend-dot.is-t78 { background: color-mix(in oklab, var(--color-ink) 70%, var(--color-graphite)); }
+  .pg-legend-dot.is-car   { background: var(--color-accent); }
+  .pg-legend-dot.is-van   { background: var(--color-ink); }
+  .pg-legend-dot.is-combo { background: color-mix(in oklab, var(--color-ink) 70%, var(--color-graphite)); }
+
+  /* Tone applied per pax-count column / row — same as the legend. */
+  .pg-tone-car   { color: var(--color-accent); }
+  .pg-tone-van   { color: var(--color-ink); }
+  .pg-tone-combo { color: color-mix(in oklab, var(--color-ink) 78%, var(--color-graphite)); }
 
   /* ---------------------------------------------------------------
-     Mobile accordion — matches home FAQ / WhyUs visual language.
+     Mobile accordion — pickup-level summary + nested per-destination
+     blocks; each destination block lists the 10 pax-count rows.
      --------------------------------------------------------------- */
   .pg-mobile {
     list-style: none;
     padding: 0;
     margin: 24px 0 0;
   }
-  .pg-mobile-row {
-    border-bottom: 1px solid var(--color-smoke);
-  }
+  .pg-mobile-row { border-bottom: 1px solid var(--color-smoke); }
   .pg-mobile-item summary::-webkit-details-marker { display: none; }
   .pg-mobile-item summary::marker { content: ''; }
   .pg-mobile-summary {
@@ -215,12 +226,7 @@ const fromToHeader = `${s.fromLabel} →`;
     padding: 18px 4px;
     min-height: 56px;
   }
-  .pg-mobile-label {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+  .pg-mobile-label { flex: 1; display: flex; flex-direction: column; gap: 2px; }
   .pg-mobile-eyebrow {
     font-size: 11px;
     letter-spacing: 0.1em;
@@ -258,28 +264,57 @@ const fromToHeader = `${s.fromLabel} →`;
     transform: translate(-50%, -50%) scaleY(0);
   }
 
-  .pg-mobile-list {
+  .pg-mobile-legs {
     list-style: none;
     padding: 0 4px 16px;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 14px;
   }
   .pg-mobile-leg {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 0;
     border-top: 1px solid color-mix(in oklab, var(--color-smoke) 60%, transparent);
-    font-size: 14px;
+    padding-top: 14px;
   }
-  .pg-mobile-leg-to { color: var(--color-graphite); }
-  /* .pg-mobile-leg-price styles consolidated below (see split-colour block) */
+  .pg-mobile-leg-to {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--color-ink);
+  }
+  .pg-mobile-pax {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+  }
+  .pg-mobile-pax-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--color-cream) 40%, var(--color-paper));
+    font-size: 13px;
+  }
+  .pg-mobile-pax-label {
+    color: var(--color-graphite);
+    font-size: 12px;
+  }
+  .pg-mobile-pax-price {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    /* tone class on the row supplies color */
+    color: inherit;
+  }
 
   /* ---------------------------------------------------------------
-     Desktop matrix — polished, premium, readable.
+     Desktop matrix — sticky route column + sticky header, h-scroll.
      --------------------------------------------------------------- */
   .pg-table-wrap {
     position: relative;
@@ -287,6 +322,7 @@ const fromToHeader = `${s.fromLabel} →`;
     border-radius: var(--radius-card);
     overflow: auto;
     background: var(--color-paper);
+    max-height: 70vh;
   }
   .pg-table {
     width: 100%;
@@ -298,131 +334,99 @@ const fromToHeader = `${s.fromLabel} →`;
     position: sticky;
     top: 0;
     z-index: 2;
-    padding: 14px 18px;
+    padding: 12px 14px;
     background: var(--color-paper);
     border-bottom: 1px solid var(--color-smoke);
     font-size: 11px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     font-weight: 500;
     color: var(--color-graphite);
     white-space: nowrap;
+    text-align: right;
+    min-width: 64px;
+  }
+  .pg-th-num {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+    text-transform: none;
+    /* color comes from .pg-tone-* */
+    color: inherit;
+    margin-bottom: 2px;
+  }
+  .pg-th-unit {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: color-mix(in oklab, var(--color-graphite) 80%, transparent);
   }
   .pg-th-corner {
     z-index: 3;
     left: 0;
+    text-align: left;
     border-right: 1px solid var(--color-smoke);
     color: var(--color-graphite);
+    min-width: 220px;
   }
   .pg-row-head {
     position: sticky;
     left: 0;
     z-index: 1;
-    padding: 14px 18px;
+    padding: 12px 16px;
     background-color: inherit;
     border-right: 1px solid var(--color-smoke);
     border-bottom: 1px solid color-mix(in oklab, var(--color-smoke) 70%, transparent);
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--color-ink);
     white-space: nowrap;
+    text-align: left;
   }
+  .pg-row-from { color: var(--color-ink); }
+  .pg-row-arrow { color: var(--color-graphite); margin: 0 6px; }
+  .pg-row-to { color: var(--color-graphite); font-weight: 400; }
+
   .pg-row-paper { background: var(--color-paper); }
   .pg-row-cream { background: color-mix(in oklab, var(--color-cream) 60%, var(--color-paper)); }
 
   .pg-td {
-    padding: 14px 18px;
+    padding: 12px 14px;
     border-bottom: 1px solid color-mix(in oklab, var(--color-smoke) 70%, transparent);
     font-family: var(--font-display);
     font-weight: 500;
     font-size: 15px;
     font-variant-numeric: tabular-nums;
-    color: var(--color-ink);
+    /* color set by .pg-tone-* on the cell */
     white-space: nowrap;
+    text-align: right;
     transition: background-color 160ms var(--ease-out);
   }
-
-  /* Tier-tinted prices: tier_1_3 (car) in accent; higher tiers stay in ink
-     with a subtle step-down so the eye scans them as "higher, higher still". */
-  .pg-price {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-  .pg-price-t13 { color: var(--color-accent); }
-  .pg-price-t46 { color: var(--color-ink); }
-  .pg-price-t78 { color: color-mix(in oklab, var(--color-ink) 78%, var(--color-graphite)); }
-  .pg-price-sep {
-    color: color-mix(in oklab, var(--color-graphite) 50%, transparent);
-    font-weight: 400;
-  }
-
-  /* Mobile accordion: each route expands to a 3-row mini-table of tiers */
-  .pg-mobile-leg {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .pg-mobile-leg-to {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 16px;
-    color: var(--color-ink);
-  }
-  .pg-mobile-tiers {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .pg-mobile-tiers li {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 6px 10px;
-    border-radius: 6px;
-    background: color-mix(in oklab, var(--color-cream) 40%, var(--color-paper));
-  }
-  .pg-mobile-tier-label {
-    font-size: 13px;
-    color: var(--color-graphite);
-  }
-  .pg-mobile-tier-price {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 16px;
-    font-variant-numeric: tabular-nums;
-  }
-  .pg-mobile-leg-price.pg-td-miss {
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--color-graphite);
+  .pg-td.is-col-hover {
+    background: color-mix(in oklab, var(--color-accent) 5%, transparent);
   }
   .matrix-row:last-child .pg-row-head,
   .matrix-row:last-child .pg-td { border-bottom: 0; }
 
-  .pg-td-empty {
-    color: color-mix(in oklab, var(--color-graphite) 40%, transparent);
-  }
   .pg-td-miss {
     font-family: var(--font-sans);
     color: var(--color-graphite);
     font-weight: 400;
+    font-size: 14px;
   }
 
-  /* Row cascade on reveal — top-to-bottom 40ms stagger */
+  /* Reveal cascade — one frame per row */
   .matrix-row {
     opacity: 0;
     transform: translateY(4px);
     transition:
       opacity var(--dur-med) var(--ease-out),
       transform var(--dur-med) var(--ease-out);
-    transition-delay: calc(var(--i, 0) * 40ms);
+    transition-delay: calc(var(--i, 0) * 24ms);
   }
   [data-reveal].is-visible .matrix-row {
     opacity: 1;
@@ -438,8 +442,7 @@ const fromToHeader = `${s.fromLabel} →`;
 </style>
 
 <script>
-  // Desktop cross-highlight — hover any cell tints the cells in its column.
-  // Row highlight via tr:has(td:hover) (pure CSS, global.css).
+  // Desktop column cross-highlight on hover.
   function run() {
     const matrix = document.querySelector<HTMLElement>('[data-price-matrix]');
     if (!matrix) return;

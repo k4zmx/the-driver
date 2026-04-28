@@ -163,10 +163,13 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
   //  - on submit: scroll to #booking-form and broadcast selection
   // Without JS: form still GET-submits to #booking-form with pickup/dropoff params.
 
-  // Tier-based pricing. The hero picker always shows the cheapest starting
-  // price (tier_1_3) since it doesn't ask for a passenger count — the real
-  // full quote is computed in BookingForm once pax is entered.
-  type PriceCell = { tier_1_3?: number; tier_4_6?: number; tier_7_8?: number };
+  // Per-pax pricing. The hero picker always shows the 1–3 pax starting price
+  // (`p1to3`) — it doesn't ask for a passenger count. The real full quote is
+  // computed in BookingForm once pax is entered.
+  type PriceCell = {
+    p1to3?: number; p4?: number; p5?: number; p6?: number; p7?: number;
+    p8?: number; p12?: number; p16?: number; p20?: number; p24?: number;
+  };
   type PriceMatrix = Record<string, Record<string, PriceCell>>;
   type Labels = { from: string; empty: string; unavailable: string };
 
@@ -248,12 +251,12 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
       }
 
       const cell = prices[from]?.[to];
-      // "From €X" = cheapest tier. Tiers are walked in order so we surface
-      // tier_1_3 if priced, then tier_4_6, then tier_7_8 as a last resort.
+      // "From €X" = the 1–3 pax price. If that's missing (shouldn't happen
+      // in normal data), fall back through 4-pax, 5-pax, etc.
       const startingPrice =
-        typeof cell?.tier_1_3 === 'number' ? cell.tier_1_3
-        : typeof cell?.tier_4_6 === 'number' ? cell.tier_4_6
-        : typeof cell?.tier_7_8 === 'number' ? cell.tier_7_8
+        typeof cell?.p1to3 === 'number' ? cell.p1to3
+        : typeof cell?.p4 === 'number' ? cell.p4
+        : typeof cell?.p5 === 'number' ? cell.p5
         : null;
 
       if (startingPrice === null) {

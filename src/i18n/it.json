@@ -1,11 +1,17 @@
 {
   "pricing": {
-    "tier": {
-      "1_3": "1–3 passeggeri",
-      "4_6": "4–6 passeggeri",
-      "7_8": "7–8 passeggeri"
-    },
-    "combo": "{n} veicoli"
+    "pax": {
+      "1_3": "1–3 persone",
+      "4": "4 persone",
+      "5": "5 persone",
+      "6": "6 persone",
+      "7": "7 persone",
+      "8": "8 persone",
+      "12": "12 persone",
+      "16": "16 persone",
+      "20": "20 persone",
+      "24": "24 persone"
+    }
   },
   "locale": "it",
   "localeName": "Italiano",
@@ -72,7 +78,7 @@
       "roundTrip": "Andata e ritorno",
       "returnDate": "Data ritorno",
       "returnTime": "Ora ritorno",
-      "returnNote": "Risparmia il 10% prenotando andata e ritorno."
+      "returnNote": "Risparmia il 5% prenotando andata e ritorno."
     },
     "when": {
       "date": "Data",
@@ -438,10 +444,15 @@
       "grid": {
         "eyebrow": "TABELLA COMPLETA",
         "heading": "Tutti i percorsi, tutti i prezzi.",
-        "sub": "Prezzo per veicolo per una sola andata. Andata e ritorno: sconto del 10 % se pagato in anticipo.",
-        "fromLabel":"Da",
+        "sub": "Prezzo per tratta in base al numero di passeggeri. Andata e ritorno: sconto del 5 % se pagato in anticipo.",
+        "fromLabel": "Da",
+        "routeHeader": "Tratta",
+        "paxUnit": "persone",
+        "legendCar": "1–3 — Berlina",
+        "legendVan": "4–8 — Furgone",
+        "legendCombo": "12+ — Combinazione",
         "unpriced": "Su preventivo",
-        "footnotePrefix": "Prezzi in euro, per veicolo. Solo andata. Andata e ritorno: −10 % se pagato in anticipo. Tratte non elencate o lunga distanza:",
+        "footnotePrefix": "Prezzi in euro, per tratta, in base al numero di passeggeri. Solo andata. Andata e ritorno: −5 % se pagato in anticipo. Tratte non elencate o lunga distanza:",
         "footnoteCta": "contattaci",
         "footnoteSuffix": " per un preventivo."
       },

@@ -3,12 +3,18 @@
   "localeName": "Français",
   "flag": "🇫🇷",
   "pricing": {
-    "tier": {
-      "1_3": "1–3 passagers",
-      "4_6": "4–6 passagers",
-      "7_8": "7–8 passagers"
-    },
-    "combo": "{n} véhicules"
+    "pax": {
+      "1_3": "1–3 personnes",
+      "4": "4 personnes",
+      "5": "5 personnes",
+      "6": "6 personnes",
+      "7": "7 personnes",
+      "8": "8 personnes",
+      "12": "12 personnes",
+      "16": "16 personnes",
+      "20": "20 personnes",
+      "24": "24 personnes"
+    }
   },
   "nav": {
     "home": "Accueil",
@@ -72,7 +78,7 @@
       "roundTrip": "Aller-retour",
       "returnDate": "Date retour",
       "returnTime": "Heure retour",
-      "returnNote": "Économisez 10 % en réservant l'aller-retour."
+      "returnNote": "Économisez 5 % en réservant l'aller-retour."
     },
     "when": {
       "date": "Date",
@@ -438,10 +444,15 @@
       "grid": {
         "eyebrow": "GRILLE COMPLÈTE",
         "heading": "Tous nos trajets, tous nos prix.",
-        "sub": "Prix par véhicule pour un aller simple. Aller-retour : remise de 10 % si paiement à l'avance.",
+        "sub": "Prix par trajet, selon le nombre de passagers. Aller-retour : remise de 5 % si paiement à l'avance.",
         "fromLabel": "Depuis",
+        "routeHeader": "Trajet",
+        "paxUnit": "personnes",
+        "legendCar": "1–3 — Berline",
+        "legendVan": "4–8 — Van",
+        "legendCombo": "12+ — Combinaison",
         "unpriced": "Sur devis",
-        "footnotePrefix": "Prix en euros, par véhicule. Aller simple. Aller-retour : −10 % si payé à l'avance. Trajets non listés ou longue distance :",
+        "footnotePrefix": "Prix en euros, par trajet, selon le nombre de passagers. Aller simple. Aller-retour : −5 % si payé à l'avance. Trajets non listés ou longue distance :",
         "footnoteCta": "nous contacter",
         "footnoteSuffix": " pour un devis."
       },
