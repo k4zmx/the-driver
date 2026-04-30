@@ -1,0 +1,209 @@
+---
+/**
+ * Welcome wave intro overlay — plays once per session.
+ *
+ * Sequence (1.6s total):
+ *   0    →  600ms  Wave sweeps in from the right (curved leading edge)
+ *   600  → 1100ms  Hold: road line draws + BIENVENUE fades in
+ *   1100 → 1600ms  Wave exits to the right; road + text fade
+ *
+ * Skipped when:
+ *   - sessionStorage flag exists (set by an inline head script in BaseLayout
+ *     so the decision is made BEFORE first paint, no flash)
+ *   - prefers-reduced-motion is reduce
+ *   - mobile in landscape orientation
+ *
+ * Implementation:
+ *   - Pure CSS keyframes drive the entire animation (transform + opacity +
+ *     stroke-dashoffset only — all GPU-friendly).
+ *   - One small inline script handles DOM cleanup after the animation ends.
+ *   - No external libraries, no runtime requestAnimationFrame loop.
+ */
+---
+
+<div class="intro-overlay" data-intro aria-hidden="true">
+  {/* Wave SVG — slightly wider than viewport (110vw) so the curved left
+      edge can leave the screen entirely on exit. preserveAspectRatio="none"
+      lets the path stretch to fit any viewport ratio. */}
+  <svg class="intro-wave" viewBox="0 0 110 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="intro-wave-grad" x1="0" y1="0.5" x2="1" y2="0.5">
+        <stop offset="0%" stop-color="#C94F3A" />
+        <stop offset="100%" stop-color="#A33D2B" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M 6 0 C 0 25 9 50 3 75 C -1 92 6 100 6 100 L 110 100 L 110 0 Z"
+      fill="url(#intro-wave-grad)"
+    />
+  </svg>
+
+  {/* Road line — drawn during the hold phase. pathLength=100 normalizes
+      the dash math regardless of actual path geometry. */}
+  <svg class="intro-road" viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
+    <path
+      class="intro-road-path"
+      d="M 30 110 Q 180 60 350 100 T 570 60"
+      fill="none"
+      stroke="#F8F5EE"
+      stroke-width="2"
+      stroke-linecap="round"
+      pathLength="100"
+      stroke-dasharray="100"
+      stroke-dashoffset="100"
+    />
+    <circle class="intro-road-dot" cx="570" cy="60" r="4" fill="#F8F5EE" />
+  </svg>
+
+  <p class="intro-text">BIENVENUE</p>
+</div>
+
+<style>
+  .intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+    contain: strict;
+  }
+  /* Skip path — the inline head script sets data-intro-skip on <html>
+     for: session-already-shown, reduced-motion, or landscape mobile.
+     CSS hides the overlay before first paint; the bottom-of-component
+     script also drops it from the DOM. */
+  :root[data-intro-skip] .intro-overlay {
+    display: none !important;
+  }
+
+  /* Wave — sweeps in from right, holds, sweeps out to right.
+     Per-keyframe animation-timing-function gives different easings to
+     each phase from a single keyframe block. */
+  .intro-wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 110vw;
+    height: 100vh;
+    transform: translate3d(110vw, 0, 0);
+    will-change: transform;
+    backface-visibility: hidden;
+    animation: intro-wave 1600ms forwards;
+  }
+  @keyframes intro-wave {
+    0% {
+      transform: translate3d(110vw, 0, 0);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    37.5% {
+      /* 600ms — wave covers the screen; hold phase begins */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: linear;
+    }
+    68.75% {
+      /* 1100ms — hold ends; exit begins */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+    }
+    100% {
+      transform: translate3d(110vw, 0, 0);
+    }
+  }
+
+  /* Road line — draws across the wave during the 500ms hold. The dot
+     pops in just as the line completes, like the route's destination
+     marker. */
+  .intro-road {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: min(70vw, 540px);
+    height: auto;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    will-change: opacity;
+    animation: intro-road-fade 1600ms forwards;
+  }
+  @media (min-width: 768px) {
+    .intro-road { width: min(60vw, 600px); }
+  }
+  .intro-road-path {
+    will-change: stroke-dashoffset;
+    animation: intro-road-draw 500ms 600ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .intro-road-dot {
+    opacity: 0;
+    transform-origin: 570px 60px;
+    will-change: transform, opacity;
+    animation: intro-road-dot 240ms 1060ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes intro-road-draw {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes intro-road-fade {
+    /* 0-37.5% (0-600ms): hidden behind off-screen wave */
+    0%, 37.5% { opacity: 0; }
+    44%       { opacity: 1; }
+    /* 1100ms = 68.75% — wave begins exit, road begins fade */
+    68.75%    { opacity: 1; }
+    81.25%    { opacity: 0; } /* 1300ms — fully faded (300ms fade) */
+    100%      { opacity: 0; }
+  }
+  @keyframes intro-road-dot {
+    0%   { opacity: 0; transform: scale(0.6); }
+    100% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* BIENVENUE — Fraunces, large, cream. Slight rise on entry. */
+  .intro-text {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    transform: translate3d(-50%, 8px, 0);
+    margin: 0;
+    font-family: var(--font-display, "Fraunces"), Georgia, serif;
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #F8F5EE;
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: intro-text 800ms 800ms forwards;
+  }
+  @media (min-width: 768px) {
+    .intro-text { font-size: 48px; top: 56%; }
+  }
+  @keyframes intro-text {
+    0%   { opacity: 0; transform: translate3d(-50%, 8px, 0); }
+    37.5% { opacity: 1; transform: translate3d(-50%, 0, 0); }
+    /* 37.5% of 800ms = 300ms in (i.e. t=1100ms total) — settled, then fade */
+    100% { opacity: 0; transform: translate3d(-50%, 0, 0); }
+  }
+
+  /* Reduced motion + landscape mobile — fully skip */
+  @media (prefers-reduced-motion: reduce) {
+    .intro-overlay { display: none !important; }
+  }
+  @media (max-width: 767px) and (orientation: landscape) {
+    .intro-overlay { display: none !important; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var overlay = document.querySelector('[data-intro]');
+    if (!overlay) return;
+
+    // Skip path — the inline head script already handled the decision.
+    // Drop the overlay from the DOM so it doesn't sit in the layer tree.
+    if (document.documentElement.getAttribute('data-intro-skip') === 'true') {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      return;
+    }
+
+    // Cleanup after the wave's exit completes. 100ms buffer past the
+    // 1600ms total so the final keyframe has settled.
+    setTimeout(function () {
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 1700);
+  })();
+</script>

@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import IntroOverlay from '../components/IntroOverlay.astro';
 import { ClientRouter } from 'astro:transitions';
 import { DEFAULT_LOCALE, LOCALES, pathForRoute, ROUTE_KEYS } from '../i18n';
 
@@ -69,6 +70,30 @@ const extraSchemas = Array.isArray(structuredData)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+
+    {/* Intro overlay session check — runs SYNCHRONOUSLY before first paint
+        so we can hide the overlay (via `data-intro-skip` on <html>) without
+        a flash on returning visitors / reduced-motion / landscape mobile.
+        Fail-safe: any error skips the animation entirely. */}
+    <script is:inline>
+      (function () {
+        var skip = false;
+        try {
+          var shown = sessionStorage.getItem('driver-services-intro-shown') === '1';
+          var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var landscape = window.matchMedia('(max-width: 767px) and (orientation: landscape)').matches;
+          skip = shown || reduced || landscape;
+        } catch (e) {
+          skip = true;
+        }
+        if (skip) {
+          document.documentElement.setAttribute('data-intro-skip', 'true');
+        } else {
+          try { sessionStorage.setItem('driver-services-intro-shown', '1'); } catch (e) {}
+        }
+      })();
+    </script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#F8F5EE" />
@@ -128,6 +153,12 @@ const extraSchemas = Array.isArray(structuredData)
     <ClientRouter fallback="none" />
   </head>
   <body>
+    {/* Welcome wave — plays once per session on first visit. Self-removes
+        from the DOM after the exit animation, so it's gone by the time
+        the user interacts. Skipped via head-script for returning visitors,
+        reduced-motion, and landscape mobile. */}
+    <IntroOverlay />
+
     {/* Top-of-viewport scroll progress bar. Subtle accent gradient that
         signals editorial flow as the reader scrolls. Decorative. */}
     <div class="scroll-progress" aria-hidden="true">
