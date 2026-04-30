@@ -291,6 +291,35 @@ const availableLabel =
     object-position: 72% center;
     filter: saturate(0.7) brightness(0.92) contrast(1.02);
     opacity: 0.85;
+    will-change: transform;
+  }
+  /* Scroll-driven parallax — modern Chromium/Safari ship this in 2024+.
+     The Eiffel image scales up + drifts up as the user scrolls past the
+     hero. Pure GPU, zero JS. Browsers without scroll-timeline support
+     simply get the static image (graceful fallback). */
+  @supports (animation-timeline: scroll()) {
+    .hero-eiffel img {
+      animation: hero-eiffel-parallax linear forwards;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+    @keyframes hero-eiffel-parallax {
+      from { transform: scale(1) translate3d(0, 0, 0); }
+      to   { transform: scale(1.18) translate3d(-24px, -48px, 0); }
+    }
+    .hero-aura {
+      animation: hero-aura-pulse linear forwards;
+      animation-timeline: scroll(root);
+      animation-range: 0 80vh;
+    }
+    @keyframes hero-aura-pulse {
+      from { opacity: 0.9; transform: translate3d(0, 0, 0) scale(1); }
+      to   { opacity: 0.5; transform: translate3d(40px, 30px, 0) scale(1.1); }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-eiffel img,
+    .hero-aura { animation: none !important; }
   }
   .hero-eiffel-overlay {
     position: absolute;

@@ -654,6 +654,81 @@
   }
 
   /* ---------------------------------------------------------------
+     Section H2 dramatic word reveal — split-headings.js wraps each
+     word in <span class="rw-word"> with a per-word --ri index. When
+     the heading's `[data-reveal]` ancestor (or itself) gets
+     `is-visible`, words rise + un-rotate into place with a stagger.
+     Heavier mass than the hero H1 (slight rotate + larger rise) for
+     architectural feel.
+     --------------------------------------------------------------- */
+  .h2 .rw-word {
+    display: inline-block;
+    transform: translateY(60%) rotate(2deg);
+    opacity: 0;
+    transition:
+      transform 760ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 540ms var(--ease-out);
+    transition-delay: calc(var(--ri, 0) * 65ms + 80ms);
+    will-change: transform, opacity;
+    transform-origin: 0 100%;
+  }
+  /* Trigger from the H2 itself, OR from any reveal-marked ancestor */
+  .h2[data-reveal].is-visible .rw-word,
+  [data-reveal].is-visible .h2 .rw-word {
+    transform: none;
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .h2 .rw-word {
+      transform: none;
+      opacity: 1;
+      transition: none;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Mesh gradient ambient orbs — soft blurred radial blobs that
+     sit absolutely behind a section's content and slow-drift via
+     CSS keyframes. Pure decorative depth; no JS, no perf cost
+     beyond paint (which the browser caches as a layer).
+     --------------------------------------------------------------- */
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .mesh-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: 0.45;
+    will-change: transform, opacity;
+  }
+  .mesh-orb.is-accent  { background: var(--color-accent-glow); }
+  .mesh-orb.is-cream   { background: color-mix(in oklab, var(--color-cream) 80%, white); }
+  .mesh-orb.is-graphite { background: color-mix(in oklab, var(--color-graphite) 35%, transparent); }
+
+  .mesh-orb.drift-a {
+    animation: mesh-drift-a 28s ease-in-out infinite alternate;
+  }
+  .mesh-orb.drift-b {
+    animation: mesh-drift-b 34s ease-in-out infinite alternate;
+  }
+  @keyframes mesh-drift-a {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(80px, 60px, 0) scale(1.15); }
+  }
+  @keyframes mesh-drift-b {
+    0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.4; }
+    100% { transform: translate3d(-60px, 80px, 0) scale(1.08); opacity: 0.55; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mesh-orb { animation: none !important; }
+  }
+
+  /* ---------------------------------------------------------------
      Magnetic primary CTAs — desktop hover only. JS sets --mx / --my
      in CSS pixels; the button translates a fraction of the cursor
      offset for a subtle "pull" effect. Touch devices get nothing.

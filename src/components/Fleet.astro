@@ -45,7 +45,13 @@ const vehicles = [
 ---
 
 <section id="fleet" class="fleet section-y" aria-labelledby="fleet-heading">
-  <div class="page-x mx-auto max-w-[1200px]">
+  {/* Ambient mesh — slow-drifting blurred orbs behind the cards. Adds
+      depth and motion without competing with the foreground. */}
+  <div class="mesh-bg" aria-hidden="true">
+    <span class="mesh-orb is-accent drift-a" style="top:-15%; left:-10%; width:540px; height:540px; opacity: 0.35;"></span>
+    <span class="mesh-orb is-graphite drift-b" style="bottom:-10%; right:-8%; width:480px; height:480px; opacity: 0.18;"></span>
+  </div>
+  <div class="fleet-content page-x mx-auto max-w-[1200px]">
     <header class="max-w-[640px]" data-reveal>
       <p class="meta-label mb-3">{s.eyebrow}</p>
       <h2 id="fleet-heading" class="h2 text-balance">{s.heading}</h2>
@@ -170,6 +176,12 @@ const vehicles = [
   .fleet {
     background: var(--color-cream);
     position: relative;
+    overflow: hidden;
+  }
+  /* Stack content above the ambient mesh-bg orbs */
+  .fleet-content {
+    position: relative;
+    z-index: 1;
   }
   /* Subtle top/bottom hairlines — chapter markers w/o a full background change */
   .fleet::before,

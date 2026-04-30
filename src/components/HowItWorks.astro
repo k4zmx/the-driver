@@ -10,30 +10,55 @@ const s = t(locale).howItWorks;
 const steps: { title: string; body: string }[] = s.steps;
 ---
 
-<section class="hiw section-y has-grain" aria-labelledby="hiw-heading">
-  <div class="page-x mx-auto max-w-[1200px]">
-    <header class="max-w-[620px]" data-reveal>
+<section class="hiw" aria-labelledby="hiw-heading" data-hiw>
+  <div class="page-x mx-auto max-w-[1200px] hiw-header">
+    <header class="max-w-[640px]" data-reveal>
       <p class="meta-label mb-3">{s.eyebrow}</p>
       <h2 id="hiw-heading" class="h2 text-balance">{s.heading}</h2>
     </header>
+  </div>
 
-    <ol class="hiw-steps mt-14 md:mt-20 relative grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8" data-reveal>
-      {steps.map((step, i) => (
-        <li class="hiw-step relative flex gap-5 md:block md:pr-4" style={`--i: ${i}`}>
-          <div class="hiw-badge-wrap">
-            <span class="hiw-badge-halo" aria-hidden="true"></span>
-            <span class="hiw-badge-ring" aria-hidden="true"></span>
-            <div class="hiw-badge">
-              <span class="hiw-badge-num">{i + 1}</span>
-            </div>
-          </div>
-          <div class="hiw-copy">
-            <h3 class="hiw-step-title">{step.title}</h3>
-            <p class="hiw-step-body">{step.body}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
+  {/*
+    Sticky horizontal scroll narrative.
+    Section is ~4× viewport tall on desktop; an inner sticky container pins
+    while a horizontal track translates left as the user scrolls vertically.
+    Mobile falls back to a horizontal scroll-snap carousel — same layout idea,
+    no scroll-jacking on small screens.
+  */}
+  <div class="hiw-scope">
+    <div class="hiw-pin">
+      <div class="hiw-stage">
+        {/* Big background numeral that crossfades step-to-step */}
+        <div class="hiw-numerals" aria-hidden="true">
+          {steps.map((_, i) => (
+            <span class="hiw-numeral" data-step={String(i)}>{String(i + 1).padStart(2, '0')}</span>
+          ))}
+        </div>
+
+        {/* Progress strip beneath the steps — segments fill as user advances */}
+        <div class="hiw-progress" aria-hidden="true">
+          {steps.map((_, i) => (
+            <span class="hiw-progress-seg" data-step={String(i)}></span>
+          ))}
+        </div>
+
+        <ol class="hiw-track" data-hiw-track>
+          {steps.map((step, i) => (
+            <li class="hiw-card" data-step={String(i)}>
+              <div class="hiw-card-inner">
+                <span class="hiw-card-eyebrow">
+                  <span class="hiw-card-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="hiw-card-divider" aria-hidden="true"></span>
+                  <span class="hiw-card-tag">{s.eyebrow}</span>
+                </span>
+                <h3 class="hiw-card-title">{step.title}</h3>
+                <p class="hiw-card-body">{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -43,169 +68,303 @@ const steps: { title: string; body: string }[] = s.steps;
     position: relative;
     overflow: hidden;
   }
+  .hiw-header {
+    padding-top: clamp(60px, 9vw, 110px);
+    padding-bottom: clamp(28px, 4vw, 56px);
+  }
 
   /* ---------------------------------------------------------------
-     Timeline line — draws behind the badges when the <ol> enters view.
-     Mobile: vertical along left edge of badge row. Desktop: horizontal.
+     Mobile (<768px): fall back to a horizontal snap carousel. No
+     pinning, no scroll-jacking — user just swipes through the cards.
      --------------------------------------------------------------- */
-  .hiw-steps::before {
-    content: '';
-    position: absolute;
-    background: var(--color-smoke);
-    transition: transform 1000ms var(--ease-out);
-    z-index: 0;
-  }
-  @media (max-width: 767px) {
-    .hiw-steps::before {
-      top: 28px; bottom: 28px;
-      left: 27px;
-      width: 1px;
-      transform: scaleY(0);
-      transform-origin: center top;
-    }
-    .hiw-steps.is-visible::before { transform: scaleY(1); }
-  }
-  @media (min-width: 768px) {
-    .hiw-steps::before {
-      top: 27px;
-      left: 28px; right: 28px;
-      height: 1px;
-      transform: scaleX(0);
-      transform-origin: left center;
-    }
-    .hiw-steps.is-visible::before { transform: scaleX(1); }
-  }
-
-  /* Step container fades in, staggered after the line starts drawing */
-  .hiw-step {
-    opacity: 0;
-    transition: opacity var(--dur-med) var(--ease-out);
-    transition-delay: calc(400ms + var(--i, 0) * 140ms);
-  }
-  .hiw-steps.is-visible .hiw-step { opacity: 1; }
-
-  /* Badge — bigger, bolder, with a halo glow and a one-shot accent ring */
-  .hiw-badge-wrap {
+  .hiw-scope {
     position: relative;
-    display: inline-flex;
-    width: 56px;
-    height: 56px;
-    flex-shrink: 0;
-    z-index: 1;
   }
-  .hiw-badge {
+  .hiw-pin {
+    /* mobile default — no pinning */
+    height: auto;
+  }
+  .hiw-stage {
     position: relative;
-    z-index: 1;
-    width: 56px;
-    height: 56px;
-    border-radius: 999px;
+    overflow: hidden;
+  }
+  .hiw-track {
+    list-style: none;
+    margin: 0;
+    padding: 0 24px 56px;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .hiw-track::-webkit-scrollbar { display: none; }
+
+  .hiw-card {
+    flex: 0 0 calc(100% - 48px);
+    max-width: 360px;
+    scroll-snap-align: center;
+  }
+  .hiw-card-inner {
+    position: relative;
+    height: 100%;
+    min-height: 280px;
+    padding: 28px 26px 30px;
+    border-radius: var(--radius-card);
     background: var(--color-paper);
-    border: 1.5px solid var(--color-smoke);
-    color: var(--color-ink);
+    border: 1px solid var(--color-smoke);
+    box-shadow: 0 12px 32px -16px rgba(26, 26, 26, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition:
+      transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 360ms var(--ease-out);
+  }
+
+  /* Big background numeral on mobile is hidden — too small to feel intentional */
+  .hiw-numerals { display: none; }
+  /* Progress strip on mobile — segments fill via scroll position */
+  .hiw-progress {
+    display: flex;
+    gap: 6px;
+    padding: 0 24px 24px;
+    justify-content: flex-start;
+  }
+  .hiw-progress-seg {
+    flex: 1;
+    height: 2px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-smoke) 80%, transparent);
+    transition: background-color 280ms var(--ease-out);
+  }
+  .hiw-progress-seg[data-active="true"] {
+    background: var(--color-accent);
+  }
+
+  .hiw-card-eyebrow {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    transform: scale(0.5);
-    box-shadow: 0 4px 14px -6px rgba(26, 26, 26, 0.1);
-    transition:
-      transform 550ms cubic-bezier(0.3, 1.5, 0.4, 1),
-      border-color 300ms var(--ease-out),
-      background-color 300ms var(--ease-out),
-      color 300ms var(--ease-out),
-      box-shadow 300ms var(--ease-out);
-    transition-delay: calc(600ms + var(--i, 0) * 140ms);
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-graphite);
   }
-  .hiw-steps.is-visible .hiw-badge {
-    transform: scale(1);
-    border-color: var(--color-ink);
-    box-shadow: 0 8px 20px -8px rgba(26, 26, 26, 0.18);
+  .hiw-card-num {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-accent);
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
   }
-  /* Step 1 — the active "you are here" marker: accent fill with inner highlight */
-  .hiw-steps.is-visible .hiw-step:first-child .hiw-badge {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-paper);
-    box-shadow:
-      0 12px 28px -8px color-mix(in oklab, var(--color-accent) 55%, transparent),
-      0 0 0 1px color-mix(in oklab, white 15%, transparent) inset;
+  .hiw-card-divider {
+    width: 24px;
+    height: 1px;
+    background: var(--color-smoke);
+    flex-shrink: 0;
   }
-
-  .hiw-badge-num {
+  .hiw-card-title {
+    margin: 4px 0 0;
     font-family: var(--font-display);
     font-weight: 500;
     font-size: 24px;
-    line-height: 1;
+    line-height: 1.18;
     letter-spacing: -0.01em;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Halo — soft accent glow behind each badge, only visible on step 1 */
-  .hiw-badge-halo {
-    position: absolute;
-    inset: -8px;
-    border-radius: 999px;
-    background: var(--color-accent-glow);
-    filter: blur(14px);
-    opacity: 0;
-    transition: opacity 500ms var(--ease-out);
-    transition-delay: calc(800ms + var(--i, 0) * 140ms);
-  }
-  .hiw-steps.is-visible .hiw-step:first-child .hiw-badge-halo {
-    opacity: 0.9;
-  }
-
-  /* Accent ring — one-shot pulse when the badge "plants" */
-  .hiw-badge-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    border: 2px solid var(--color-accent);
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  .hiw-steps.is-visible .hiw-badge-ring {
-    animation: hiw-ring 1100ms var(--ease-out) forwards;
-    animation-delay: calc(720ms + var(--i, 0) * 140ms);
-  }
-  @keyframes hiw-ring {
-    0%   { opacity: 0.7; transform: scale(0.6); }
-    100% { opacity: 0;   transform: scale(1.8); }
-  }
-
-  /* Copy — sits to the right of badge on mobile, below on desktop */
-  .hiw-copy {
-    padding-top: 4px;
-  }
-  @media (min-width: 768px) {
-    .hiw-copy { padding-top: 24px; }
-  }
-  .hiw-step-title {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 21px;
-    line-height: 1.2;
-    letter-spacing: -0.005em;
     color: var(--color-ink);
+  }
+  .hiw-card-body {
     margin: 0;
-  }
-  @media (min-width: 768px) {
-    .hiw-step-title { font-size: 22px; }
-  }
-  .hiw-step-body {
-    margin-top: 8px;
     font-size: 15px;
     line-height: 1.55;
     color: var(--color-graphite);
   }
-  @media (min-width: 768px) {
-    .hiw-step-body { font-size: 16px; }
+
+  /* ---------------------------------------------------------------
+     Desktop (≥1024px): pinned horizontal-on-vertical scroll. The
+     section is 3.5× viewport tall; the inner stage sticks while the
+     track translates -X based on scroll progress through the section.
+     A massive background numeral crossfades to mark the active step.
+     --------------------------------------------------------------- */
+  @media (min-width: 1024px) {
+    .hiw-pin {
+      height: 360vh; /* 4 steps × ~90vh of vertical scroll budget */
+    }
+    .hiw-stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      align-content: center;
+    }
+
+    /* Big background numerals — one per step, crossfade based on
+       --hiw-progress (set by JS, normalized 0..stepCount). */
+    .hiw-numerals {
+      display: block;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .hiw-numeral {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(280px, 38vw, 540px);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      color: color-mix(in oklab, var(--color-accent) 8%, transparent);
+      opacity: 0;
+      transition: opacity 360ms var(--ease-out), transform 360ms var(--ease-out);
+    }
+    .hiw-numeral[data-active="true"] {
+      opacity: 1;
+      transform: translate(-50%, -52%);
+    }
+
+    .hiw-track {
+      position: relative;
+      z-index: 1;
+      padding: 0;
+      gap: 0;
+      overflow: visible;
+      scroll-snap-type: none;
+      align-items: center;
+      transform: translate3d(var(--hiw-tx, 0px), 0, 0);
+      will-change: transform;
+      transition: transform 80ms linear;
+    }
+    .hiw-card {
+      flex: 0 0 60vw;
+      max-width: 720px;
+      padding: 0 32px;
+      scroll-snap-align: none;
+    }
+    .hiw-card-inner {
+      min-height: 380px;
+      padding: 48px 56px 52px;
+      gap: 18px;
+      transform: scale(0.92);
+      opacity: 0.5;
+      filter: blur(0.4px);
+      transition:
+        transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 360ms var(--ease-out),
+        filter 360ms var(--ease-out),
+        box-shadow 480ms var(--ease-out);
+    }
+    .hiw-card[data-active="true"] .hiw-card-inner {
+      transform: scale(1);
+      opacity: 1;
+      filter: none;
+      box-shadow: 0 24px 60px -20px rgba(26, 26, 26, 0.22);
+    }
+    .hiw-card-title { font-size: 36px; }
+    .hiw-card-body  { font-size: 17px; }
+
+    .hiw-progress {
+      position: relative;
+      z-index: 2;
+      padding: 0 8vw 56px;
+      gap: 10px;
+    }
+    .hiw-progress-seg { height: 3px; }
   }
 
-  /* Subtle hover desktop — heading tints accent */
-  @media (hover: hover) {
-    .hiw-step:hover .hiw-step-title {
-      color: var(--color-accent);
-      transition: color 200ms var(--ease-out);
-    }
+  /* Reduced-motion: drop the dramatic transitions */
+  @media (prefers-reduced-motion: reduce) {
+    .hiw-card-inner { transition: none; }
+    .hiw-numeral { transition: none; }
+    .hiw-progress-seg { transition: none; }
   }
 </style>
+
+<script>
+  // Sticky horizontal-on-vertical scroll for HowItWorks. Reads scroll
+  // progress through the section, drives the track's translateX, and
+  // updates which step is "active" for the numeral + progress strip.
+  // Mobile (<1024px) falls back to a horizontal snap carousel — the
+  // observer below drives the active step from the snapped card.
+
+  function run() {
+    const sectionEl = document.querySelector<HTMLElement>('[data-hiw]');
+    if (!sectionEl) return;
+    const section = sectionEl;
+
+    const track = section.querySelector<HTMLElement>('[data-hiw-track]');
+    const cards = Array.from(section.querySelectorAll<HTMLElement>('.hiw-card'));
+    const numerals = Array.from(section.querySelectorAll<HTMLElement>('.hiw-numeral'));
+    const segs = Array.from(section.querySelectorAll<HTMLElement>('.hiw-progress-seg'));
+    if (!track || cards.length === 0) return;
+
+    const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
+    function setActive(index: number) {
+      cards.forEach((c, i) => c.dataset.active = String(i === index));
+      numerals.forEach((n, i) => n.dataset.active = String(i === index));
+      segs.forEach((seg, i) => seg.dataset.active = String(i <= index));
+    }
+    setActive(0);
+
+    // ----- Desktop: drive translateX from scroll progress -----
+    let rafQueued = false;
+    function updateDesktop() {
+      rafQueued = false;
+      if (!isDesktop()) return;
+      const rect = section.getBoundingClientRect();
+      const sectionHeight = section.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      const scrollable = sectionHeight - viewportHeight;
+      // Progress 0..1 across the entire pinned scroll budget
+      const raw = -rect.top / scrollable;
+      const progress = Math.max(0, Math.min(1, raw));
+      // The horizontal track needs to slide one card width per step.
+      // Take the inner card width × (cards.length − 1) as max travel.
+      const trackEl = track!;
+      const firstCard = cards[0];
+      const cardW = firstCard.getBoundingClientRect().width;
+      const maxTravel = cardW * (cards.length - 1);
+      const tx = -progress * maxTravel;
+      trackEl.style.setProperty('--hiw-tx', `${tx}px`);
+      // Active step = nearest in [0..stepCount-1]
+      const activeIdx = Math.min(cards.length - 1, Math.round(progress * (cards.length - 1)));
+      setActive(activeIdx);
+    }
+    function onScroll() {
+      if (rafQueued) return;
+      rafQueued = true;
+      requestAnimationFrame(updateDesktop);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateDesktop);
+    updateDesktop();
+
+    // ----- Mobile: IntersectionObserver on the snap track -----
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (isDesktop()) return;
+          for (const e of entries) {
+            if (e.intersectionRatio > 0.6) {
+              const idx = cards.indexOf(e.target as HTMLElement);
+              if (idx >= 0) setActive(idx);
+            }
+          }
+        },
+        { root: track, threshold: [0, 0.6, 1] },
+      );
+      cards.forEach((c) => io.observe(c));
+    }
+  }
+  document.addEventListener('astro:page-load', run);
+</script>
