@@ -640,7 +640,11 @@
     will-change: transform, opacity;
   }
   /* Whitespace between words — kept as plain text nodes so word-wrap
-     still works naturally. */
+     still works naturally. Trigger from the H1 itself (when it carries
+     `[data-reveal]`) AND from any reveal-marked ancestor. Without the
+     first selector, the kinetic H1 stays at opacity 0 forever because
+     `.kinetic-h1` IS the [data-reveal] element, not a descendant. */
+  .kinetic-h1[data-reveal].is-visible .kw,
   [data-reveal].is-visible .kinetic-h1 .kw {
     transform: none;
     opacity: 1;

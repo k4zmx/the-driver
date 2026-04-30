@@ -25,14 +25,8 @@ const hero = strings.hero;
 // has picked both endpoints. Anchors price expectations on first glance.
 const teaserMin = minCarStarting() ?? 45;
 
-// Conversion microcopy beneath the CTA. Locale-aware reassurance pulled from
-// existing form strings where applicable, with hero-specific tweaks.
-const availableLabel =
-  locale === 'en' ? 'Available now · Reply within 1h'
-  : locale === 'es' ? 'Disponible ahora · Respuesta en 1h'
-  : locale === 'it' ? 'Disponibile ora · Risposta entro 1h'
-  : 'Disponible maintenant · Réponse en 1h';
-
+// Conversion microcopy beneath the CTA. Locale-aware reassurance pulled
+// from existing form strings where applicable.
 const reassureLabel =
   locale === 'en' ? 'No deposit · WhatsApp confirmation in 1h'
   : locale === 'es' ? 'Sin depósito · Confirmación por WhatsApp en 1h'
@@ -59,15 +53,6 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
 ---
 
 <div class="qp-shell" data-variant={variant}>
-  {/* Live availability badge — pulsing dot + reassurance. Floats just
-      above the booking card to anchor "this is bookable RIGHT NOW". */}
-  {variant === 'hero' && (
-    <div class="qp-live" aria-live="polite">
-      <span class="qp-live-dot" aria-hidden="true"></span>
-      <span class="qp-live-label">{availableLabel}</span>
-    </div>
-  )}
-
   <form
     class:list={[
       'quote-picker relative bg-[color:var(--color-paper)] flex flex-col gap-3',
@@ -191,49 +176,6 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
     display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-
-  /* Live availability badge — green pulse + "Available · Reply within 1h".
-     Sits on top of the card's upper edge for "alive right now" signaling. */
-  .qp-live {
-    align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    background: var(--color-paper);
-    border: 1px solid color-mix(in oklab, var(--color-success, #1B9F4A) 30%, var(--color-smoke));
-    box-shadow: 0 4px 14px -6px rgba(26, 26, 26, 0.10);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--color-ink);
-    margin-bottom: 4px;
-  }
-  .qp-live-dot {
-    position: relative;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--color-success, #1B9F4A);
-    flex-shrink: 0;
-  }
-  .qp-live-dot::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 999px;
-    background: var(--color-success, #1B9F4A);
-    opacity: 0.4;
-    animation: qp-live-pulse 1.6s ease-out infinite;
-  }
-  @keyframes qp-live-pulse {
-    0%   { transform: scale(0.6); opacity: 0.55; }
-    100% { transform: scale(1.9); opacity: 0;    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .qp-live-dot::after { animation: none; }
   }
 
   /* ---------------------------------------------------------------
