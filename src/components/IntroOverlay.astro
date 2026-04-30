@@ -1,85 +1,85 @@
 ---
 /**
- * Welcome wave intro overlay — plays once per session.
+ * Welcome wave intro overlay — plays once per session, on the home page only.
  *
- * Sequence (2.4s total):
- *   0     →  800ms   Wave sweeps in from the right (decel, weighted)
- *   800   → 1500ms   Hold begins; road line draws across the wave
- *   1000  → 1500ms   BIENVENUE fades in + rises
- *   1300  → 1600ms   "Bienvenue à Paris" subline fades in
- *   1500  → 1850ms   Cream dot pops at the road's terminus
- *   1700  → 2400ms   Wave exits to right (accel); text + road fade
- *   2400ms          Cleanup: overlay removed from DOM
+ * Sequence (1.8s total — 25% faster than the previous 2.4s pacing):
+ *   0     →  600ms   4 horizontal color bands stagger in from the right —
+ *                    deepest terracotta on top → dusty cream at bottom,
+ *                    ~113ms stagger top-to-bottom
+ *   600   → 1275ms   Hold; cream arrow draws across upper darker band,
+ *                    BIENVENUE + "Bienvenue à Paris" subline fade in
+ *   600ms           BaseLayout's `intro-pending` class is removed — page
+ *                    content paints behind the (still-covering) bands,
+ *                    so it's ready when the bands slide off
+ *   1275  → 1800ms   Bands stagger out — bottom (cream) first, top last
+ *   1900ms          Cleanup: overlay removed from DOM
  *
- * Depth: two stacked wave layers create parallax. The background wave
- * leads the entry by ~60ms and trails the exit by ~60ms — visible during
- * motion as a darker silhouette ahead of (entry) / behind (exit) the
- * brighter foreground wave.
+ * Visual: warm tonal sunset poster — 4 stacked horizontal color bands
+ * tracking the brand palette (deep terracotta → terracotta → warm rose →
+ * dusty cream). Each band's curvy bottom edge laps over the band below
+ * for a hand-cut paper-collage feel. Bands overlap heavily so the next
+ * band's flat top always sits beneath the previous band's highest crest
+ * — no gaps, hero content never visible during the intro.
  *
  * Skipped when:
- *   - sessionStorage flag exists (set by an inline head script in
- *     BaseLayout so the decision is made BEFORE first paint, no flash)
+ *   - sessionStorage flag exists (set by inline head script in BaseLayout
+ *     pre-paint, no flash on returning visitors)
  *   - prefers-reduced-motion is reduce
  *   - mobile in landscape orientation
  *
  * Performance: pure CSS keyframes, transform/opacity/stroke-dashoffset
- * only. No external libraries, no rAF loops. One `is:inline` cleanup
- * script removes the overlay from the DOM after the wave's exit.
+ * only. 4 SVG bands + arrow + 2 text elements = 7 GPU layers.
  */
 ---
 
 <div class="intro-overlay" data-intro aria-hidden="true">
-  {/* Background wave — solid darker accent, 90% opacity. Stacks BEHIND
-      the foreground wave so it peeks out at the leading edge during
-      transitions only. */}
-  <svg class="intro-wave intro-wave--back" viewBox="0 0 110 100" preserveAspectRatio="none">
-    <path
-      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100 L 110 100 L 110 0 Z"
-      fill="#AF4434"
-    />
+  {/* Four horizontal color bands. Each is a full-viewport-wide SVG with
+      viewBox 0 0 100 30 stretched to fill its 30%-tall container. Path
+      tops are flat (flush against the band above's wavy bottom); path
+      bottoms are wavy curves that lap over the band below. */}
+
+  <svg class="intro-band intro-band--b1" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+    {/* Band 1 (deep terracotta, top): bold single dip slightly off-center */}
+    <path d="M 0 0 L 100 0 L 100 22 C 90 22, 76 30, 58 30 C 40 30, 24 22, 0 22 Z" />
   </svg>
 
-  {/* Foreground wave — gradient fill (slightly darker on the trailing
-      edge for directional depth) + crest highlight stroke along the
-      leading edge for "wave catches the light" feel. */}
-  <svg class="intro-wave intro-wave--front" viewBox="0 0 110 100" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id="intro-wave-grad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#B94935" />
-        <stop offset="100%" stop-color="#C94F3A" />
-      </linearGradient>
-    </defs>
-    <path
-      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100 L 110 100 L 110 0 Z"
-      fill="url(#intro-wave-grad)"
-    />
-    {/* Crest highlight — same leading-edge curve, open path, thin cream stroke.
-        vector-effect prevents the stroke from getting stretched when the SVG
-        is scaled to the viewport with preserveAspectRatio="none". */}
-    <path
-      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100"
-      fill="none"
-      stroke="rgba(248, 245, 238, 0.25)"
-      stroke-width="1"
-      vector-effect="non-scaling-stroke"
-    />
+  <svg class="intro-band intro-band--b2" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+    {/* Band 2 (terracotta brand): double crest, more aggressive waves */}
+    <path d="M 0 0 L 100 0 L 100 24 C 80 30, 65 22, 50 26 C 35 30, 20 22, 0 26 Z" />
   </svg>
 
-  {/* Road line — drawn during the hold phase. pathLength=100 normalizes
-      the dash math regardless of the actual path geometry. */}
-  <svg class="intro-road" viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
+  <svg class="intro-band intro-band--b3" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+    {/* Band 3 (warm rose): gentle continuous wave, broader and calmer */}
+    <path d="M 0 0 L 100 0 L 100 25 C 70 28, 40 23, 0 25 Z" />
+  </svg>
+
+  <svg class="intro-band intro-band--b4" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+    {/* Band 4 (dusty cream, foundational base): full-rectangle fill so the
+        bottom of the viewport is always covered. Band 3's wave sits on top
+        of this band's flat surface — that's where the visual character at
+        the band-3/band-4 boundary comes from. */}
+    <path d="M 0 0 L 100 0 L 100 30 L 0 30 Z" />
+  </svg>
+
+  {/* Bolder cream arrow with arrowhead — unchanged from previous round.
+      Sits over the darker top bands so the cream stroke has high contrast. */}
+  <svg class="intro-arrow" viewBox="0 0 320 50" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
     <path
-      class="intro-road-path"
-      d="M 30 110 Q 180 60 350 100 T 570 60"
+      class="intro-arrow-shaft"
+      d="M 20 25 Q 100 5, 180 25 T 290 25"
       fill="none"
       stroke="#F8F5EE"
-      stroke-width="2"
+      stroke-width="4"
       stroke-linecap="round"
       pathLength="100"
       stroke-dasharray="100"
       stroke-dashoffset="100"
     />
-    <circle class="intro-road-dot" cx="570" cy="60" r="4" fill="#F8F5EE" />
+    <polygon
+      class="intro-arrow-head"
+      points="298,25 282,17 282,33"
+      fill="#F8F5EE"
+    />
   </svg>
 
   <p class="intro-text">BIENVENUE</p>
@@ -95,152 +95,182 @@
     overflow: hidden;
     contain: strict;
   }
-  /* Skip path — the inline head script in BaseLayout sets data-intro-skip
-     on <html> for: session-already-shown, reduced-motion, or landscape
-     mobile. CSS hides the overlay before first paint; the bottom-of-
-     component script also drops it from the DOM. */
+  /* Skip path — set by the inline head script in BaseLayout for: session-
+     already-shown, reduced-motion, or landscape mobile. */
   :root[data-intro-skip] .intro-overlay {
     display: none !important;
   }
 
   /* ---------------------------------------------------------------
-     Wave layers — same geometry, different timing & fill. Background
-     wave leads the entry by ~60ms (its "covers screen" keyframe is at
-     30.83% vs the foreground's 33.33%) and trails the exit by ~60ms
-     (its "exit begins" keyframe is at 73.33% vs the foreground's
-     70.83%). 2400ms total animation. Per-keyframe timing-function
-     gives different easings to each phase from one keyframe block.
+     Horizontal color bands — 4 stacked layers. Heights and tops are
+     tuned so each band's flat top sits at-or-above the previous band's
+     highest wave crest, eliminating any gap to hero content. Higher
+     z-index on top bands so their wavy bottom edges sit ON TOP of the
+     band below — paper-cut sunset effect.
+
+     Math: each path's wave reaches y=22 at its highest crest in a
+     viewBox 0..30. Container heights of 30% / 30% / 30% / 34% with
+     tops at 0 / 22% / 44% / 66% give 8% overlap between consecutive
+     bands — exactly enough so band-N+1's flat top covers band-N's
+     highest crest at viewport (22/30 × 30%) = 22% inside the band.
      --------------------------------------------------------------- */
-  .intro-wave {
+  .intro-band {
     position: absolute;
-    top: 0;
     left: 0;
-    width: 110vw;
-    height: 100vh;
-    transform: translate3d(110vw, 0, 0);
+    width: 100vw;
+    display: block;
     will-change: transform;
     backface-visibility: hidden;
+    transform: translate3d(100vw, 0, 0); /* off-screen baseline */
+    pointer-events: none;
   }
-  .intro-wave--back {
-    z-index: 1;
-    opacity: 0.9;
-    animation: intro-wave-back 2400ms forwards;
-  }
-  .intro-wave--front {
-    z-index: 2;
-    animation: intro-wave-front 2400ms forwards;
-  }
-  @keyframes intro-wave-front {
+  .intro-band--b1 { top: 0;    height: 30%; z-index: 4; animation: intro-band-b1 1800ms forwards; }
+  .intro-band--b2 { top: 22%;  height: 30%; z-index: 3; animation: intro-band-b2 1800ms forwards; }
+  .intro-band--b3 { top: 44%;  height: 30%; z-index: 2; animation: intro-band-b3 1800ms forwards; }
+  .intro-band--b4 { top: 66%;  height: 34%; z-index: 1; animation: intro-band-b4 1800ms forwards; }
+
+  /* Brand-tonal palette — every color is the accent or a mix of accent +
+     cream / accent + black. Sets fill via CSS so we get the variable. */
+  .intro-band--b1 path { fill: color-mix(in srgb, var(--color-accent) 100%, black 25%); }
+  .intro-band--b2 path { fill: var(--color-accent); }
+  .intro-band--b3 path { fill: color-mix(in srgb, var(--color-accent) 60%, var(--color-cream) 40%); }
+  .intro-band--b4 path { fill: color-mix(in srgb, var(--color-accent) 25%, var(--color-cream) 75%); }
+
+  /* Per-band keyframes — single shared 2400ms timeline, each band has its
+     own entry hold + exit start so we get a coherent arrival moment at
+     800ms and a coherent dismissal moment at 2400ms with varied
+     per-band durations. Easings applied per-keyframe. */
+
+  @keyframes intro-band-b1 {
+    /* Top band — first in (0ms), last out (2150ms exit start, 250ms exit) */
     0% {
-      transform: translate3d(110vw, 0, 0);
+      transform: translate3d(100vw, 0, 0);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    33.33% {
-      /* 800ms — front covers screen */
+    33.33% { /* 800ms — settled */
       transform: translate3d(0, 0, 0);
       animation-timing-function: linear;
     }
-    70.83% {
-      /* 1700ms — front begins exit */
+    89.58% { /* 2150ms — exit begins */
       transform: translate3d(0, 0, 0);
       animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
     }
-    100% {
-      transform: translate3d(110vw, 0, 0);
-    }
+    100% { transform: translate3d(100vw, 0, 0); }
   }
-  @keyframes intro-wave-back {
+  @keyframes intro-band-b2 {
+    /* Terracotta — second in (150ms), exits at 2000ms (400ms exit) */
     0% {
-      transform: translate3d(110vw, 0, 0);
+      transform: translate3d(100vw, 0, 0);
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    30.83% {
-      /* 740ms — back covers screen 60ms before front (parallax lead) */
+    6.25% { transform: translate3d(100vw, 0, 0); } /* held off-screen until 150ms */
+    33.33% { /* 800ms — settled */
       transform: translate3d(0, 0, 0);
       animation-timing-function: linear;
     }
-    73.33% {
-      /* 1760ms — back begins exit 60ms after front (parallax trail) */
+    83.33% { /* 2000ms — exit begins */
       transform: translate3d(0, 0, 0);
       animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
     }
-    100% {
-      transform: translate3d(110vw, 0, 0);
+    100% { transform: translate3d(100vw, 0, 0); }
+  }
+  @keyframes intro-band-b3 {
+    /* Warm rose — third in (300ms), exits at 1850ms (550ms exit) */
+    0% {
+      transform: translate3d(100vw, 0, 0);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
+    12.5% { transform: translate3d(100vw, 0, 0); } /* held until 300ms */
+    33.33% { /* 800ms — settled */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: linear;
+    }
+    77.08% { /* 1850ms — exit begins */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
+    }
+    100% { transform: translate3d(100vw, 0, 0); }
+  }
+  @keyframes intro-band-b4 {
+    /* Dusty cream — last in (450ms), first out (1700ms exit start, 700ms exit) */
+    0% {
+      transform: translate3d(100vw, 0, 0);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    18.75% { transform: translate3d(100vw, 0, 0); } /* held until 450ms */
+    33.33% { /* 800ms — settled */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: linear;
+    }
+    70.83% { /* 1700ms — exit begins (first to leave) */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
+    }
+    100% { transform: translate3d(100vw, 0, 0); }
   }
 
   /* ---------------------------------------------------------------
-     Road line — drawn during the hold phase. The wrapper handles
-     opacity (so it's hidden during entry/exit), the inner path
-     handles the stroke draw, and the dot pops at the terminus.
+     Cream arrow — bolder stroke, S-curve, draws across the upper
+     darker bands during hold. Position shifted up so it sits over
+     band 1 + band 2 (deep terracotta + terracotta) — high contrast
+     for the cream stroke and the BIENVENUE text below it.
      --------------------------------------------------------------- */
-  .intro-road {
+  .intro-arrow {
     position: absolute;
     left: 50%;
-    top: 46%;
-    width: min(70vw, 540px);
+    top: 28%;
+    width: min(60vw, 220px);
     height: auto;
     transform: translate(-50%, -50%);
-    z-index: 3;
+    z-index: 10;
     opacity: 0;
     will-change: opacity;
-    animation: intro-road-fade 2400ms forwards;
+    animation: intro-arrow-fade 1800ms forwards;
   }
   @media (min-width: 768px) {
-    .intro-road { width: min(60vw, 600px); }
+    .intro-arrow {
+      width: min(50vw, 320px);
+      top: 26%;
+    }
   }
-  .intro-road-path {
+  .intro-arrow-shaft {
     will-change: stroke-dashoffset;
-    animation: intro-road-draw 700ms 800ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
+    animation: intro-arrow-draw 450ms 600ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
   }
-  .intro-road-dot {
+  .intro-arrow-head {
     opacity: 0;
-    transform-origin: 570px 60px;
+    transform: scale(0.6);
+    transform-origin: center;
+    transform-box: fill-box;
     will-change: transform, opacity;
-    /* 700ms total: pop (overshoot) → hold → fade with rest of overlay */
-    animation: intro-road-dot 700ms 1500ms forwards;
+    animation: intro-arrow-head 165ms 1050ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
-  @keyframes intro-road-draw {
+  @keyframes intro-arrow-draw {
     to { stroke-dashoffset: 0; }
   }
-  @keyframes intro-road-fade {
-    /* hidden behind the off-screen wave during entry */
+  @keyframes intro-arrow-head {
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes intro-arrow-fade {
+    /* Hidden behind off-screen bands during entry */
     0%, 33.33% { opacity: 0; }
     35%        { opacity: 1; }
-    /* 1700ms (70.83%) — exit begins, fade starts */
+    /* 1700ms (70.83%) — bands begin exit, arrow fades with text */
     70.83%     { opacity: 1; }
-    91.67%     { opacity: 0; } /* 2200ms — fully faded (500ms fade) */
+    91.67%     { opacity: 0; } /* 2200ms — fully faded */
     100%       { opacity: 0; }
-  }
-  @keyframes intro-road-dot {
-    0% {
-      opacity: 0;
-      transform: scale(0.6);
-      animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    50% {
-      /* 350ms — pop completed with overshoot */
-      opacity: 1;
-      transform: scale(1.5);
-      animation-timing-function: linear;
-    }
-    100% {
-      /* 700ms — faded out alongside the rest of the overlay */
-      opacity: 0;
-      transform: scale(1.5);
-    }
   }
 
   /* ---------------------------------------------------------------
-     BIENVENUE — large, light, tracked. Centered just above the
-     screen's vertical midline so it pairs with the road below.
-     Sub-text uses Inter for a sharp contrast against the Fraunces
-     display heading.
+     BIENVENUE + subline — typography unchanged, but vertical position
+     shifted up so the text sits on band 2 (base terracotta — viewport
+     22-52%). Cream-on-terracotta keeps high contrast; on the lighter
+     bottom bands the cream text would wash out.
      --------------------------------------------------------------- */
   .intro-text {
     position: absolute;
     left: 50%;
-    top: 56%;
+    top: 38%;
     transform: translate3d(-50%, 8px, 0);
     margin: 0;
     font-family: var(--font-display, "Fraunces"), Georgia, serif;
@@ -248,38 +278,30 @@
     font-weight: 400;
     letter-spacing: 0.08em;
     color: #F8F5EE;
-    z-index: 3;
+    z-index: 10;
     opacity: 0;
     will-change: transform, opacity;
-    /* in (1000-1500) → hold (1500-1700) → out (1700-2200) — 1200ms total
-       starting 1000ms after page load. */
-    animation: intro-text 1200ms 1000ms forwards;
+    animation: intro-text 900ms 750ms forwards;
   }
   @media (min-width: 768px) {
-    .intro-text {
-      font-size: 64px;
-      top: 54%;
-    }
+    .intro-text { font-size: 64px; top: 36%; }
   }
   @keyframes intro-text {
-    0%      {
+    0% {
       opacity: 0;
       transform: translate3d(-50%, 8px, 0);
       animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    41.67%  {
-      /* 500ms in (= 1500ms total) — settled */
+    41.67% { /* 500ms in — settled */
       opacity: 1;
       transform: translate3d(-50%, 0, 0);
       animation-timing-function: linear;
     }
-    58.33%  {
-      /* 700ms in (= 1700ms total) — exit begins */
+    58.33% { /* 700ms in — exit begins */
       opacity: 1;
       transform: translate3d(-50%, 0, 0);
     }
-    100%    {
-      /* 1200ms in (= 2200ms total) — faded */
+    100% {
       opacity: 0;
       transform: translate3d(-50%, 0, 0);
     }
@@ -288,11 +310,8 @@
   .intro-subline {
     position: absolute;
     left: 50%;
-    top: 56%;
+    top: 38%;
     transform: translate(-50%, 0);
-    /* Sits just below BIENVENUE — offset is the line height of BIENVENUE
-       plus the 12px gap. We use a margin-top on top of the absolute
-       position so it tracks the heading regardless of font size. */
     margin: 56px 0 0;
     font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
     font-size: 13px;
@@ -300,37 +319,34 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: rgba(248, 245, 238, 0.75);
-    z-index: 3;
+    z-index: 10;
     opacity: 0;
     white-space: nowrap;
     will-change: transform, opacity;
-    /* 900ms total: in 1300-1600, hold 1600-1700, out 1700-2200 */
-    animation: intro-subline 900ms 1300ms forwards;
+    animation: intro-subline 675ms 975ms forwards;
   }
   @media (min-width: 768px) {
     .intro-subline {
       font-size: 16px;
-      top: 54%;
+      top: 36%;
       margin-top: 84px;
     }
   }
   @keyframes intro-subline {
-    0%      {
+    0% {
       opacity: 0;
       transform: translate(-50%, 4px);
       animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    33.33%  {
-      /* 300ms in (= 1600ms total) — settled at 75% per spec */
+    33.33% { /* 300ms in — settled */
       opacity: 0.75;
       transform: translate(-50%, 0);
     }
-    44.44%  {
-      /* 400ms in (= 1700ms total) — exit begins */
+    44.44% { /* 400ms in — exit begins */
       opacity: 0.75;
       transform: translate(-50%, 0);
     }
-    100%    {
+    100% {
       opacity: 0;
       transform: translate(-50%, 0);
     }
@@ -351,16 +367,23 @@
     if (!overlay) return;
 
     // Skip path — the inline head script already handled the decision.
-    // Drop the overlay from the DOM so it doesn't sit in the layer tree.
     if (document.documentElement.getAttribute('data-intro-skip') === 'true') {
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       return;
     }
 
-    // Cleanup after the wave's exit completes. 100ms buffer past the
-    // 2400ms total so the final keyframe has settled.
+    // Reveal page content once bands have fully covered the screen (600ms).
+    // BaseLayout's `intro-pending` class hid <main>/<nav>/<footer> through
+    // first paint; lifting it here lets the page paint behind the still-
+    // covering bands so it's ready by the time bands begin their exit
+    // (1275ms). No flash either way.
+    setTimeout(function () {
+      document.documentElement.classList.remove('intro-pending');
+    }, 600);
+
+    // Cleanup after the band exit completes. 100ms buffer past 1800ms.
     setTimeout(function () {
       if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 2500);
+    }, 1900);
   })();
 </script>

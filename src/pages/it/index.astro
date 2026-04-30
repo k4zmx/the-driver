@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import IntroOverlay from '../../components/IntroOverlay.astro';
 import Hero from '../../components/Hero.astro';
 import TrustMarquee from '../../components/TrustMarquee.astro';
 import WhyUs from '../../components/WhyUs.astro';
@@ -15,6 +16,7 @@ import BookingForm from '../../components/BookingForm.astro';
 ---
 
 <BaseLayout locale="it" routeKey="home">
+  <IntroOverlay slot="intro-overlay" />
   <Hero locale="it" />
   <TrustMarquee locale="it" />
   <WhyUs locale="it" />
