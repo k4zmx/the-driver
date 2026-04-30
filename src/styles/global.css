@@ -588,4 +588,104 @@
     outline-offset: -1px;
     transition: outline 150ms var(--ease-out);
   }
+
+  /* ---------------------------------------------------------------
+     Scroll progress bar — fixed top hairline. Width is driven by a
+     CSS variable updated from JS via requestAnimationFrame, applied
+     as transform: scaleX so it stays GPU-only.
+     --------------------------------------------------------------- */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 90;
+    pointer-events: none;
+    background: color-mix(in oklab, var(--color-smoke) 30%, transparent);
+  }
+  .scroll-progress-bar {
+    --scroll-progress: 0;
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    transform: scaleX(var(--scroll-progress));
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-accent) 80%, transparent),
+      var(--color-accent),
+      color-mix(in oklab, var(--color-accent) 60%, transparent)
+    );
+    will-change: transform;
+    transition: transform 80ms linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-progress-bar { transition: none; }
+  }
+
+  /* ---------------------------------------------------------------
+     Hero H1 kinetic typography — words rise + fade into place with
+     a stagger when the reveal observer fires. Pairs with the
+     existing .h1 styles; no layout shift (transform/opacity only).
+     --------------------------------------------------------------- */
+  .kinetic-h1 .kw {
+    display: inline-block;
+    transform: translateY(40%);
+    opacity: 0;
+    transition:
+      transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 600ms var(--ease-out);
+    transition-delay: calc(var(--ki, 0) * 70ms + 60ms);
+    will-change: transform, opacity;
+  }
+  /* Whitespace between words — kept as plain text nodes so word-wrap
+     still works naturally. */
+  [data-reveal].is-visible .kinetic-h1 .kw {
+    transform: none;
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kinetic-h1 .kw {
+      transform: none;
+      opacity: 1;
+      transition: none;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Magnetic primary CTAs — desktop hover only. JS sets --mx / --my
+     in CSS pixels; the button translates a fraction of the cursor
+     offset for a subtle "pull" effect. Touch devices get nothing.
+     --------------------------------------------------------------- */
+  @media (hover: hover) and (pointer: fine) {
+    [data-magnetic] {
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+    [data-magnetic][data-magnetic-active="true"] {
+      transform: translate(var(--mx, 0px), var(--my, 0px));
+      transition: transform 80ms linear;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     3D card tilt — desktop hover only. JS sets --rx / --ry from
+     cursor position relative to the card's center. Cards already
+     have their own hover transforms; tilt layers on top via
+     `transform: ... rotateX rotateY`.
+     --------------------------------------------------------------- */
+  @media (hover: hover) and (pointer: fine) {
+    [data-tilt] {
+      transform-style: preserve-3d;
+      transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    [data-tilt][data-tilt-active="true"] {
+      transform:
+        perspective(900px)
+        rotateX(var(--rx, 0deg))
+        rotateY(var(--ry, 0deg));
+      transition: transform 80ms linear;
+    }
+  }
 }

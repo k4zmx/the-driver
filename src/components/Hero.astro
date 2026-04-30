@@ -87,8 +87,12 @@ const availableLabel =
           <span>{availableLabel}</span>
         </p>
 
-        <h1 class="h1 text-balance hero-h1" data-reveal data-reveal-delay="1">
-          {h1Head}{h1Head ? ' ' : ''}<span class="accent-word">{h1Last}</span>
+        <h1 class="h1 text-balance hero-h1 kinetic-h1" data-reveal data-reveal-delay="1">
+          {(h1Head.split(/\s+/).filter(Boolean) as string[]).map((w: string, i: number) => (
+            <>
+              <span class="kw" style={`--ki: ${i}`}>{w}</span>{' '}
+            </>
+          ))}<span class="kw accent-word" style={`--ki: ${h1Head.split(/\s+/).filter(Boolean).length}`}>{h1Last}</span>
         </h1>
 
         <p class="body-lg hero-sub" data-reveal data-reveal-delay="2">{hero.sub}</p>

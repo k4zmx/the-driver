@@ -128,6 +128,12 @@ const extraSchemas = Array.isArray(structuredData)
     <ClientRouter fallback="none" />
   </head>
   <body>
+    {/* Top-of-viewport scroll progress bar. Subtle accent gradient that
+        signals editorial flow as the reader scrolls. Decorative. */}
+    <div class="scroll-progress" aria-hidden="true">
+      <span class="scroll-progress-bar"></span>
+    </div>
+
     <Nav locale={locale} routeKey={routeKey} />
     <main>
       <slot />
@@ -137,6 +143,10 @@ const extraSchemas = Array.isArray(structuredData)
     {/* Scroll-reveal via Intersection Observer. Re-runs after each ClientRouter navigation. */}
     <script>
       import '../scripts/reveal.js';
+      import '../scripts/scroll-progress.js';
+      import '../scripts/magnetic.js';
+      import '../scripts/card-tilt.js';
+      import '../scripts/count-up.js';
     </script>
   </body>
 </html>
