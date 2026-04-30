@@ -2,44 +2,71 @@
 /**
  * Welcome wave intro overlay — plays once per session.
  *
- * Sequence (1.6s total):
- *   0    →  600ms  Wave sweeps in from the right (curved leading edge)
- *   600  → 1100ms  Hold: road line draws + BIENVENUE fades in
- *   1100 → 1600ms  Wave exits to the right; road + text fade
+ * Sequence (2.4s total):
+ *   0     →  800ms   Wave sweeps in from the right (decel, weighted)
+ *   800   → 1500ms   Hold begins; road line draws across the wave
+ *   1000  → 1500ms   BIENVENUE fades in + rises
+ *   1300  → 1600ms   "Bienvenue à Paris" subline fades in
+ *   1500  → 1850ms   Cream dot pops at the road's terminus
+ *   1700  → 2400ms   Wave exits to right (accel); text + road fade
+ *   2400ms          Cleanup: overlay removed from DOM
+ *
+ * Depth: two stacked wave layers create parallax. The background wave
+ * leads the entry by ~60ms and trails the exit by ~60ms — visible during
+ * motion as a darker silhouette ahead of (entry) / behind (exit) the
+ * brighter foreground wave.
  *
  * Skipped when:
- *   - sessionStorage flag exists (set by an inline head script in BaseLayout
- *     so the decision is made BEFORE first paint, no flash)
+ *   - sessionStorage flag exists (set by an inline head script in
+ *     BaseLayout so the decision is made BEFORE first paint, no flash)
  *   - prefers-reduced-motion is reduce
  *   - mobile in landscape orientation
  *
- * Implementation:
- *   - Pure CSS keyframes drive the entire animation (transform + opacity +
- *     stroke-dashoffset only — all GPU-friendly).
- *   - One small inline script handles DOM cleanup after the animation ends.
- *   - No external libraries, no runtime requestAnimationFrame loop.
+ * Performance: pure CSS keyframes, transform/opacity/stroke-dashoffset
+ * only. No external libraries, no rAF loops. One `is:inline` cleanup
+ * script removes the overlay from the DOM after the wave's exit.
  */
 ---
 
 <div class="intro-overlay" data-intro aria-hidden="true">
-  {/* Wave SVG — slightly wider than viewport (110vw) so the curved left
-      edge can leave the screen entirely on exit. preserveAspectRatio="none"
-      lets the path stretch to fit any viewport ratio. */}
-  <svg class="intro-wave" viewBox="0 0 110 100" preserveAspectRatio="none">
+  {/* Background wave — solid darker accent, 90% opacity. Stacks BEHIND
+      the foreground wave so it peeks out at the leading edge during
+      transitions only. */}
+  <svg class="intro-wave intro-wave--back" viewBox="0 0 110 100" preserveAspectRatio="none">
+    <path
+      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100 L 110 100 L 110 0 Z"
+      fill="#AF4434"
+    />
+  </svg>
+
+  {/* Foreground wave — gradient fill (slightly darker on the trailing
+      edge for directional depth) + crest highlight stroke along the
+      leading edge for "wave catches the light" feel. */}
+  <svg class="intro-wave intro-wave--front" viewBox="0 0 110 100" preserveAspectRatio="none">
     <defs>
-      <linearGradient id="intro-wave-grad" x1="0" y1="0.5" x2="1" y2="0.5">
-        <stop offset="0%" stop-color="#C94F3A" />
-        <stop offset="100%" stop-color="#A33D2B" />
+      <linearGradient id="intro-wave-grad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#B94935" />
+        <stop offset="100%" stop-color="#C94F3A" />
       </linearGradient>
     </defs>
     <path
-      d="M 6 0 C 0 25 9 50 3 75 C -1 92 6 100 6 100 L 110 100 L 110 0 Z"
+      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100 L 110 100 L 110 0 Z"
       fill="url(#intro-wave-grad)"
+    />
+    {/* Crest highlight — same leading-edge curve, open path, thin cream stroke.
+        vector-effect prevents the stroke from getting stretched when the SVG
+        is scaled to the viewport with preserveAspectRatio="none". */}
+    <path
+      d="M 0 0 C 4 18, 12 22, 8 40 C 5 58, 14 65, 10 80 C 6 92, 12 100, 12 100"
+      fill="none"
+      stroke="rgba(248, 245, 238, 0.25)"
+      stroke-width="1"
+      vector-effect="non-scaling-stroke"
     />
   </svg>
 
   {/* Road line — drawn during the hold phase. pathLength=100 normalizes
-      the dash math regardless of actual path geometry. */}
+      the dash math regardless of the actual path geometry. */}
   <svg class="intro-road" viewBox="0 0 600 160" preserveAspectRatio="xMidYMid meet">
     <path
       class="intro-road-path"
@@ -56,6 +83,7 @@
   </svg>
 
   <p class="intro-text">BIENVENUE</p>
+  <p class="intro-subline">Bienvenue à Paris</p>
 </div>
 
 <style>
@@ -67,17 +95,22 @@
     overflow: hidden;
     contain: strict;
   }
-  /* Skip path — the inline head script sets data-intro-skip on <html>
-     for: session-already-shown, reduced-motion, or landscape mobile.
-     CSS hides the overlay before first paint; the bottom-of-component
-     script also drops it from the DOM. */
+  /* Skip path — the inline head script in BaseLayout sets data-intro-skip
+     on <html> for: session-already-shown, reduced-motion, or landscape
+     mobile. CSS hides the overlay before first paint; the bottom-of-
+     component script also drops it from the DOM. */
   :root[data-intro-skip] .intro-overlay {
     display: none !important;
   }
 
-  /* Wave — sweeps in from right, holds, sweeps out to right.
-     Per-keyframe animation-timing-function gives different easings to
-     each phase from a single keyframe block. */
+  /* ---------------------------------------------------------------
+     Wave layers — same geometry, different timing & fill. Background
+     wave leads the entry by ~60ms (its "covers screen" keyframe is at
+     30.83% vs the foreground's 33.33%) and trails the exit by ~60ms
+     (its "exit begins" keyframe is at 73.33% vs the foreground's
+     70.83%). 2400ms total animation. Per-keyframe timing-function
+     gives different easings to each phase from one keyframe block.
+     --------------------------------------------------------------- */
   .intro-wave {
     position: absolute;
     top: 0;
@@ -87,99 +120,223 @@
     transform: translate3d(110vw, 0, 0);
     will-change: transform;
     backface-visibility: hidden;
-    animation: intro-wave 1600ms forwards;
   }
-  @keyframes intro-wave {
+  .intro-wave--back {
+    z-index: 1;
+    opacity: 0.9;
+    animation: intro-wave-back 2400ms forwards;
+  }
+  .intro-wave--front {
+    z-index: 2;
+    animation: intro-wave-front 2400ms forwards;
+  }
+  @keyframes intro-wave-front {
     0% {
       transform: translate3d(110vw, 0, 0);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    37.5% {
-      /* 600ms — wave covers the screen; hold phase begins */
+    33.33% {
+      /* 800ms — front covers screen */
       transform: translate3d(0, 0, 0);
       animation-timing-function: linear;
     }
-    68.75% {
-      /* 1100ms — hold ends; exit begins */
+    70.83% {
+      /* 1700ms — front begins exit */
       transform: translate3d(0, 0, 0);
-      animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+      animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
+    }
+    100% {
+      transform: translate3d(110vw, 0, 0);
+    }
+  }
+  @keyframes intro-wave-back {
+    0% {
+      transform: translate3d(110vw, 0, 0);
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    30.83% {
+      /* 740ms — back covers screen 60ms before front (parallax lead) */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: linear;
+    }
+    73.33% {
+      /* 1760ms — back begins exit 60ms after front (parallax trail) */
+      transform: translate3d(0, 0, 0);
+      animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0.04);
     }
     100% {
       transform: translate3d(110vw, 0, 0);
     }
   }
 
-  /* Road line — draws across the wave during the 500ms hold. The dot
-     pops in just as the line completes, like the route's destination
-     marker. */
+  /* ---------------------------------------------------------------
+     Road line — drawn during the hold phase. The wrapper handles
+     opacity (so it's hidden during entry/exit), the inner path
+     handles the stroke draw, and the dot pops at the terminus.
+     --------------------------------------------------------------- */
   .intro-road {
     position: absolute;
     left: 50%;
-    top: 48%;
+    top: 46%;
     width: min(70vw, 540px);
     height: auto;
     transform: translate(-50%, -50%);
+    z-index: 3;
     opacity: 0;
     will-change: opacity;
-    animation: intro-road-fade 1600ms forwards;
+    animation: intro-road-fade 2400ms forwards;
   }
   @media (min-width: 768px) {
     .intro-road { width: min(60vw, 600px); }
   }
   .intro-road-path {
     will-change: stroke-dashoffset;
-    animation: intro-road-draw 500ms 600ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    animation: intro-road-draw 700ms 800ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
   }
   .intro-road-dot {
     opacity: 0;
     transform-origin: 570px 60px;
     will-change: transform, opacity;
-    animation: intro-road-dot 240ms 1060ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    /* 700ms total: pop (overshoot) → hold → fade with rest of overlay */
+    animation: intro-road-dot 700ms 1500ms forwards;
   }
   @keyframes intro-road-draw {
     to { stroke-dashoffset: 0; }
   }
   @keyframes intro-road-fade {
-    /* 0-37.5% (0-600ms): hidden behind off-screen wave */
-    0%, 37.5% { opacity: 0; }
-    44%       { opacity: 1; }
-    /* 1100ms = 68.75% — wave begins exit, road begins fade */
-    68.75%    { opacity: 1; }
-    81.25%    { opacity: 0; } /* 1300ms — fully faded (300ms fade) */
-    100%      { opacity: 0; }
+    /* hidden behind the off-screen wave during entry */
+    0%, 33.33% { opacity: 0; }
+    35%        { opacity: 1; }
+    /* 1700ms (70.83%) — exit begins, fade starts */
+    70.83%     { opacity: 1; }
+    91.67%     { opacity: 0; } /* 2200ms — fully faded (500ms fade) */
+    100%       { opacity: 0; }
   }
   @keyframes intro-road-dot {
-    0%   { opacity: 0; transform: scale(0.6); }
-    100% { opacity: 1; transform: scale(1.5); }
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+      animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    50% {
+      /* 350ms — pop completed with overshoot */
+      opacity: 1;
+      transform: scale(1.5);
+      animation-timing-function: linear;
+    }
+    100% {
+      /* 700ms — faded out alongside the rest of the overlay */
+      opacity: 0;
+      transform: scale(1.5);
+    }
   }
 
-  /* BIENVENUE — Fraunces, large, cream. Slight rise on entry. */
+  /* ---------------------------------------------------------------
+     BIENVENUE — large, light, tracked. Centered just above the
+     screen's vertical midline so it pairs with the road below.
+     Sub-text uses Inter for a sharp contrast against the Fraunces
+     display heading.
+     --------------------------------------------------------------- */
   .intro-text {
     position: absolute;
     left: 50%;
-    top: 58%;
+    top: 56%;
     transform: translate3d(-50%, 8px, 0);
     margin: 0;
     font-family: var(--font-display, "Fraunces"), Georgia, serif;
-    font-size: 32px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
     color: #F8F5EE;
+    z-index: 3;
     opacity: 0;
     will-change: transform, opacity;
-    animation: intro-text 800ms 800ms forwards;
+    /* in (1000-1500) → hold (1500-1700) → out (1700-2200) — 1200ms total
+       starting 1000ms after page load. */
+    animation: intro-text 1200ms 1000ms forwards;
   }
   @media (min-width: 768px) {
-    .intro-text { font-size: 48px; top: 56%; }
+    .intro-text {
+      font-size: 64px;
+      top: 54%;
+    }
   }
   @keyframes intro-text {
-    0%   { opacity: 0; transform: translate3d(-50%, 8px, 0); }
-    37.5% { opacity: 1; transform: translate3d(-50%, 0, 0); }
-    /* 37.5% of 800ms = 300ms in (i.e. t=1100ms total) — settled, then fade */
-    100% { opacity: 0; transform: translate3d(-50%, 0, 0); }
+    0%      {
+      opacity: 0;
+      transform: translate3d(-50%, 8px, 0);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    41.67%  {
+      /* 500ms in (= 1500ms total) — settled */
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0);
+      animation-timing-function: linear;
+    }
+    58.33%  {
+      /* 700ms in (= 1700ms total) — exit begins */
+      opacity: 1;
+      transform: translate3d(-50%, 0, 0);
+    }
+    100%    {
+      /* 1200ms in (= 2200ms total) — faded */
+      opacity: 0;
+      transform: translate3d(-50%, 0, 0);
+    }
   }
 
-  /* Reduced motion + landscape mobile — fully skip */
+  .intro-subline {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, 0);
+    /* Sits just below BIENVENUE — offset is the line height of BIENVENUE
+       plus the 12px gap. We use a margin-top on top of the absolute
+       position so it tracks the heading regardless of font size. */
+    margin: 56px 0 0;
+    font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(248, 245, 238, 0.75);
+    z-index: 3;
+    opacity: 0;
+    white-space: nowrap;
+    will-change: transform, opacity;
+    /* 900ms total: in 1300-1600, hold 1600-1700, out 1700-2200 */
+    animation: intro-subline 900ms 1300ms forwards;
+  }
+  @media (min-width: 768px) {
+    .intro-subline {
+      font-size: 16px;
+      top: 54%;
+      margin-top: 84px;
+    }
+  }
+  @keyframes intro-subline {
+    0%      {
+      opacity: 0;
+      transform: translate(-50%, 4px);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    33.33%  {
+      /* 300ms in (= 1600ms total) — settled at 75% per spec */
+      opacity: 0.75;
+      transform: translate(-50%, 0);
+    }
+    44.44%  {
+      /* 400ms in (= 1700ms total) — exit begins */
+      opacity: 0.75;
+      transform: translate(-50%, 0);
+    }
+    100%    {
+      opacity: 0;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  /* Reduced-motion + landscape mobile — fully skip */
   @media (prefers-reduced-motion: reduce) {
     .intro-overlay { display: none !important; }
   }
@@ -201,9 +358,9 @@
     }
 
     // Cleanup after the wave's exit completes. 100ms buffer past the
-    // 1600ms total so the final keyframe has settled.
+    // 2400ms total so the final keyframe has settled.
     setTimeout(function () {
       if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 1700);
+    }, 2500);
   })();
 </script>
