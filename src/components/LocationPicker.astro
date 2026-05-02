@@ -574,7 +574,6 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     if (!native || !trigger || !menu || !display) return;
 
     let isOpen = false;
-    let lastFocused: HTMLElement | null = null;
 
     // ---- Portaling for the mobile "centered" variant ------------------
     // Ancestors of `.lp` may have `transform`, `filter`, or `will-change:
@@ -682,7 +681,6 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
       lp.dataset.lpOpen = String(open);
 
       if (open) {
-        lastFocused = document.activeElement as HTMLElement;
         syncDisabledState();
         menu!.hidden = false;
         // Portal BEFORE applying inline position so the rect is measured
