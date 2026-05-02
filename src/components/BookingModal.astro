@@ -30,7 +30,9 @@ const dragHandleLabel =
   {/* Backdrop — click to close, fades in with the panel */}
   <div class="modal-backdrop" data-modal-backdrop aria-hidden="true"></div>
 
-  {/* Panel — bottom sheet on mobile, centered dialog on desktop */}
+  {/* Panel — bottom sheet on mobile, centered dialog on desktop.
+      Flex-column so the header is always pinned at the top of the panel
+      regardless of body scroll position. */}
   <div class="modal-panel" role="document" data-modal-panel>
     {/* Drag handle — mobile only. Also the primary drag target. */}
     <div
@@ -41,18 +43,24 @@ const dragHandleLabel =
       aria-label={dragHandleLabel}
     ></div>
 
-    <button
-      type="button"
-      class="modal-close"
-      data-modal-close
-      aria-label={locale === 'fr' ? 'Fermer' : locale === 'es' ? 'Cerrar' : locale === 'it' ? 'Chiudi' : 'Close'}
-    >
-      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </svg>
-    </button>
+    {/* Persistent top bar — always visible, never scrolls with the form.
+        Holds the eyebrow label + close button. Top padding accounts for
+        iOS safe-area-inset-top so it doesn't tuck under the notch. */}
+    <header class="modal-header">
+      <p class="modal-eyebrow">{strings.eyebrow}</p>
+      <button
+        type="button"
+        class="modal-close"
+        data-modal-close
+        aria-label={locale === 'fr' ? 'Fermer' : locale === 'es' ? 'Cerrar' : locale === 'it' ? 'Chiudi' : 'Close'}
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </header>
 
     {/* Accessible title — visually hidden because the slotted form has its own heading */}
     <h2 id={titleId} class="sr-only">{strings.heading}</h2>
@@ -89,7 +97,18 @@ const dragHandleLabel =
   .modal-panel {
     position: relative;
     width: 100%;
+    /* `100dvh` accounts for iOS Safari's collapsing URL bar; `vh` is
+       the fallback for browsers that don't support dvh. Subtract the
+       top safe area so the panel never paints behind the notch /
+       status bar in viewport-fit=cover. */
     max-height: 92vh;
+    max-height: calc(100dvh - max(20px, env(safe-area-inset-top, 0px)));
+    /* Padding here (not on header/body) keeps absolute children like the
+       grip positioned relative to the panel's visual top edge while
+       still pushing the flex content (header + body) clear of the
+       notch above and the home indicator below on mobile. */
+    padding-top: max(14px, env(safe-area-inset-top, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--color-paper);
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
@@ -97,6 +116,10 @@ const dragHandleLabel =
     transform: translateY(12px);
     opacity: 0;
     transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms var(--ease-out);
+    /* Flex column so the header pins to the top and the body fills the
+       remaining height + handles its own internal scroll. */
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
   /* While the user is actively drag-following, bypass the release transition
@@ -112,6 +135,11 @@ const dragHandleLabel =
     .modal-panel {
       width: min(640px, calc(100vw - 64px));
       max-height: min(88vh, 820px);
+      max-height: min(88dvh, 820px);
+      /* Desktop is a centered dialog with its own padding from the
+         outer modal — drop the mobile safe-area padding entirely. */
+      padding-top: 0;
+      padding-bottom: 0;
       border-radius: 20px;
       box-shadow: 0 30px 80px -12px rgba(0, 0, 0, 0.25);
       transform: translateY(16px) scale(0.985);
@@ -153,10 +181,49 @@ const dragHandleLabel =
     outline-offset: 3px;
   }
 
+  /* Persistent top bar — pinned at the top of the panel via flex-column.
+     Mobile safe-area is handled on the panel itself, so this header
+     only needs its own visual padding. The grip (absolute on the
+     panel) sits 8px below the panel's padding-top edge, which is
+     above the header content — they don't overlap visually. */
+  .modal-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 12px 20px;
+    background: var(--color-paper);
+    border-bottom: 1px solid transparent;
+    z-index: 2;
+    transition: border-color 200ms var(--ease-out);
+  }
+  /* When the body has scrolled, mark the header with a hairline divider
+     so it visually detaches from the (now-scrolling) content beneath. */
+  .modal.is-scrolled .modal-header {
+    border-bottom-color: color-mix(in oklab, var(--color-ink) 8%, transparent);
+  }
+  @media (min-width: 768px) {
+    .modal-header {
+      padding: 20px 24px 14px 28px;
+    }
+  }
+
+  .modal-eyebrow {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-graphite);
+    line-height: 1;
+    /* On mobile the grip overlaps the very top edge of the header; the
+       eyebrow sits below it visually thanks to the padding-top above. */
+  }
+
   .modal-close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
+    flex-shrink: 0;
     width: 38px;
     height: 38px;
     border: 0;
@@ -164,7 +231,6 @@ const dragHandleLabel =
     background: var(--color-cream);
     color: var(--color-ink);
     cursor: pointer;
-    z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -178,10 +244,13 @@ const dragHandleLabel =
   }
 
   .modal-body {
-    padding-top: 24px;
+    flex: 1 1 auto;
+    /* `min-height: 0` is required so the flex item is allowed to shrink
+       below its content height and the body's internal scroll engages. */
+    min-height: 0;
+    padding-top: 8px;
     padding-bottom: 16px;
     overflow-y: auto;
-    max-height: inherit;
     /* Don't bubble overscroll into the locked <body>. Without this,
        reaching the top/bottom of the form chains the scroll event up
        through the chain and causes the locked page to flicker on iOS
@@ -191,14 +260,32 @@ const dragHandleLabel =
        form doesn't reflow the layout when the scrollbar appears/disappears. */
     scrollbar-gutter: stable;
     /* When Tab-focus moves to an input, scroll-into-view should leave
-       room for the floating close button + drag handle at the top, and
-       a touch of breathing room at the bottom for sticky CTA shadows. */
-    scroll-padding-top: 60px;
+       room for the sticky header above. */
+    scroll-padding-top: 24px;
     scroll-padding-bottom: 24px;
+    /* iOS native momentum scrolling — silently ignored elsewhere. */
     -webkit-overflow-scrolling: touch;
+    /* Soft fade at the bottom so users see content can scroll further;
+       fades out the last 24px into the modal background. */
+    mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent 100%);
   }
   @media (min-width: 768px) {
-    .modal-body { padding-top: 20px; }
+    .modal-body { padding-top: 4px; }
+  }
+
+  /* When the body is fully scrolled (or non-scrollable in the first
+     place), drop the bottom fade so the last form field reads cleanly. */
+  .modal.is-at-bottom .modal-body {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  /* Hide the form's internal eyebrow when it's rendered inside the modal —
+     the modal-header already shows it, no need to repeat. The standalone
+     home-page form keeps its eyebrow because it's not inside `.modal-body`. */
+  .modal-body :global(.booking-form-eyebrow) {
+    display: none;
   }
 
   /* Neutralise the slotted <section>'s vertical padding + max width — the modal
@@ -277,6 +364,30 @@ const dragHandleLabel =
 
     let lastFocus: HTMLElement | null = null;
     let savedScroll = 0;
+
+    // ---- Internal scroll state tracking --------------------------------
+    // - .is-scrolled marks the header with a hairline divider when the
+    //   user has moved past the top of the form.
+    // - .is-at-bottom drops the bottom mask-image fade so the last form
+    //   field doesn't sit half-faded when the user has reached the end
+    //   of the form (or the form is short enough to not need scrolling).
+    function updateScrollState() {
+      if (!modalBody) return;
+      const isScrollable = modalBody.scrollHeight > modalBody.clientHeight + 2;
+      const atBottom =
+        !isScrollable ||
+        modalBody.scrollTop + modalBody.clientHeight >= modalBody.scrollHeight - 4;
+      const atTop = modalBody.scrollTop <= 4;
+      modal.classList.toggle('is-scrolled', !atTop);
+      modal.classList.toggle('is-at-bottom', atBottom);
+    }
+    modalBody?.addEventListener('scroll', updateScrollState, { passive: true });
+    // Recompute when the panel resizes (e.g. orientation change, soft
+    // keyboard slide, or expandable form rows toggling).
+    if ('ResizeObserver' in window && modalBody) {
+      const ro = new ResizeObserver(() => updateScrollState());
+      ro.observe(modalBody);
+    }
 
     // ---- iOS-safe page-scroll lock --------------------------------
     // `body { overflow: hidden }` alone doesn't actually lock scroll on
@@ -384,6 +495,8 @@ const dragHandleLabel =
       // the hero CTA, and it lands at the submit button instead of the
       // pickup field).
       if (modalBody) modalBody.scrollTop = 0;
+      // Sync header-divider + bottom-fade classes after scrollTop reset
+      requestAnimationFrame(updateScrollState);
       // Double rAF so the initial styles apply before is-open kicks in (smooth transition)
       requestAnimationFrame(() => {
         requestAnimationFrame(() => modal.classList.add('is-open'));
