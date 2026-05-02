@@ -8,16 +8,19 @@ interface Props {
 const { locale } = Astro.props;
 const s = t(locale).howItWorks;
 const steps: { title: string; body: string }[] = s.steps;
+const labels = {
+  fr: { prev: 'Précédent', next: 'Suivant' },
+  en: { prev: 'Previous', next: 'Next' },
+  es: { prev: 'Anterior', next: 'Siguiente' },
+  it: { prev: 'Precedente', next: 'Successivo' },
+}[locale];
 ---
 
 {/*
-  Reworked HowItWorks — no sticky scroll-jacking, no JS coupling.
-  Mobile (<768px): 1-column stack.
-  Tablet  (≥768):  2-column grid.
-  Desktop (≥1024): 4-column grid, each card with a big background numeral
-                   that always reads (no scroll-driven crossfade).
-  Reveal: existing reveal.js applies opacity/translate via [data-reveal];
-          per-card stagger comes from a transition-delay tied to --i.
+  Horizontal carousel — works on every viewport. Native scroll-snap
+  handles touch swipe / trackpad scroll; the prev/next buttons (visible
+  on tablet+) call scrollBy() for click-based navigation. No scroll-
+  jacking, no sticky positioning — just flex + overflow-x.
 */}
 <section class="hiw" aria-labelledby="hiw-heading">
   <div class="page-x mx-auto max-w-[1200px] hiw-header">
@@ -25,10 +28,22 @@ const steps: { title: string; body: string }[] = s.steps;
       <p class="meta-label mb-3">{s.eyebrow}</p>
       <h2 id="hiw-heading" class="h2 text-balance">{s.heading}</h2>
     </header>
+    <div class="hiw-controls" aria-hidden="true">
+      <button type="button" class="hiw-btn" data-hiw-prev aria-label={labels.prev}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button type="button" class="hiw-btn" data-hiw-next aria-label={labels.next}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
-  <div class="page-x mx-auto max-w-[1200px]">
-    <ol class="hiw-steps">
+  <div class="hiw-viewport">
+    <ol class="hiw-track" data-hiw-track tabindex="0" aria-label={s.heading}>
       {steps.map((step, i) => (
         <li class="hiw-step" data-reveal style={`--i: ${i}`}>
           <span class="hiw-step-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
@@ -55,27 +70,116 @@ const steps: { title: string; body: string }[] = s.steps;
     padding-bottom: clamp(60px, 9vw, 110px);
   }
   .hiw-header {
-    margin-bottom: clamp(40px, 6vw, 72px);
-  }
-
-  /* ── Steps grid ── */
-  .hiw-steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 20px;
-    grid-template-columns: 1fr;
+    margin-bottom: clamp(32px, 5vw, 56px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
   @media (min-width: 768px) {
-    .hiw-steps { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-  }
-  @media (min-width: 1024px) {
-    .hiw-steps { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .hiw-header {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 40px;
+    }
   }
 
-  /* ── Card ── */
+  /* ── Prev/next controls ── */
+  .hiw-controls {
+    display: none;
+    gap: 12px;
+  }
+  @media (min-width: 768px) {
+    .hiw-controls { display: inline-flex; }
+  }
+  .hiw-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--color-smoke);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+      border-color 240ms var(--ease-out),
+      background-color 240ms var(--ease-out),
+      color 240ms var(--ease-out),
+      transform 240ms var(--ease-out),
+      opacity 240ms var(--ease-out);
+  }
+  .hiw-btn svg { width: 18px; height: 18px; }
+  .hiw-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-paper);
+    transform: translateY(-1px);
+  }
+  .hiw-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .hiw-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* ── Viewport (full-bleed mask) ── */
+  .hiw-viewport {
+    position: relative;
+  }
+  /* Edge fade hints — desktop only, where the masking reads */
+  @media (min-width: 1024px) {
+    .hiw-viewport::before,
+    .hiw-viewport::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 48px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .hiw-viewport::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--color-cream) 0%, transparent 100%);
+    }
+    .hiw-viewport::after {
+      right: 0;
+      background: linear-gradient(270deg, var(--color-cream) 0%, transparent 100%);
+    }
+  }
+
+  /* ── Scroll track ── */
+  .hiw-track {
+    list-style: none;
+    margin: 0;
+    /* Side padding centers the first/last card within the 1200-max layout
+       grid while still letting the track be edge-to-edge for snap. */
+    padding: 8px max(24px, calc((100vw - 1200px) / 2)) 32px;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: max(24px, calc((100vw - 1200px) / 2));
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .hiw-track::-webkit-scrollbar { display: none; }
+  .hiw-track:focus-visible { outline: none; }
+
+  /* Card width per breakpoint — sized so the user always sees that there
+     are more cards to the right (avoids the "looks like a static grid"
+     problem when 4 cards fit cleanly in the viewport). */
   .hiw-step {
+    flex: 0 0 calc(100% - 48px);
+    max-width: 360px;
+    scroll-snap-align: start;
+
     position: relative;
     padding: 32px 28px 30px;
     border-radius: var(--radius-card, 14px);
@@ -88,6 +192,16 @@ const steps: { title: string; body: string }[] = s.steps;
       box-shadow 360ms var(--ease-out),
       border-color 360ms var(--ease-out);
   }
+  @media (min-width: 768px) {
+    .hiw-step { flex: 0 0 calc(50% - 32px); max-width: 380px; }
+  }
+  @media (min-width: 1024px) {
+    .hiw-step { flex: 0 0 340px; max-width: 340px; }
+  }
+  @media (min-width: 1280px) {
+    .hiw-step { flex: 0 0 360px; max-width: 360px; }
+  }
+
   .hiw-step:hover {
     transform: translateY(-6px);
     box-shadow: 0 24px 60px -22px rgba(26, 26, 26, 0.24);
@@ -98,9 +212,7 @@ const steps: { title: string; body: string }[] = s.steps;
     transform: translate(0, -4px);
   }
 
-  /* Big background numeral — always visible (no scroll crossfade), sits
-     behind the content. Pinned top-right, slightly oversized so it reads
-     as a poster numeral without crowding the title. */
+  /* Big background numeral — pinned top-right, always visible */
   .hiw-step-num {
     position: absolute;
     top: -14px;
@@ -151,35 +263,77 @@ const steps: { title: string; body: string }[] = s.steps;
     letter-spacing: -0.01em;
     color: var(--color-ink);
   }
-
   .hiw-step-text {
     margin: 0;
     font-size: 14px;
     line-height: 1.55;
     color: var(--color-graphite);
   }
-
   @media (min-width: 768px) {
     .hiw-step-title { font-size: 24px; }
     .hiw-step-text  { font-size: 15px; }
   }
-  @media (min-width: 1280px) {
-    .hiw-step-title { font-size: 22px; }
-  }
 
-  /* ── Reveal stagger — global [data-reveal] in global.css already
-     handles the opacity/translate; we just sequence them via --i. ── */
+  /* Reveal stagger — global [data-reveal] handles opacity/translate;
+     we just sequence them. */
   .hiw-step[data-reveal] {
     transition-delay: calc(var(--i, 0) * 90ms);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .hiw-track { scroll-behavior: auto; }
     .hiw-step,
     .hiw-step:hover,
     .hiw-step .hiw-step-num,
-    .hiw-step:hover .hiw-step-num {
+    .hiw-step:hover .hiw-step-num,
+    .hiw-btn,
+    .hiw-btn:hover {
       transition: none;
       transform: none;
     }
   }
 </style>
+
+<script>
+  // Wire up prev/next buttons. Re-runs after every Astro view transition.
+  function run() {
+    const track = document.querySelector<HTMLElement>('[data-hiw-track]');
+    const prev = document.querySelector<HTMLButtonElement>('[data-hiw-prev]');
+    const next = document.querySelector<HTMLButtonElement>('[data-hiw-next]');
+    if (!track || !prev || !next) return;
+
+    const stepDistance = () => {
+      const card = track.querySelector<HTMLElement>('.hiw-step');
+      if (!card) return 360;
+      const gapStr = getComputedStyle(track).gap || '0px';
+      const gap = parseFloat(gapStr) || 0;
+      return card.getBoundingClientRect().width + gap;
+    };
+
+    function scrollByStep(direction: 1 | -1) {
+      track!.scrollBy({ left: stepDistance() * direction, behavior: 'smooth' });
+    }
+
+    function refreshButtons() {
+      const max = track!.scrollWidth - track!.clientWidth;
+      const x = track!.scrollLeft;
+      // 1px tolerance to avoid flicker at edges
+      prev!.disabled = x <= 1;
+      next!.disabled = x >= max - 1;
+    }
+
+    prev.addEventListener('click', () => scrollByStep(-1));
+    next.addEventListener('click', () => scrollByStep(1));
+    track.addEventListener('scroll', refreshButtons, { passive: true });
+    window.addEventListener('resize', refreshButtons);
+
+    // Keyboard nav for the focused track (←/→).
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); scrollByStep(1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollByStep(-1); }
+    });
+
+    refreshButtons();
+  }
+  document.addEventListener('astro:page-load', run);
+</script>
