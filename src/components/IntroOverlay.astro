@@ -2,17 +2,17 @@
 /**
  * Welcome wave intro overlay — plays once per session, on the home page only.
  *
- * Sequence (1.44s total):
- *   0     →  480ms   4 horizontal color bands stagger in from the right —
+ * Sequence (1.728s total):
+ *   0     →  576ms   4 horizontal color bands stagger in from the right —
  *                    deepest terracotta on top → dusty cream at bottom,
- *                    ~90ms stagger top-to-bottom
- *   480   → 1020ms   Hold; circular "Bienvenue à Paris" stamp fades in
+ *                    ~108ms stagger top-to-bottom
+ *   576   → 1224ms   Hold; circular "Bienvenue à Paris" stamp fades in
  *                    centered in the viewport (only foreground element)
- *   480ms           BaseLayout's `intro-pending` class is removed — page
+ *   576ms           BaseLayout's `intro-pending` class is removed — page
  *                    content paints behind the (still-covering) bands,
  *                    so it's ready when the bands slide off
- *   1020  → 1440ms   Bands stagger out — bottom (cream) first, top last
- *   1520ms          Cleanup: overlay removed from DOM
+ *   1224  → 1728ms   Bands stagger out — bottom (cream) first, top last
+ *   1824ms          Cleanup: overlay removed from DOM
  *
  * Visual: warm tonal sunset poster — 4 stacked horizontal color bands
  * tracking the brand palette (deep terracotta → terracotta → warm rose →
@@ -62,8 +62,11 @@
   </svg>
 
   <div class="intro-stamp" aria-hidden="true">
+    <span class="intro-stamp-mark">✦</span>
     <span class="intro-stamp-line">Bienvenue</span>
+    <span class="intro-stamp-rule"></span>
     <span class="intro-stamp-line">à Paris</span>
+    <span class="intro-stamp-tag">Paris · FR</span>
   </div>
 </div>
 
@@ -105,10 +108,10 @@
     transform: translate3d(100vw, 0, 0); /* off-screen baseline */
     pointer-events: none;
   }
-  .intro-band--b1 { top: 0;    height: 30%; z-index: 4; animation: intro-band-b1 1440ms forwards; }
-  .intro-band--b2 { top: 22%;  height: 30%; z-index: 3; animation: intro-band-b2 1440ms forwards; }
-  .intro-band--b3 { top: 44%;  height: 30%; z-index: 2; animation: intro-band-b3 1440ms forwards; }
-  .intro-band--b4 { top: 66%;  height: 34%; z-index: 1; animation: intro-band-b4 1440ms forwards; }
+  .intro-band--b1 { top: 0;    height: 30%; z-index: 4; animation: intro-band-b1 1728ms forwards; }
+  .intro-band--b2 { top: 22%;  height: 30%; z-index: 3; animation: intro-band-b2 1728ms forwards; }
+  .intro-band--b3 { top: 44%;  height: 30%; z-index: 2; animation: intro-band-b3 1728ms forwards; }
+  .intro-band--b4 { top: 66%;  height: 34%; z-index: 1; animation: intro-band-b4 1728ms forwards; }
 
   /* Brand-tonal palette — every color is the accent or a mix of accent +
      cream / accent + black. Sets fill via CSS so we get the variable. */
@@ -191,9 +194,15 @@
   }
 
   /* ── Postmark-style circular stamp — the only foreground element.
-     Centered in the viewport, larger and bolder since it stands alone
-     (BIENVENUE text + arrow have been removed). Double-ringed (solid
-     outer + dashed inner) for authentic stamp character. ── */
+     Centered in the viewport. Five-element layout for that filled-out
+     passport-stamp look:
+       • top  ornament (✦)        small decorative mark, scaled by font-size
+       • main line   (Bienvenue)  uppercase, bold, primary
+       • rule        (—)          thin horizontal divider, breaks the lines
+       • main line   (à Paris)    uppercase, bold, primary
+       • bottom tag  (Paris · FR) tiny letterspaced caption, half opacity
+     Wrapped in a solid outer + dashed inner ring for stamp character.
+   ── */
   .intro-stamp {
     position: absolute;
     left: 50%;
@@ -208,12 +217,13 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 6px;
+    gap: 4px;
+    padding: 22px 28px;
     box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.28);
     z-index: 10;
     opacity: 0;
     will-change: transform, opacity;
-    animation: intro-stamp 540ms 780ms forwards;
+    animation: intro-stamp 648ms 936ms forwards;
   }
   /* Inner dashed ring — postmark detail */
   .intro-stamp::before {
@@ -224,6 +234,12 @@
     border: 1.5px dashed rgba(248, 245, 238, 0.7);
     pointer-events: none;
   }
+  .intro-stamp-mark {
+    font-size: 14px;
+    line-height: 1;
+    color: rgba(248, 245, 238, 0.95);
+    margin-bottom: 2px;
+  }
   .intro-stamp-line {
     font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
     font-size: 18px;
@@ -231,7 +247,25 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-cream, #F8F5EE);
-    line-height: 1.25;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .intro-stamp-rule {
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: rgba(248, 245, 238, 0.55);
+    margin: 2px 0;
+  }
+  .intro-stamp-tag {
+    font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(248, 245, 238, 0.65);
+    line-height: 1;
+    margin-top: 4px;
     white-space: nowrap;
   }
   @media (min-width: 768px) {
@@ -239,9 +273,18 @@
       width: 320px;
       height: 320px;
       border-width: 4px;
+      padding: 32px 40px;
+      gap: 6px;
     }
     .intro-stamp::before { inset: 20px; border-width: 1.5px; }
+    .intro-stamp-mark { font-size: 18px; margin-bottom: 4px; }
     .intro-stamp-line { font-size: 24px; letter-spacing: 0.18em; }
+    .intro-stamp-rule { width: 44px; margin: 4px 0; }
+    .intro-stamp-tag {
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      margin-top: 6px;
+    }
   }
   @keyframes intro-stamp {
     0% {
@@ -283,18 +326,18 @@
       return;
     }
 
-    // Reveal page content once bands have fully covered the screen (480ms).
+    // Reveal page content once bands have fully covered the screen (576ms).
     // BaseLayout's `intro-pending` class hid <main>/<nav>/<footer> through
     // first paint; lifting it here lets the page paint behind the still-
     // covering bands so it's ready by the time bands begin their exit
-    // (1020ms). No flash either way.
+    // (1224ms). No flash either way.
     setTimeout(function () {
       document.documentElement.classList.remove('intro-pending');
-    }, 480);
+    }, 576);
 
-    // Cleanup after the band exit completes. 80ms buffer past 1440ms.
+    // Cleanup after the band exit completes. ~96ms buffer past 1728ms.
     setTimeout(function () {
       if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 1520);
+    }, 1824);
   })();
 </script>
