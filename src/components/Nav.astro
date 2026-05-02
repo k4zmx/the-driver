@@ -32,11 +32,11 @@ const currentLocale = t(locale);
     >
       <span class="brand-glow" aria-hidden="true"></span>
       <img
-        src="/driverlogo.jpg"
+        src="/newlogo.png"
         alt="The Driver"
         class="brand-logo"
-        width="1678"
-        height="1184"
+        width="1688"
+        height="964"
         decoding="async"
         fetchpriority="high"
       />
@@ -200,19 +200,10 @@ const currentLocale = t(locale);
   }
 
   /* ---------------------------------------------------------------
-     Brand — cream marks directly on the navy nav (no plaque). The
-     filter chain converts the dark-on-white JPG into cream-on-near-
-     black, then `mix-blend-mode: lighten` drops the inverted bg
-     against the navy nav backdrop:
-
-       invert(1)               flips dark↔light  (marks → white,  bg → black)
-       contrast(1.5)           pushes off-whites/off-blacks of the JPG to
-                               TRUE extremes — without this, the inverted
-                               bg is near-black-but-not-quite, and lighten
-                               leaves a faint rectangle.
-       sepia(0.5) saturate(0.6) tints the white marks toward cream.
-       lighten blend           per-channel max() vs navy backdrop —
-                               pure-black bg loses, cream marks win.
+     Brand — white marks directly on the navy nav. The PNG is already
+     white-on-transparent so it renders cleanly without any filter
+     tricks; hover layers two accent-colored drop-shadows that follow
+     the silhouette for a halo effect.
    --------------------------------------------------------------- */
   .brand {
     position: relative;
@@ -269,12 +260,6 @@ const currentLocale = t(locale);
     display: block;
     height: 30px;
     width: auto;
-    /* Pure white marks — drop the sepia/saturate tint, keep just the
-       invert + contrast pair. Contrast pushes the JPG's off-whites and
-       off-blacks to true #FFF / #000 so `lighten` against the navy
-       backdrop drops the inverted bg without leaving a halo. */
-    filter: invert(1) contrast(1.5);
-    mix-blend-mode: lighten;
     transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), filter 320ms var(--ease-out);
     z-index: 1;
   }
@@ -285,8 +270,6 @@ const currentLocale = t(locale);
   .brand:focus-visible .brand-logo {
     transform: scale(1.04);
     filter:
-      invert(1)
-      contrast(1.5)
       drop-shadow(0 0 8px color-mix(in oklab, var(--color-accent) 55%, transparent))
       drop-shadow(0 0 18px color-mix(in oklab, var(--color-accent) 25%, transparent));
   }
