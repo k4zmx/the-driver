@@ -2,17 +2,17 @@
 /**
  * Welcome wave intro overlay — plays once per session, on the home page only.
  *
- * Sequence (1.8s total — 25% faster than the previous 2.4s pacing):
- *   0     →  600ms   4 horizontal color bands stagger in from the right —
+ * Sequence (1.44s total — 20% faster than the previous 1.8s pacing):
+ *   0     →  480ms   4 horizontal color bands stagger in from the right —
  *                    deepest terracotta on top → dusty cream at bottom,
- *                    ~113ms stagger top-to-bottom
- *   600   → 1275ms   Hold; cream arrow draws across upper darker band,
- *                    BIENVENUE + "Bienvenue à Paris" subline fade in
- *   600ms           BaseLayout's `intro-pending` class is removed — page
+ *                    ~90ms stagger top-to-bottom
+ *   480   → 1020ms   Hold; cream arrow draws across upper darker band,
+ *                    BIENVENUE + "Bienvenue à Paris" stamp fade in
+ *   480ms           BaseLayout's `intro-pending` class is removed — page
  *                    content paints behind the (still-covering) bands,
  *                    so it's ready when the bands slide off
- *   1275  → 1800ms   Bands stagger out — bottom (cream) first, top last
- *   1900ms          Cleanup: overlay removed from DOM
+ *   1020  → 1440ms   Bands stagger out — bottom (cream) first, top last
+ *   1520ms          Cleanup: overlay removed from DOM
  *
  * Visual: warm tonal sunset poster — 4 stacked horizontal color bands
  * tracking the brand palette (deep terracotta → terracotta → warm rose →
@@ -83,7 +83,10 @@
   </svg>
 
   <p class="intro-text">BIENVENUE</p>
-  <p class="intro-subline">Bienvenue à Paris</p>
+  <div class="intro-stamp" aria-hidden="true">
+    <span class="intro-stamp-line">Bienvenue</span>
+    <span class="intro-stamp-line">à Paris</span>
+  </div>
 </div>
 
 <style>
@@ -124,10 +127,10 @@
     transform: translate3d(100vw, 0, 0); /* off-screen baseline */
     pointer-events: none;
   }
-  .intro-band--b1 { top: 0;    height: 30%; z-index: 4; animation: intro-band-b1 1800ms forwards; }
-  .intro-band--b2 { top: 22%;  height: 30%; z-index: 3; animation: intro-band-b2 1800ms forwards; }
-  .intro-band--b3 { top: 44%;  height: 30%; z-index: 2; animation: intro-band-b3 1800ms forwards; }
-  .intro-band--b4 { top: 66%;  height: 34%; z-index: 1; animation: intro-band-b4 1800ms forwards; }
+  .intro-band--b1 { top: 0;    height: 30%; z-index: 4; animation: intro-band-b1 1440ms forwards; }
+  .intro-band--b2 { top: 22%;  height: 30%; z-index: 3; animation: intro-band-b2 1440ms forwards; }
+  .intro-band--b3 { top: 44%;  height: 30%; z-index: 2; animation: intro-band-b3 1440ms forwards; }
+  .intro-band--b4 { top: 66%;  height: 34%; z-index: 1; animation: intro-band-b4 1440ms forwards; }
 
   /* Brand-tonal palette — every color is the accent or a mix of accent +
      cream / accent + black. Sets fill via CSS so we get the variable. */
@@ -225,7 +228,7 @@
     z-index: 10;
     opacity: 0;
     will-change: opacity;
-    animation: intro-arrow-fade 1800ms forwards;
+    animation: intro-arrow-fade 1440ms forwards;
   }
   @media (min-width: 768px) {
     .intro-arrow {
@@ -235,7 +238,7 @@
   }
   .intro-arrow-shaft {
     will-change: stroke-dashoffset;
-    animation: intro-arrow-draw 450ms 600ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
+    animation: intro-arrow-draw 360ms 480ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
   }
   .intro-arrow-head {
     opacity: 0;
@@ -243,7 +246,7 @@
     transform-origin: center;
     transform-box: fill-box;
     will-change: transform, opacity;
-    animation: intro-arrow-head 165ms 1050ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: intro-arrow-head 132ms 840ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   @keyframes intro-arrow-draw {
     to { stroke-dashoffset: 0; }
@@ -281,7 +284,7 @@
     z-index: 10;
     opacity: 0;
     will-change: transform, opacity;
-    animation: intro-text 900ms 750ms forwards;
+    animation: intro-text 720ms 600ms forwards;
   }
   @media (min-width: 768px) {
     .intro-text { font-size: 64px; top: 36%; }
@@ -307,48 +310,75 @@
     }
   }
 
-  .intro-subline {
+  /* ── Postmark-style circular stamp — replaces the old fading subline.
+     Sits below BIENVENUE, double-ringed (solid outer + dashed inner) for
+     stamp authenticity, full cream opacity, slight scale-in on entry. ── */
+  .intro-stamp {
     position: absolute;
     left: 50%;
-    top: 38%;
-    transform: translate(-50%, 0);
-    margin: 56px 0 0;
-    font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(248, 245, 238, 0.75);
+    top: 56%;
+    transform: translate(-50%, -50%) scale(0.85);
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    border: 2px solid var(--color-cream, #F8F5EE);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 2px;
+    box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.18);
     z-index: 10;
     opacity: 0;
-    white-space: nowrap;
     will-change: transform, opacity;
-    animation: intro-subline 675ms 975ms forwards;
+    animation: intro-stamp 540ms 780ms forwards;
+  }
+  /* Inner dashed ring — postmark detail */
+  .intro-stamp::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    border: 1px dashed rgba(248, 245, 238, 0.65);
+    pointer-events: none;
+  }
+  .intro-stamp-line {
+    font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-cream, #F8F5EE);
+    line-height: 1.25;
+    white-space: nowrap;
   }
   @media (min-width: 768px) {
-    .intro-subline {
-      font-size: 16px;
-      top: 36%;
-      margin-top: 84px;
+    .intro-stamp {
+      width: 144px;
+      height: 144px;
+      top: 54%;
     }
+    .intro-stamp::before { inset: 9px; }
+    .intro-stamp-line { font-size: 13px; letter-spacing: 0.18em; }
   }
-  @keyframes intro-subline {
+  @keyframes intro-stamp {
     0% {
       opacity: 0;
-      transform: translate(-50%, 4px);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translate(-50%, -50%) scale(0.85) rotate(-3deg);
+      animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    33.33% { /* 300ms in — settled */
-      opacity: 0.75;
-      transform: translate(-50%, 0);
+    33.33% { /* settled — slight rotation slap for stamp feel */
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(-2deg);
     }
-    44.44% { /* 400ms in — exit begins */
-      opacity: 0.75;
-      transform: translate(-50%, 0);
+    55.56% { /* hold */
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(-2deg);
     }
     100% {
       opacity: 0;
-      transform: translate(-50%, 0);
+      transform: translate(-50%, -50%) scale(1) rotate(-2deg);
     }
   }
 
@@ -372,18 +402,18 @@
       return;
     }
 
-    // Reveal page content once bands have fully covered the screen (600ms).
+    // Reveal page content once bands have fully covered the screen (480ms).
     // BaseLayout's `intro-pending` class hid <main>/<nav>/<footer> through
     // first paint; lifting it here lets the page paint behind the still-
     // covering bands so it's ready by the time bands begin their exit
-    // (1275ms). No flash either way.
+    // (1020ms). No flash either way.
     setTimeout(function () {
       document.documentElement.classList.remove('intro-pending');
-    }, 600);
+    }, 480);
 
-    // Cleanup after the band exit completes. 100ms buffer past 1800ms.
+    // Cleanup after the band exit completes. 80ms buffer past 1440ms.
     setTimeout(function () {
       if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 1900);
+    }, 1520);
   })();
 </script>
