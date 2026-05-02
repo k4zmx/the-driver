@@ -269,11 +269,11 @@ const currentLocale = t(locale);
     display: block;
     height: 30px;
     width: auto;
-    filter:
-      invert(1)
-      contrast(1.5)
-      sepia(0.5)
-      saturate(0.6);
+    /* Pure white marks — drop the sepia/saturate tint, keep just the
+       invert + contrast pair. Contrast pushes the JPG's off-whites and
+       off-blacks to true #FFF / #000 so `lighten` against the navy
+       backdrop drops the inverted bg without leaving a halo. */
+    filter: invert(1) contrast(1.5);
     mix-blend-mode: lighten;
     transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), filter 320ms var(--ease-out);
     z-index: 1;
@@ -287,8 +287,6 @@ const currentLocale = t(locale);
     filter:
       invert(1)
       contrast(1.5)
-      sepia(0.5)
-      saturate(0.6)
       drop-shadow(0 0 8px color-mix(in oklab, var(--color-accent) 55%, transparent))
       drop-shadow(0 0 18px color-mix(in oklab, var(--color-accent) 25%, transparent));
   }
