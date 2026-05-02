@@ -395,6 +395,16 @@ const dragHandleLabel =
       // Consume the URL state so refresh doesn't replay the open.
       cleanUrlState();
 
+      // Force-reveal any [data-reveal] elements nested in the modal.
+      // The page-load IntersectionObserver observed them while the modal
+      // was still `hidden` (display:none), and depending on browser timing
+      // it may not fire on the display change — leaving split-heading
+      // words stuck at opacity 0 with their layout space reserved (a
+      // visible "blank gap" above the form description).
+      panel.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        el.classList.add('is-visible');
+      });
+
       // Focus first focusable inside (close button or first input).
       // preventScroll keeps the modal-body at top — without it the
       // browser auto-scrolls into the focused element.
