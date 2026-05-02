@@ -2,12 +2,12 @@
 /**
  * Welcome wave intro overlay — plays once per session, on the home page only.
  *
- * Sequence (1.44s total — 20% faster than the previous 1.8s pacing):
+ * Sequence (1.44s total):
  *   0     →  480ms   4 horizontal color bands stagger in from the right —
  *                    deepest terracotta on top → dusty cream at bottom,
  *                    ~90ms stagger top-to-bottom
- *   480   → 1020ms   Hold; cream arrow draws across upper darker band,
- *                    BIENVENUE + "Bienvenue à Paris" stamp fade in
+ *   480   → 1020ms   Hold; circular "Bienvenue à Paris" stamp fades in
+ *                    centered in the viewport (only foreground element)
  *   480ms           BaseLayout's `intro-pending` class is removed — page
  *                    content paints behind the (still-covering) bands,
  *                    so it's ready when the bands slide off
@@ -61,28 +61,6 @@
     <path d="M 0 0 L 100 0 L 100 30 L 0 30 Z" />
   </svg>
 
-  {/* Bolder cream arrow with arrowhead — unchanged from previous round.
-      Sits over the darker top bands so the cream stroke has high contrast. */}
-  <svg class="intro-arrow" viewBox="0 0 320 50" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <path
-      class="intro-arrow-shaft"
-      d="M 20 25 Q 100 5, 180 25 T 290 25"
-      fill="none"
-      stroke="#F8F5EE"
-      stroke-width="4"
-      stroke-linecap="round"
-      pathLength="100"
-      stroke-dasharray="100"
-      stroke-dashoffset="100"
-    />
-    <polygon
-      class="intro-arrow-head"
-      points="298,25 282,17 282,33"
-      fill="#F8F5EE"
-    />
-  </svg>
-
-  <p class="intro-text">BIENVENUE</p>
   <div class="intro-stamp" aria-hidden="true">
     <span class="intro-stamp-line">Bienvenue</span>
     <span class="intro-stamp-line">à Paris</span>
@@ -212,123 +190,26 @@
     100% { transform: translate3d(100vw, 0, 0); }
   }
 
-  /* ---------------------------------------------------------------
-     Cream arrow — bolder stroke, S-curve, draws across the upper
-     darker bands during hold. Position shifted up so it sits over
-     band 1 + band 2 (deep terracotta + terracotta) — high contrast
-     for the cream stroke and the BIENVENUE text below it.
-     --------------------------------------------------------------- */
-  .intro-arrow {
-    position: absolute;
-    left: 50%;
-    top: 28%;
-    width: min(60vw, 220px);
-    height: auto;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-    opacity: 0;
-    will-change: opacity;
-    animation: intro-arrow-fade 1440ms forwards;
-  }
-  @media (min-width: 768px) {
-    .intro-arrow {
-      width: min(50vw, 320px);
-      top: 26%;
-    }
-  }
-  .intro-arrow-shaft {
-    will-change: stroke-dashoffset;
-    animation: intro-arrow-draw 360ms 480ms cubic-bezier(0.65, 0.05, 0.36, 1) forwards;
-  }
-  .intro-arrow-head {
-    opacity: 0;
-    transform: scale(0.6);
-    transform-origin: center;
-    transform-box: fill-box;
-    will-change: transform, opacity;
-    animation: intro-arrow-head 132ms 840ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-  @keyframes intro-arrow-draw {
-    to { stroke-dashoffset: 0; }
-  }
-  @keyframes intro-arrow-head {
-    to { opacity: 1; transform: scale(1); }
-  }
-  @keyframes intro-arrow-fade {
-    /* Hidden behind off-screen bands during entry */
-    0%, 33.33% { opacity: 0; }
-    35%        { opacity: 1; }
-    /* 1700ms (70.83%) — bands begin exit, arrow fades with text */
-    70.83%     { opacity: 1; }
-    91.67%     { opacity: 0; } /* 2200ms — fully faded */
-    100%       { opacity: 0; }
-  }
-
-  /* ---------------------------------------------------------------
-     BIENVENUE + subline — typography unchanged, but vertical position
-     shifted up so the text sits on band 2 (base terracotta — viewport
-     22-52%). Cream-on-terracotta keeps high contrast; on the lighter
-     bottom bands the cream text would wash out.
-     --------------------------------------------------------------- */
-  .intro-text {
-    position: absolute;
-    left: 50%;
-    top: 38%;
-    transform: translate3d(-50%, 8px, 0);
-    margin: 0;
-    font-family: var(--font-display, "Fraunces"), Georgia, serif;
-    font-size: 38px;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    color: #F8F5EE;
-    z-index: 10;
-    opacity: 0;
-    will-change: transform, opacity;
-    animation: intro-text 720ms 600ms forwards;
-  }
-  @media (min-width: 768px) {
-    .intro-text { font-size: 64px; top: 36%; }
-  }
-  @keyframes intro-text {
-    0% {
-      opacity: 0;
-      transform: translate3d(-50%, 8px, 0);
-      animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    41.67% { /* 500ms in — settled */
-      opacity: 1;
-      transform: translate3d(-50%, 0, 0);
-      animation-timing-function: linear;
-    }
-    58.33% { /* 700ms in — exit begins */
-      opacity: 1;
-      transform: translate3d(-50%, 0, 0);
-    }
-    100% {
-      opacity: 0;
-      transform: translate3d(-50%, 0, 0);
-    }
-  }
-
-  /* ── Postmark-style circular stamp — replaces the old fading subline.
-     Sits below BIENVENUE, double-ringed (solid outer + dashed inner) for
-     stamp authenticity, full cream opacity, slight scale-in on entry. ── */
+  /* ── Postmark-style circular stamp — the only foreground element.
+     Centered in the viewport, larger and bolder since it stands alone
+     (BIENVENUE text + arrow have been removed). Double-ringed (solid
+     outer + dashed inner) for authentic stamp character. ── */
   .intro-stamp {
     position: absolute;
     left: 50%;
-    top: 56%;
+    top: 50%;
     transform: translate(-50%, -50%) scale(0.85);
-    width: 116px;
-    height: 116px;
+    width: 220px;
+    height: 220px;
     border-radius: 50%;
-    border: 2px solid var(--color-cream, #F8F5EE);
+    border: 3px solid var(--color-cream, #F8F5EE);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 2px;
-    box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.18);
+    gap: 6px;
+    box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.28);
     z-index: 10;
     opacity: 0;
     will-change: transform, opacity;
@@ -338,14 +219,14 @@
   .intro-stamp::before {
     content: '';
     position: absolute;
-    inset: 7px;
+    inset: 14px;
     border-radius: 50%;
-    border: 1px dashed rgba(248, 245, 238, 0.65);
+    border: 1.5px dashed rgba(248, 245, 238, 0.7);
     pointer-events: none;
   }
   .intro-stamp-line {
     font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
-    font-size: 11px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -355,12 +236,12 @@
   }
   @media (min-width: 768px) {
     .intro-stamp {
-      width: 144px;
-      height: 144px;
-      top: 54%;
+      width: 320px;
+      height: 320px;
+      border-width: 4px;
     }
-    .intro-stamp::before { inset: 9px; }
-    .intro-stamp-line { font-size: 13px; letter-spacing: 0.18em; }
+    .intro-stamp::before { inset: 20px; border-width: 1.5px; }
+    .intro-stamp-line { font-size: 24px; letter-spacing: 0.18em; }
   }
   @keyframes intro-stamp {
     0% {
