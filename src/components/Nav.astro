@@ -27,10 +27,19 @@ const currentLocale = t(locale);
   >
     <a
       href={homeHref}
-      class="brand inline-flex items-baseline gap-1 font-display text-[20px] md:text-[22px] leading-none tracking-[-0.01em]"
+      class="brand"
+      aria-label="The Driver — accueil"
     >
-      <span class="font-medium">Driver Services</span>
-      <span class="brand-dot leading-none" aria-hidden="true">.</span>
+      <span class="brand-glow" aria-hidden="true"></span>
+      <img
+        src="/driverlogo.jpg"
+        alt="The Driver"
+        class="brand-logo"
+        width="1678"
+        height="1184"
+        decoding="async"
+        fetchpriority="high"
+      />
     </a>
 
     <ul class="hidden md:flex items-center gap-8 text-[14px] font-medium">
@@ -189,8 +198,111 @@ const currentLocale = t(locale);
     body { padding-top: 68px; }
   }
 
-  .brand { color: var(--color-cream); }
-  .brand-dot { color: var(--color-accent); }
+  /* ---------------------------------------------------------------
+     Brand logo — sourced from /public/driverlogo.jpg (dark marks on a
+     white background). Two-layer trick to render it cleanly on the
+     dark navy nav:
+       1. `filter: invert(1)`  flips dark↔white (logo marks → white,
+          background → black).
+       2. `mix-blend-mode: screen` blends the inverted image with the
+          nav backdrop — pure black drops out (showing nav navy
+          through), white marks stay bright cream-on-navy.
+     The result is a clean, crisp wordmark with no white box around it,
+     no SVG export needed, just CSS.
+
+     `.brand-glow` is a soft radial accent halo that fades in on hover
+     — sits behind the logo via `isolation: isolate` on the parent. */
+  .brand {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    isolation: isolate;
+    color: var(--color-cream);
+  }
+  .brand::after {
+    /* Thin accent underbar that scales in on hover */
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+    height: 1.5px;
+    width: 100%;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 1;
+  }
+  .brand:hover::after,
+  .brand:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .brand-glow {
+    position: absolute;
+    inset: -10px -14px;
+    border-radius: 22px;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--color-accent) 38%, transparent) 0%,
+      color-mix(in oklab, var(--color-accent) 12%, transparent) 45%,
+      transparent 78%
+    );
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 320ms var(--ease-out), transform 360ms var(--ease-out);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .brand:hover .brand-glow,
+  .brand:focus-visible .brand-glow {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .brand-logo {
+    position: relative;
+    display: block;
+    height: 34px;
+    width: auto;
+    filter: invert(1);
+    mix-blend-mode: screen;
+    transform-origin: left center;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                filter 320ms var(--ease-out);
+    z-index: 1;
+  }
+  @media (min-width: 768px) {
+    .brand-logo { height: 42px; }
+  }
+  .brand:hover .brand-logo,
+  .brand:focus-visible .brand-logo {
+    transform: scale(1.04);
+    /* Layered drop-shadow gives the cream wordmark a subtle accent halo
+       that follows the silhouette, not a rectangle. Stays inside the
+       screen blend, so it brightens the nav navy with accent tint. */
+    filter:
+      invert(1)
+      drop-shadow(0 0 8px color-mix(in oklab, var(--color-accent) 55%, transparent))
+      drop-shadow(0 0 18px color-mix(in oklab, var(--color-accent) 25%, transparent));
+  }
+  .brand:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 60%, transparent);
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-logo,
+    .brand-glow,
+    .brand::after {
+      transition: none;
+    }
+    .brand:hover .brand-logo,
+    .brand:focus-visible .brand-logo {
+      transform: none;
+    }
+  }
 
   .nav-link {
     color: color-mix(in oklab, var(--color-cream) 72%, transparent);
