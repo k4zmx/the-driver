@@ -17,6 +17,15 @@ const AIRPORT_PICKUPS = ['CDG', 'Orly', 'Beauvais'];
 const STATION_PICKUPS = ['Paris Train Station'];
 const CITY_DROPOFFS = ['Paris', 'Disneyland', 'Versailles'];
 
+// Specific Paris train stations — proper nouns, kept in French across all
+// locales. The driver needs to know exactly which station to head to.
+const PARIS_STATIONS = [
+  'Gare du Nord',
+  'Gare de l\'Est',
+  'Gare de Lyon',
+  'Gare Montparnasse',
+];
+
 const configBlob = {
   prices: PRICES,
   vehicle: VEHICLE_CAPACITY,
@@ -206,6 +215,25 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
             autocomplete="off"
             enterkeyhint="next"
             placeholder={f.trip.flightPlaceholder}
+          />
+        </div>
+
+        {/* Conditional: which Paris train station — shown when pickup is
+            "Paris Train Station". `required={false}` keeps the native
+            select out of HTML5 validation when hidden; the form script
+            toggles `.required` dynamically based on visibility so the
+            station can't be skipped when the field is on screen. */}
+        <div data-reveal="station" hidden>
+          <LocationPicker
+            uid={`${uid}-station`}
+            name="station"
+            dataRole="station"
+            label={f.trip.stationLabel}
+            placeholder={f.trip.stationPlaceholder}
+            sheetTitle={f.trip.stationSheetTitle}
+            options={PARIS_STATIONS}
+            iconType="from"
+            required={false}
           />
         </div>
 
@@ -643,6 +671,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const $ = <T extends Element = HTMLElement>(sel: string) => form.querySelector<T>(sel)!;
     const pickup = $<HTMLSelectElement>('[data-role="pickup"]');
     const dropoff = $<HTMLSelectElement>('[data-role="dropoff"]');
+    const station = form.querySelector<HTMLSelectElement>('[data-role="station"]');
     const paxInput = $<HTMLInputElement>('[data-role="pax"]');
     const paxInc = $<HTMLButtonElement>('[data-role="pax-inc"]');
     const paxDec = $<HTMLButtonElement>('[data-role="pax-dec"]');
@@ -705,19 +734,36 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
           if (i.type === 'checkbox') i.checked = false;
           else i.value = '';
         });
+        // Custom selects (LocationPicker) — clear value AND sync the
+        // visible trigger via a dispatched change event so it shows the
+        // placeholder again instead of stale "Gare du Nord".
+        el.querySelectorAll<HTMLSelectElement>('select').forEach((s) => {
+          if (s.value !== '') {
+            s.value = '';
+            s.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
       }
     }
 
     function refreshConditionals() {
       const pu = pickup.value;
       const dr = dropoff.value;
+      const isStationPickup = cfg.stationPickups.includes(pu);
       setReveal('flight', cfg.airportPickups.includes(pu));
-      setReveal('train', cfg.stationPickups.includes(pu));
+      setReveal('station', isStationPickup);
+      setReveal('train', isStationPickup);
       setReveal('pickup-address', cfg.cityPickups.includes(pu));
       setReveal('dropoff-address', cfg.cityDropoffs.includes(dr));
       const tripType = [...tripRadios].find((r) => r.checked)?.value;
       setReveal('return', tripType === 'round-trip');
       setReveal('extra-stop-details', extraStop.checked);
+
+      // Station select — required only when shown. Without this toggle,
+      // the form would never validate (the always-required attribute
+      // would block submit on every other pickup type) or it'd silently
+      // accept an empty station when the field is on-screen.
+      if (station) station.required = isStationPickup;
 
       // Disable same-point drop-off
       for (const opt of Array.from(dropoff.options)) {
@@ -769,7 +815,13 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       const pax = Math.max(1, Math.min(24, parseInt(paxInput.value || '1', 10)));
       const tripType = [...tripRadios].find((r) => r.checked)?.value ?? 'one-way';
 
-      sRoute.textContent = pu && dr ? `${pu} → ${dr}` : '—';
+      // Include the specific Paris train station in the route line when
+       // the pickup is "Paris Train Station" and the user has chosen one.
+      const stationVal = station?.value || '';
+      const puLabel = pu && stationVal && cfg.stationPickups.includes(pu)
+        ? `${pu} (${stationVal})`
+        : pu;
+      sRoute.textContent = pu && dr ? `${puLabel} → ${dr}` : '—';
       sPax.textContent = String(pax);
       sType.textContent = tripType === 'round-trip' ? cfg.labels.tripRoundTrip : cfg.labels.tripOneWay;
 
@@ -929,8 +981,16 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
       const last = (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim();
       (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = `${first} ${last}`.trim();
+      // Email subject — include the specific Paris train station in the
+      // pickup label when applicable so the driver sees it without
+      // hunting through the body. (Web3Forms also includes every named
+      // field in the body; the `station` input goes through automatically.)
+      const stationVal = station?.value || '';
+      const subjectPickup = stationVal && cfg.stationPickups.includes(pickup.value)
+        ? `${pickup.value} (${stationVal})`
+        : pickup.value;
       (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value =
-        `Nouvelle réservation — ${pickup.value} → ${dropoff.value} — ${(form.querySelector<HTMLInputElement>('[name="date"]')!).value}`;
+        `Nouvelle réservation — ${subjectPickup} → ${dropoff.value} — ${(form.querySelector<HTMLInputElement>('[name="date"]')!).value}`;
 
       if (!cfg.accessKey) {
         errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';

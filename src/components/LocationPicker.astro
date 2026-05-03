@@ -37,6 +37,13 @@ interface Props {
    * Desktop layout (inline dropdown) is identical for both variants.
    */
   mobileVariant?: 'sheet' | 'centered';
+  /**
+   * Whether the underlying native <select> should be required.
+   * Defaults to true (matches pickup/dropoff). Pass false for conditional
+   * pickers that should only validate when shown — caller toggles
+   * `.required` dynamically based on visibility.
+   */
+  required?: boolean;
 }
 
 const {
@@ -49,6 +56,7 @@ const {
   iconType,
   sheetTitle,
   mobileVariant = 'sheet',
+  required = true,
 } = Astro.props;
 
 const triggerId = `${uid}-trigger`;
@@ -70,7 +78,7 @@ const iconSvg = iconType === 'from' ? fromPath : toPath;
     data-role={dataRole}
     data-lp-native
     autocomplete="off"
-    required
+    required={required}
     aria-hidden="true"
     tabindex="-1"
   >
