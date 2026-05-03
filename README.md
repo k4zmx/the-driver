@@ -35,7 +35,27 @@ Other commands:
 npm run build              # output to ./dist
 npm run preview            # preview the built site
 npm run optimize-images    # regenerate .jpg/.webp/.avif variants (see below)
+npm run generate-favicons  # regenerate favicon set from public/favicon.svg
 ```
+
+## Favicons
+
+The master is [public/favicon.svg](public/favicon.svg) — edit it in any vector
+editor and re-run `npm run generate-favicons` to regenerate the derived files:
+
+| Output | Use |
+| ------ | --- |
+| `public/favicon.svg` | Modern browsers (vector, scales perfectly) |
+| `public/favicon.ico` | Legacy browsers (multi-res 16/32/48) |
+| `public/apple-touch-icon.png` | iOS "Add to Home Screen" (180×180) |
+| `public/icon-192.png` | Android Chrome (192×192) |
+| `public/icon-512.png` | PWA install / splash (512×512) |
+| `public/site.webmanifest` | PWA manifest pointing at the icons |
+
+The generator script ([scripts/generate-favicons.js](scripts/generate-favicons.js))
+reads the SVG, rasterizes via sharp, and writes everything back into `/public/`.
+Don't run it on every build — it's a manual command for when the favicon source
+changes.
 
 ## Image pipeline
 
