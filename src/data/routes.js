@@ -20,6 +20,7 @@ export const DROP_POINTS = ['Paris', 'Disneyland', 'Versailles', 'Paris Train St
 // ---------------------------------------------------------------------
 export const PRICES = {
   Paris: {
+    Paris:                 { p1to3: 60,  p4: 65,  p5: 70,  p6: 70,  p7: 80,  p8: 80,  p12: 145, p16: 160, p20: 225, p24: 240 }, // intra-Paris transfer
     CDG:                   { p1to3: 65,  p4: 70,  p5: 75,  p6: 75,  p7: 85,  p8: 90,  p12: 160, p16: 180, p20: 250, p24: 270 },
     Disneyland:            { p1to3: 70,  p4: 75,  p5: 80,  p6: 85,  p7: 90,  p8: 100, p12: 170, p16: 200, p20: 270, p24: 300 },
     Orly:                  { p1to3: 65,  p4: 70,  p5: 75,  p6: 75,  p7: 85,  p8: 90,  p12: 160, p16: 180, p20: 250, p24: 270 },

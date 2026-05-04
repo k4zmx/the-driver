@@ -126,6 +126,19 @@ const countryCodes = [
 ];
 
 const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
+
+// Convert a 2-letter ISO country code to its flag emoji by combining
+// regional-indicator codepoints (each letter A–Z maps to a regional
+// indicator: A → 🇦, B → 🇧 …). Two combined make a flag (FR → 🇫🇷).
+// Renders natively on Apple/Android, via Segoe UI Emoji on Win10+, and
+// gracefully falls back to text on platforms without emoji support.
+function isoToFlag(iso: string): string {
+  return iso
+    .toUpperCase()
+    .split('')
+    .map((ch) => String.fromCodePoint(0x1F1A5 + ch.charCodeAt(0)))
+    .join('');
+}
 ---
 
 <section id="booking-form" aria-labelledby={`${uid}-heading`}>
@@ -378,6 +391,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
             <label class="flex items-center gap-3 min-h-[48px] px-4 rounded-[var(--radius-input)] border border-[color:var(--color-smoke)] bg-[color:var(--color-paper)] cursor-pointer has-[:checked]:border-[color:var(--color-ink)] has-[:checked]:border-[1.5px] transition-colors">
               <input type="radio" name="trip_type" value="round-trip" class="accent-[color:var(--color-accent)]" data-role="trip-type" />
               <span class="text-[15px]">{f.trip.roundTrip}</span>
+              <span class="round-trip-badge" aria-hidden="true">{f.trip.roundTripBadge}</span>
             </label>
           </div>
 
@@ -532,7 +546,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
                   value={c.cc}
                   selected={c.cc === '+33' && c.iso === 'FR'}
                   aria-label={`${c.label} ${c.cc}`}
-                >{c.iso}  {c.cc}</option>
+                >{isoToFlag(c.iso)}  {c.cc}</option>
               ))}
             </select>
             <input
@@ -571,6 +585,12 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
             <dt class="text-[color:var(--color-graphite)]">{f.summary.route}</dt>
             <dd class="text-[color:var(--color-ink)] text-right" data-role="summary-route">—</dd>
           </div>
+          {/* Subtle hint shown only when both pickup & dropoff are "Paris" */}
+          <p
+            class="text-[12px] text-[color:var(--color-graphite)] -mt-1"
+            data-role="intra-paris-hint"
+            hidden
+          >{f.trip.intraParisHint}</p>
           <div class="flex justify-between gap-4">
             <dt class="text-[color:var(--color-graphite)]">{f.summary.vehicle}</dt>
             <dd class="text-[color:var(--color-ink)] bf-vehicle-cell">
@@ -712,6 +732,7 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
     const sType = $('[data-role="summary-type"]');
     const sTotal = $('[data-role="summary-total"]');
     const sVehicleIcons = $('[data-role="vehicle-icons"]');
+    const intraParisHint = form.querySelector<HTMLElement>('[data-role="intra-paris-hint"]');
 
     // Inline Lucide-style SVG paths. Stroke + sizing handled by the parent
     // CSS — these strings are just the inner <path>/<circle> content.
@@ -793,12 +814,20 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       if (pickupStation) pickupStation.required = isStationPickup;
       if (dropoffStation) dropoffStation.required = isStationDropoff;
 
-      // Disable same-point drop-off
+      // Disable same-point drop-off, with one explicit exception:
+      // Paris → Paris is a valid intra-city transfer (hotel → restaurant,
+      // Airbnb → hotel, etc.), so we keep that pair selectable.
       for (const opt of Array.from(dropoff.options)) {
         if (!opt.value) continue;
+        if (opt.value === 'Paris' && pu === 'Paris') {
+          opt.disabled = false;
+          continue;
+        }
         opt.disabled = opt.value === pu;
       }
-      if (dropoff.value === pu) dropoff.value = '';
+      if (dropoff.value === pu && !(pu === 'Paris' && dr === 'Paris')) {
+        dropoff.value = '';
+      }
     }
 
     // ---- Pricing + summary -------------------------------------------
@@ -855,6 +884,10 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
         ? `${dr} (${drStationVal})`
         : dr;
       sRoute.textContent = pu && dr ? `${puLabel} → ${drLabel}` : '—';
+      // Show the "intra-Paris transfer" hint only when both endpoints
+      // are exactly "Paris" — clarifies the otherwise-unusual same-city
+      // route, since the cross-disable lets it through as an exception.
+      if (intraParisHint) intraParisHint.hidden = !(pu === 'Paris' && dr === 'Paris');
       sPax.textContent = String(pax);
       sType.textContent = tripType === 'round-trip' ? cfg.labels.tripRoundTrip : cfg.labels.tripOneWay;
 

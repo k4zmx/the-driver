@@ -80,9 +80,11 @@
       "typeLabel": "TRIP TYPE",
       "oneWay": "One way",
       "roundTrip": "Round trip",
+      "roundTripBadge": "-5%",
       "returnDate": "Return date",
       "returnTime": "Return time",
-      "returnNote": "Save 5% when you book a round trip."
+      "returnNote": "Save 5% when you book a round trip.",
+      "intraParisHint": "Intra-Paris transfer (hotel, restaurant, Airbnb, etc.)"
     },
     "when": {
       "date": "Date",

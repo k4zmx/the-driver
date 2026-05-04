@@ -80,9 +80,11 @@
       "typeLabel": "TYPE DE TRAJET",
       "oneWay": "Aller simple",
       "roundTrip": "Aller-retour",
+      "roundTripBadge": "-5%",
       "returnDate": "Date retour",
       "returnTime": "Heure retour",
-      "returnNote": "Économisez 5 % en réservant l'aller-retour."
+      "returnNote": "Économisez 5 % en réservant l'aller-retour.",
+      "intraParisHint": "Transfert intra-Paris (hôtel, restaurant, Airbnb, etc.)"
     },
     "when": {
       "date": "Date",

@@ -80,9 +80,11 @@
       "typeLabel": "TIPO DE TRAYECTO",
       "oneWay": "Solo ida",
       "roundTrip": "Ida y vuelta",
+      "roundTripBadge": "-5%",
       "returnDate": "Fecha de vuelta",
       "returnTime": "Hora de vuelta",
-      "returnNote": "Ahorra un 5 % reservando ida y vuelta."
+      "returnNote": "Ahorra un 5 % reservando ida y vuelta.",
+      "intraParisHint": "Transferencia intra-París (hotel, restaurante, Airbnb, etc.)"
     },
     "when": {
       "date": "Fecha",

@@ -452,11 +452,19 @@ const uid = 'qp-' + Math.random().toString(36).slice(2, 9);
 
     function refreshDropoffOptions() {
       const from = pickup.value;
+      // Paris → Paris is a valid intra-city transfer; all other same-name
+      // pairs (CDG → CDG etc.) stay disabled.
       for (const opt of Array.from(dropoff.options)) {
         if (!opt.value) continue;
+        if (opt.value === 'Paris' && from === 'Paris') {
+          opt.disabled = false;
+          continue;
+        }
         opt.disabled = opt.value === from;
       }
-      if (dropoff.value && dropoff.value === from) dropoff.value = '';
+      if (dropoff.value && dropoff.value === from && !(from === 'Paris' && dropoff.value === 'Paris')) {
+        dropoff.value = '';
+      }
     }
 
     function animatePrice(to: number) {

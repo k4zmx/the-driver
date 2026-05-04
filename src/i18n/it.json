@@ -80,9 +80,11 @@
       "typeLabel": "TIPO DI VIAGGIO",
       "oneWay": "Solo andata",
       "roundTrip": "Andata e ritorno",
+      "roundTripBadge": "-5%",
       "returnDate": "Data ritorno",
       "returnTime": "Ora ritorno",
-      "returnNote": "Risparmia il 5% prenotando andata e ritorno."
+      "returnNote": "Risparmia il 5% prenotando andata e ritorno.",
+      "intraParisHint": "Trasferimento intra-Parigi (hotel, ristorante, Airbnb, ecc.)"
     },
     "when": {
       "date": "Data",
