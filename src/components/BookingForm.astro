@@ -945,24 +945,6 @@ const uid = 'bf-' + Math.random().toString(36).slice(2, 9);
       el.min = today;
     });
 
-    // ---- Date / time empty-state tracker -----------------------------
-    // CSS hides the "mm/dd/yyyy" placeholder text via
-    //   input[data-empty]:not(:focus)::-webkit-datetime-edit { color: transparent }
-    // — but `[data-empty]` has to be toggled from JS because `:invalid`
-    // only matches `required` fields, and we have optional return
-    // date/time fields too.
-    form
-      .querySelectorAll<HTMLInputElement>('input[type="date"], input[type="time"]')
-      .forEach((el) => {
-        const sync = () => {
-          if (el.value) el.removeAttribute('data-empty');
-          else el.setAttribute('data-empty', '');
-        };
-        el.addEventListener('input', sync);
-        el.addEventListener('change', sync);
-        sync();
-      });
-
     // ---- WhatsApp link prefill ---------------------------------------
     function updateWhatsApp() {
       if (!whatsappLink) return;

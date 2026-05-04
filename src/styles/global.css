@@ -61,12 +61,6 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Opt out of Android Chrome / Samsung Internet "auto dark theme for
-       web" — without this, when the user's OS is in dark mode the browser
-       auto-inverts our cream-and-ink palette and the modal goes black
-       with text becoming invisible. We're a light-only design; the
-       browser shouldn't try to be helpful. */
-    color-scheme: light;
   }
 
   body {
@@ -250,92 +244,6 @@
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 40px;
-  }
-
-  /* ----------------------------------------------------------------
-     Native <input type="date"> / <input type="time"> polish.
-
-     The .field base handles size/padding/border/font/transition, so
-     here we only:
-       1. Layer a Lucide calendar / clock icon on the right via
-          background-image (no DOM wrapper needed — same pattern as
-          .field-select). Clicks pass through to the native picker.
-       2. Hide the browser's default calendar/clock + spin indicators
-          (they're inconsistent across Chrome/Safari/Firefox).
-       3. Drop the "mm/dd/yyyy" placeholder text when the field is
-          empty AND not focused. The empty state is tracked via a
-          [data-empty] attribute toggled in BookingForm's script —
-          this works for both required and optional date/time inputs
-          (the :invalid trick only works for required fields).
-     ---------------------------------------------------------------- */
-
-  input.field[type="date"],
-  input.field[type="time"] {
-    /* Override the base 0 16px so the icon has 28px-wide reserved space
-       on the right. Focus state below mirrors .field:focus's 0.5px
-       border compensation so the layout doesn't shift on focus. */
-    padding: 0 44px 0 16px;
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 18px 18px;
-    /* Strip browser-native spin/clear chrome */
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  input.field[type="date"]:focus,
-  input.field[type="time"]:focus {
-    padding: 0 43.5px 0 15.5px;
-  }
-
-  input.field[type="date"] {
-    /* Lucide calendar */
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%234A4A48' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
-  }
-  input.field[type="time"] {
-    /* Lucide clock */
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%234A4A48' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>");
-  }
-
-  /* WebKit: the calendar/clock indicator (the actual native icon) is
-     hidden but kept clickable as the icon-area target. Restricting it
-     to the right 44px (where our custom icon sits) means clicking the
-     TEXT portion focuses the field normally — it doesn't auto-open
-     the picker. Without this, every click on the field opens the
-     picker and traps focus until the user closes it ("stuck on date"
-     bug). Spin/clear buttons are removed entirely. */
-  input.field[type="date"]::-webkit-calendar-picker-indicator,
-  input.field[type="time"]::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 44px;
-    margin: 0;
-    padding: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-  input.field[type="date"]::-webkit-inner-spin-button,
-  input.field[type="time"]::-webkit-inner-spin-button,
-  input.field[type="date"]::-webkit-clear-button,
-  input.field[type="time"]::-webkit-clear-button {
-    display: none;
-  }
-
-  /* Hide the mm/dd/yyyy edit text whenever the value is empty —
-     focused or not. The form script sets [data-empty] when `value`
-     is empty; once the user picks (or fully types) a date the
-     attribute is removed and the ink color below kicks back in.
-     The clean look the spec asked for: just the icon, no format hint. */
-  input.field[type="date"][data-empty]::-webkit-datetime-edit,
-  input.field[type="time"][data-empty]::-webkit-datetime-edit {
-    color: transparent;
-  }
-  /* Filled state — the date/time text uses the regular ink color */
-  input.field[type="date"]:not([data-empty])::-webkit-datetime-edit,
-  input.field[type="time"]:not([data-empty])::-webkit-datetime-edit {
-    color: var(--color-ink);
-    line-height: 1.2;
   }
 
   /* Country-code picker — ISO-2 badge + phone code aligned in tabular numerals.

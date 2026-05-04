@@ -315,26 +315,13 @@
   }
 </style>
 
-<script is:inline data-astro-rerun>
-  // `data-astro-rerun` forces this script to re-execute on every Astro
-  // ClientRouter navigation. Without it, navigating /flotte → home via
-  // a client-side transition adds `intro-pending` (set by BaseLayout's
-  // head script, which DOES rerun) but never removes it — main/nav/
-  // footer stay `visibility: hidden` and the page reads as empty.
+<script is:inline>
   (function () {
     var overlay = document.querySelector('[data-intro]');
-    // Defensive: if intro-pending was set but the overlay is missing,
-    // lift the class immediately so the page isn't permanently empty.
-    if (!overlay) {
-      document.documentElement.classList.remove('intro-pending');
-      return;
-    }
+    if (!overlay) return;
 
     // Skip path — the inline head script already handled the decision.
-    // Also lift any stale intro-pending class (head script clears it on
-    // every run, but be defensive).
     if (document.documentElement.getAttribute('data-intro-skip') === 'true') {
-      document.documentElement.classList.remove('intro-pending');
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       return;
     }
@@ -344,25 +331,8 @@
     // first paint; lifting it here lets the page paint behind the still-
     // covering bands so it's ready by the time bands begin their exit
     // (1224ms). No flash either way.
-    //
-    // Then force-reveal any [data-reveal] elements currently in the
-    // viewport. The page-load IntersectionObserver in reveal.js was set
-    // up while `main` had `visibility: hidden` — depending on the
-    // browser, that can cause it to compute elements as not-intersecting
-    // and NOT re-fire when the visibility flips back. Result: hero h1,
-    // booking card, and other above-the-fold reveals get stuck at
-    // opacity:0 forever. Below-the-fold reveals are unaffected — they
-    // stay observed and trigger on scroll naturally.
     setTimeout(function () {
       document.documentElement.classList.remove('intro-pending');
-      var els = document.querySelectorAll('[data-reveal]:not(.is-visible)');
-      for (var i = 0; i < els.length; i++) {
-        var el = els[i];
-        var rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-          el.classList.add('is-visible');
-        }
-      }
     }, 576);
 
     // Cleanup after the band exit completes. ~96ms buffer past 1728ms.
