@@ -315,13 +315,26 @@
   }
 </style>
 
-<script is:inline>
+<script is:inline data-astro-rerun>
+  // `data-astro-rerun` forces this script to re-execute on every Astro
+  // ClientRouter navigation. Without it, navigating /flotte → home via
+  // a client-side transition adds `intro-pending` (set by BaseLayout's
+  // head script, which DOES rerun) but never removes it — main/nav/
+  // footer stay `visibility: hidden` and the page reads as empty.
   (function () {
     var overlay = document.querySelector('[data-intro]');
-    if (!overlay) return;
+    // Defensive: if intro-pending was set but the overlay is missing,
+    // lift the class immediately so the page isn't permanently empty.
+    if (!overlay) {
+      document.documentElement.classList.remove('intro-pending');
+      return;
+    }
 
     // Skip path — the inline head script already handled the decision.
+    // Also lift any stale intro-pending class (head script clears it on
+    // every run, but be defensive).
     if (document.documentElement.getAttribute('data-intro-skip') === 'true') {
+      document.documentElement.classList.remove('intro-pending');
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       return;
     }
