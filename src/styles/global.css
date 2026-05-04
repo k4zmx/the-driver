@@ -61,6 +61,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Opt out of Android Chrome / Samsung Internet "auto dark theme for
+       web" — without this, when the user's OS is in dark mode the browser
+       auto-inverts our cream-and-ink palette and the modal goes black
+       with text becoming invisible. We're a light-only design; the
+       browser shouldn't try to be helpful. */
+    color-scheme: light;
   }
 
   body {
@@ -290,15 +296,20 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%234A4A48' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>");
   }
 
-  /* WebKit: full-coverage transparent indicator keeps the native
-     picker click target while hiding the default icon. Spin/clear
-     buttons are removed entirely. */
+  /* WebKit: the calendar/clock indicator (the actual native icon) is
+     hidden but kept clickable as the icon-area target. Restricting it
+     to the right 44px (where our custom icon sits) means clicking the
+     TEXT portion focuses the field normally — it doesn't auto-open
+     the picker. Without this, every click on the field opens the
+     picker and traps focus until the user closes it ("stuck on date"
+     bug). Spin/clear buttons are removed entirely. */
   input.field[type="date"]::-webkit-calendar-picker-indicator,
   input.field[type="time"]::-webkit-calendar-picker-indicator {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 44px;
     margin: 0;
     padding: 0;
     opacity: 0;
@@ -311,17 +322,18 @@
     display: none;
   }
 
-  /* Hide the mm/dd/yyyy edit text in the empty + unfocused state.
-     The form script sets [data-empty] when `value === ''`. WebKit
-     uses ::-webkit-datetime-edit; transparent text + the icon on the
-     right is what reads as "empty placeholder" visually. */
-  input.field[type="date"][data-empty]:not(:focus)::-webkit-datetime-edit,
-  input.field[type="time"][data-empty]:not(:focus)::-webkit-datetime-edit {
+  /* Hide the mm/dd/yyyy edit text whenever the value is empty —
+     focused or not. The form script sets [data-empty] when `value`
+     is empty; once the user picks (or fully types) a date the
+     attribute is removed and the ink color below kicks back in.
+     The clean look the spec asked for: just the icon, no format hint. */
+  input.field[type="date"][data-empty]::-webkit-datetime-edit,
+  input.field[type="time"][data-empty]::-webkit-datetime-edit {
     color: transparent;
   }
-  /* Filled / focused state — the date/time text uses the regular ink color */
-  input.field[type="date"]::-webkit-datetime-edit,
-  input.field[type="time"]::-webkit-datetime-edit {
+  /* Filled state — the date/time text uses the regular ink color */
+  input.field[type="date"]:not([data-empty])::-webkit-datetime-edit,
+  input.field[type="time"]:not([data-empty])::-webkit-datetime-edit {
     color: var(--color-ink);
     line-height: 1.2;
   }

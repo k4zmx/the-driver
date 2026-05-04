@@ -68,6 +68,12 @@ const extraSchemas = Array.isArray(structuredData)
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Opt out of Android Chrome's auto-dark-mode (and Samsung Internet's
+         night theme). The CSS `color-scheme: light` on <html> is the
+         primary signal; this meta is the legacy/fallback for browsers
+         that read it instead. We're a light-only design — without this,
+         dark-themed Androids invert the page, breaking the modal. -->
+    <meta name="color-scheme" content="light only" />
     <meta name="generator" content={Astro.generator} />
 
     {/* Intro overlay session check — runs SYNCHRONOUSLY before first paint.
