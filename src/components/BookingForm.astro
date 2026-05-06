@@ -182,7 +182,10 @@ function isoToFlag(iso: string): string {
       {/* Web3Forms required fields (hidden) */}
       <input type="hidden" name="access_key" value={configBlob.accessKey} />
       <input type="hidden" name="subject" data-role="subject" value="Nouvelle réservation" />
-      <input type="hidden" name="from_name" data-role="from-name" value="" />
+      <input type="hidden" name="from_name" data-role="from-name" value="Driver Services" />
+      {/* `replyto` is set on submit to the customer's email — that way
+          when the driver hits "Reply" it goes to the customer, not Web3Forms. */}
+      <input type="hidden" name="replyto" data-role="replyto" value="" />
       <input type="hidden" name="language" value={locale} />
       <input type="hidden" name="vehicle_summary" data-role="vehicle-summary" value="" />
       <input type="hidden" name="total_price" data-role="total-price" value="" />
@@ -656,6 +659,8 @@ function isoToFlag(iso: string): string {
 </section>
 
 <script>
+  import { buildBookingEmailHtml, buildSubject } from '../utils/emailTemplate.js';
+
   type PriceCell = {
     p1to3?: number; p4?: number; p5?: number; p6?: number; p7?: number;
     p8?: number; p12?: number; p16?: number; p20?: number; p24?: number;
@@ -1053,25 +1058,34 @@ function isoToFlag(iso: string): string {
         return;
       }
 
-      // Build from_name + subject from current form values
+      // ── Pull current values so we can build subject + HTML email ──
       const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
       const last = (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim();
-      (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = `${first} ${last}`.trim();
-      // Email subject — include the specific Paris train station on
-      // either side when applicable so the driver sees it without
-      // hunting through the body. Web3Forms also includes every named
-      // field in the body; the `pickup_station` and `dropoff_station`
-      // inputs go through automatically.
+      const dateVal = (form.querySelector<HTMLInputElement>('[name="date"]')!).value;
+      const timeVal = (form.querySelector<HTMLInputElement>('[name="time"]')!).value;
+      const emailVal = (form.querySelector<HTMLInputElement>('[name="email"]')!).value.trim();
+      const phoneVal = (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value.trim();
+      const countryCodeVal = (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value;
+
       const puStationVal = pickupStation?.value || '';
       const drStationVal = dropoffStation?.value || '';
-      const subjectPickup = puStationVal && cfg.stationPickups.includes(pickup.value)
-        ? `${pickup.value} (${puStationVal})`
-        : pickup.value;
-      const subjectDropoff = drStationVal && cfg.stationPickups.includes(dropoff.value)
-        ? `${dropoff.value} (${drStationVal})`
-        : dropoff.value;
-      (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value =
-        `Nouvelle réservation — ${subjectPickup} → ${subjectDropoff} — ${(form.querySelector<HTMLInputElement>('[name="date"]')!).value}`;
+
+      // ASCII-only subject (no →, no accents, ≤60 chars). Locale-aware
+      // prefix from `buildSubject` so EN inbox shows "Booking: ..." etc.
+      // The station name doesn't appear in the subject — keeping it short
+      // for inbox-list previews. The full station goes in the email body.
+      (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value = buildSubject({
+        pickup: pickup.value,
+        dropoff: dropoff.value,
+        date: dateVal,
+        time: timeVal,
+      }, cfg.locale as 'fr' | 'en' | 'es' | 'it');
+
+      // from_name stays "Driver Services" (set in markup default). The
+      // customer's full name is rendered prominently INSIDE the HTML body.
+      (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = 'Driver Services';
+      // Reply-to so "Reply" in the inbox routes to the customer, not Web3Forms.
+      (form.querySelector<HTMLInputElement>('[data-role="replyto"]')!).value = emailVal;
 
       if (!cfg.accessKey) {
         errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';
@@ -1079,12 +1093,49 @@ function isoToFlag(iso: string): string {
         return;
       }
 
+      // ── Build the branded HTML email body ──
+      const totalPriceVal = (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value;
+      const vehicleSummaryVal = (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value;
+      const tripTypeVal = form.querySelector<HTMLInputElement>('[name="trip_type"]:checked')?.value || 'one-way';
+      const emailHtml = buildBookingEmailHtml({
+        pickup: pickup.value,
+        dropoff: dropoff.value,
+        pickupStation: puStationVal,
+        dropoffStation: drStationVal,
+        date: dateVal,
+        time: timeVal,
+        passengers: paxInput.value,
+        tripType: tripTypeVal,
+        returnDate: form.querySelector<HTMLInputElement>('[name="return_date"]')?.value || '',
+        returnTime: form.querySelector<HTMLInputElement>('[name="return_time"]')?.value || '',
+        totalPrice: totalPriceVal,
+        vehicleSummary: vehicleSummaryVal,
+        firstName: first,
+        lastName: last,
+        countryCode: countryCodeVal,
+        phone: phoneVal,
+        email: emailVal,
+        flightNumber: form.querySelector<HTMLInputElement>('[name="flight_number"]')?.value || '',
+        trainNumber: form.querySelector<HTMLInputElement>('[name="train_number"]')?.value || '',
+        pickupAddress: form.querySelector<HTMLInputElement>('[name="pickup_address"]')?.value || '',
+        dropoffAddress: form.querySelector<HTMLInputElement>('[name="dropoff_address"]')?.value || '',
+        seatCosy: form.querySelector<HTMLInputElement>('[name="seat_cosy"]')?.value || '0',
+        seatBaby: form.querySelector<HTMLInputElement>('[name="seat_baby"]')?.value || '0',
+        seatBooster: form.querySelector<HTMLInputElement>('[name="seat_booster"]')?.value || '0',
+        extraStop: !!form.querySelector<HTMLInputElement>('[name="extra_stop"]')?.checked,
+        extraStopDetails: form.querySelector<HTMLInputElement>('[name="extra_stop_details"]')?.value || '',
+      }, cfg.locale as 'fr' | 'en' | 'es' | 'it');
+
       submitBtn.disabled = true;
       submitLabel.textContent = submitBtn.dataset.loadingText || submitLabel.textContent!;
       submitSpinner.classList.remove('hidden');
 
       try {
         const body = new FormData(form);
+        // Web3Forms renders the value of the `template` field as the email
+        // body (text/html). With this, the driver sees a branded summary
+        // instead of the default field-by-field table layout.
+        body.append('template', emailHtml);
         const res = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           body,

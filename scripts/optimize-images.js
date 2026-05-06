@@ -43,6 +43,19 @@ const FOLDERS = [
   { dir: 'public/images/routes', maxWidth: 800 },
 ];
 
+// Specific files at /public/ root that need AVIF+WebP siblings. Listed
+// explicitly (not a folder scan) so we don't accidentally re-encode the
+// nav logo, PWA icons, or favicons. Different maxWidth per file based on
+// where they're rendered:
+//   - babycarseat: full-width hero photo, 1600px
+//   - 3 seat cards: card aspect 4:3, 800px is plenty
+const ROOT_FILES = [
+  { src: 'public/babycarseat.jpg', maxWidth: 1600 },
+  { src: 'public/cosybebe.jpg',    maxWidth: 800 },
+  { src: 'public/siegebebe.jpg',   maxWidth: 800 },
+  { src: 'public/rehausseur.jpg',  maxWidth: 800 },
+];
+
 const RASTER_EXT = new Set(['.jpg', '.jpeg', '.png', '.avif', '.webp']);
 
 function needsUpdate(srcPath, outPath) {
@@ -128,6 +141,29 @@ for (const { dir, maxWidth } of FOLDERS) {
       }
     } catch (err) {
       console.error(`  ✗ failed on ${f}:`, err.message);
+    }
+  }
+}
+
+// Process individually-listed root files (no folder scan).
+if (ROOT_FILES.length > 0) {
+  console.log(`[optimize-images] root files — ${ROOT_FILES.length} explicit entries`);
+  for (const { src, maxWidth } of ROOT_FILES) {
+    if (!existsSync(src)) {
+      console.log(`  · skip missing: ${src}`);
+      continue;
+    }
+    try {
+      const res = await processFile(src, maxWidth);
+      if (res.skipped) {
+        totalSkipped++;
+        console.log(`  · up-to-date: ${src}`);
+      } else {
+        totalProcessed++;
+        console.log(`  ✓ generated ${res.written} variant(s) for: ${src}`);
+      }
+    } catch (err) {
+      console.error(`  ✗ failed on ${src}:`, err.message);
     }
   }
 }
