@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PLACEHOLDER wordmark — Option C from the post-build fix prompt.
+  This is intentionally NOT a hand-drawn copy of the official owl + wordmark
+  (the owl is iconic + trademarked artwork; we shouldn't recreate it).
+
+  To swap with the real asset before launch:
+    1. Download the official SVG from
+         https://en.wikipedia.org/wiki/TripAdvisor#/media/File:Tripadvisor_logo.svg
+       (or TripAdvisor's brand portal, https://www.tripadvisor.com/Press-Center).
+    2. Save it over this file at /public/images/tripadvisor-logo.svg.
+    3. The footer's white pill wrapper auto-fits any rectangular SVG up
+       to ~5:1 aspect — no other code changes needed.
+
+  Color used: #34E0A1 (TripAdvisor digital primary green, per spec Option C).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" role="img" aria-label="TripAdvisor">
+  <text
+    x="0"
+    y="30"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    font-size="28"
+    font-weight="800"
+    letter-spacing="-0.5"
+    fill="#34E0A1"
+  >Tripadvisor</text>
+</svg>

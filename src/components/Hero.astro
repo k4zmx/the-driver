@@ -1,6 +1,8 @@
 ---
 import { t } from '../i18n';
 import QuotePicker from './QuotePicker.astro';
+import HeroTrustBadges from './HeroTrustBadges.astro';
+import Icon from './Icon.astro';
 import { findImageByKeywords, logImageMatch } from '../utils/images.js';
 
 interface Props {
@@ -82,12 +84,17 @@ const availableLabel =
     <div class="hero-grid">
       {/* Left column — the editorial stack */}
       <div class="hero-copy">
-        <p class="status-pill" data-reveal>
+        {/* Trust badges — extracted to a shared component so the FAQ-
+            Contact hero can mount the exact same bar without duplicating
+            markup, links, or styling. */}
+        <HeroTrustBadges locale={locale} />
+
+        <p class="status-pill" data-reveal data-reveal-delay="1">
           <span class="status-dot" aria-hidden="true"></span>
           <span>{availableLabel}</span>
         </p>
 
-        <h1 class="h1 text-balance hero-h1 kinetic-h1" data-reveal data-reveal-delay="1">
+        <h1 class="h1 text-balance hero-h1 kinetic-h1" data-reveal data-reveal-delay="2">
           {(h1Head.split(/\s+/).filter(Boolean) as string[]).map((w: string, i: number) => (
             <>
               <span class="kw" style={`--ki: ${i}`}>{w}</span>{' '}
@@ -95,43 +102,7 @@ const availableLabel =
           ))}<span class="kw accent-word" style={`--ki: ${h1Head.split(/\s+/).filter(Boolean).length}`}>{h1Last}</span>
         </h1>
 
-        <p class="body-lg hero-sub" data-reveal data-reveal-delay="2">{hero.sub}</p>
-
-        {/* Trust chips — real badges with icons, not grey text */}
-        <ul class="trust-chips" data-reveal data-reveal-delay="3">
-          <li class="trust-chip">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="trust-chip-icon is-accent" aria-hidden="true">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            <span>{hero.trust.rating}</span>
-          </li>
-          <li class="trust-chip">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="m9 12 2 2 4-4"/>
-            </svg>
-            <span>{hero.trust.license}</span>
-          </li>
-          <li class="trust-chip">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
-              <path d="M9 12h.01"/>
-              <path d="M15 12h.01"/>
-              <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/>
-              <path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>
-            </svg>
-            <span>{hero.trust.childseats}</span>
-          </li>
-          <li class="trust-chip">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                 stroke-linecap="round" stroke-linejoin="round" class="trust-chip-icon" aria-hidden="true">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-            <span>{hero.trust.payment}</span>
-          </li>
-        </ul>
+        <p class="body-lg hero-sub" data-reveal data-reveal-delay="3">{hero.sub}</p>
       </div>
 
       {/* Right column — the booking-picker anchor */}
@@ -139,6 +110,25 @@ const availableLabel =
         <QuotePicker locale={locale} variant="hero" />
       </div>
     </div>
+
+    {/* Trust pills below the booking card. Same 4 strings the
+        dot-separated line previously rendered, but each gets its own
+        icon-pill — visually more anchored, easier to scan, and on
+        mobile the pills wrap onto multiple rows naturally instead of
+        becoming a long ribbon of text.
+        Icons map by index: 0=clock (24/7) · 1=shield (license)
+        2=baby (child seats) · 3=credit-card (pay on arrival). */}
+    <ul class="hero-trust-pills" data-reveal data-reveal-delay="5">
+      {hero.trustLine.map((item: string, i: number) => {
+        const icon = ['clock', 'shield', 'baby', 'credit-card'][i] ?? 'check';
+        return (
+          <li class="hero-trust-pill">
+            <Icon name={icon} size={14} strokeWidth={1.8} />
+            <span>{item}</span>
+          </li>
+        );
+      })}
+    </ul>
   </div>
 </section>
 
@@ -483,42 +473,47 @@ const availableLabel =
   }
 
   /* ---------------------------------------------------------------
-     Trust chips — real badges with icons. Flex-wrap on mobile.
+     Hero trust pills — 4 individual rounded pills below the booking
+     card. Icon (terracotta) on the left, label on the right. Wraps
+     to multiple rows on narrow screens.
      --------------------------------------------------------------- */
-  .trust-chips {
-    margin-top: 22px;
+  .hero-trust-pills {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
   }
   @media (min-width: 768px) {
-    .trust-chips { margin-top: 30px; gap: 10px; }
+    .hero-trust-pills { margin-top: 32px; gap: 10px; }
   }
-  .trust-chip {
+  .hero-trust-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+    gap: 6px;
+    padding: 6px 12px;
+    background: color-mix(in oklab, var(--color-paper) 92%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-smoke) 90%, transparent);
     border-radius: 999px;
-    background: var(--color-paper);
-    border: 1px solid var(--color-smoke);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-ink);
-    box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-ink) 4%, transparent);
-    transition: border-color 200ms var(--ease-out), transform 200ms var(--ease-out);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--color-graphite);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
-  .trust-chip:hover {
-    border-color: var(--color-graphite);
-    transform: translateY(-1px);
-  }
-  .trust-chip-icon {
+  .hero-trust-pill svg {
     width: 14px;
     height: 14px;
-    color: var(--color-graphite);
     flex-shrink: 0;
+    color: var(--color-accent);
   }
-  .trust-chip-icon.is-accent { color: var(--color-accent); }
+  @media (max-width: 480px) {
+    .hero-trust-pills { gap: 6px; }
+    .hero-trust-pill { padding: 5px 10px; font-size: 11px; }
+    .hero-trust-pill svg { width: 12px; height: 12px; }
+  }
 
   /* ---------------------------------------------------------------
      Picker column — on desktop, nudge up into the headline's visual field

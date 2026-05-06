@@ -3,7 +3,7 @@ import { t, LOCALES, pathForRoute } from '../i18n';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
-  routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+  routeKey?: 'home' | 'fleet' | 'rates' | 'childSeats' | 'faqContact';
 }
 
 const { locale, routeKey = 'home' } = Astro.props;
@@ -12,6 +12,7 @@ const strings = t(locale);
 const homeHref = pathForRoute('home', locale);
 const fleetHref = pathForRoute('fleet', locale);
 const ratesHref = pathForRoute('rates', locale);
+const childSeatsHref = pathForRoute('childSeats', locale);
 const faqHref = pathForRoute('faqContact', locale);
 
 const WA_NUMBER = '33628658127';
@@ -57,6 +58,11 @@ const currentLocale = t(locale);
       <li>
         <a class:list={['nav-link', routeKey === 'rates' && 'is-active']} href={ratesHref}>
           {strings.nav.routes}
+        </a>
+      </li>
+      <li>
+        <a class:list={['nav-link', routeKey === 'childSeats' && 'is-active']} href={childSeatsHref}>
+          {strings.nav.childSeats}
         </a>
       </li>
       <li>
@@ -152,6 +158,9 @@ const currentLocale = t(locale);
         </li>
         <li>
           <a class:list={['nav-drawer-link', routeKey === 'rates' && 'is-active']} href={ratesHref}>{strings.nav.routes}</a>
+        </li>
+        <li>
+          <a class:list={['nav-drawer-link', routeKey === 'childSeats' && 'is-active']} href={childSeatsHref}>{strings.nav.childSeats}</a>
         </li>
         <li>
           <a class:list={['nav-drawer-link', routeKey === 'faqContact' && 'is-active']} href={faqHref}>{strings.nav.contact}</a>

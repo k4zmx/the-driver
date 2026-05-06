@@ -1,7 +1,6 @@
 {
   "pricing": {
     "pax": {
-      "1_3": "1–3 people",
       "4": "4 people",
       "5": "5 people",
       "6": "6 people",
@@ -10,7 +9,8 @@
       "12": "12 people",
       "16": "16 people",
       "20": "20 people",
-      "24": "24 people"
+      "24": "24 people",
+      "1_3": "1–3 people"
     }
   },
   "locale": "en",
@@ -22,7 +22,8 @@
     "routes": "Routes & pricing",
     "about": "About",
     "contact": "Contact",
-    "book": "Book"
+    "book": "Book",
+    "childSeats": "Child seats"
   },
   "cta": {
     "bookNow": "Book now",
@@ -53,7 +54,19 @@
       "empty": "Pick your route",
       "unavailable": "Message us for this route"
     },
-    "cta": "Book now"
+    "cta": "Book now",
+    "trustBadges": {
+      "google": "Google Reviews · 45+ reviews",
+      "googleAriaLabel": "See our Google reviews (5.0 stars, 45+ reviews)",
+      "tripadvisor": "TripAdvisor",
+      "tripadvisorAriaLabel": "See our TripAdvisor reviews (5 stars)"
+    },
+    "trustLine": [
+      "Available 24/7",
+      "VTC Licensed",
+      "Free child seats",
+      "Pay on arrival"
+    ]
   },
   "form": {
     "eyebrow": "BOOKING",
@@ -165,10 +178,22 @@
     "eyebrow": "HOW IT WORKS",
     "heading": "Book in 2 minutes. Travel relaxed.",
     "steps": [
-      { "title": "Pick your route.", "body": "Choose pickup and drop-off. The price shows up instantly." },
-      { "title": "Fill in the details.", "body": "Date, time, passengers, flight number. That's it." },
-      { "title": "Get your confirmation.", "body": "Within 1 hour by email and WhatsApp, with your driver's details." },
-      { "title": "Hop in, unwind.", "body": "A sign with your name at the airport. Pay cash or card on arrival." }
+      {
+        "title": "Pick your route.",
+        "body": "Choose pickup and drop-off. The price shows up instantly."
+      },
+      {
+        "title": "Fill in the details.",
+        "body": "Date, time, passengers, flight number. That's it."
+      },
+      {
+        "title": "Get your confirmation.",
+        "body": "Within 1 hour by email and WhatsApp, with your driver's details."
+      },
+      {
+        "title": "Hop in, unwind.",
+        "body": "A sign with your name at the airport. Pay cash or card on arrival."
+      }
     ]
   },
   "destinations": {
@@ -234,9 +259,22 @@
     "combine": {
       "heading": "More than 8 passengers? We combine.",
       "examples": [
-        { "pax": "11 people", "combo": "2 vans" },
-        { "pax": "16 people", "combo": "2 vans" },
-        { "pax": "20 people", "combo": "3 vans" }
+        {
+          "pax": "12 people",
+          "combo": "1 van + 1 sedan"
+        },
+        {
+          "pax": "16 people",
+          "combo": "2 vans"
+        },
+        {
+          "pax": "20 people",
+          "combo": "2 vans + 1 sedan"
+        },
+        {
+          "pax": "24 people",
+          "combo": "3 vans"
+        }
       ],
       "footer": "Same per-vehicle price. No surprises."
     }
@@ -287,7 +325,8 @@
       "google": "Google Reviews",
       "googleScore": "5.0",
       "tripadvisor": "TripAdvisor"
-    }
+    },
+    "aggregateCount": "{n}+ reviews"
   },
   "faq": {
     "eyebrow": "FREQUENT QUESTIONS",
@@ -295,10 +334,22 @@
     "subPrefix": "A question not covered here?",
     "subCta": "WhatsApp us",
     "items": [
-      { "q": "What happens if my flight is delayed?", "a": "We track your flight in real time. Your driver waits up to 60 minutes after landing, at no extra charge." },
-      { "q": "Where do I meet my driver at the airport?", "a": "In the arrivals hall, with a sign bearing your name. We send you their photo and WhatsApp number 24h before your trip." },
-      { "q": "How do I pay?", "a": "Cash or card, paid directly to the driver on arrival. No deposit required. A deposit is possible to lock in the round-trip discount." },
-      { "q": "What if we're more than 8 people?", "a": "No problem. We combine vehicles. 11 passengers = 2 vans. Per-vehicle pricing, no surprises." }
+      {
+        "q": "What happens if my flight is delayed?",
+        "a": "We track your flight in real time. Your driver waits up to 60 minutes after landing, at no extra charge."
+      },
+      {
+        "q": "Where do I meet my driver at the airport?",
+        "a": "In the arrivals hall, with a sign bearing your name. We send you their photo and WhatsApp number 24h before your trip."
+      },
+      {
+        "q": "How do I pay?",
+        "a": "Cash or card, paid directly to the driver on arrival. No deposit required. A deposit is possible to lock in the round-trip discount."
+      },
+      {
+        "q": "What if we're more than 8 people?",
+        "a": "No problem. We combine vehicles. 11 passengers = 2 vans. Per-vehicle pricing, no surprises."
+      }
     ],
     "seeAll": "See all questions"
   },
@@ -310,6 +361,122 @@
     "secondary": "WhatsApp",
     "footnote": "Available 24/7 · Reply within 1 hour · Fixed price guaranteed"
   },
+  "seoFooter": {
+    "routes": {
+      "eyebrow": "POPULAR ROUTES",
+      "title": "Book your transfer directly.",
+      "sub": "Click to pre-fill your booking.",
+      "items": [
+        {
+          "label": "Family chauffeur Paris",
+          "routeKey": "childSeats"
+        },
+        {
+          "label": "Taxi CDG to Paris",
+          "pickup": "CDG",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Taxi Orly to Paris",
+          "pickup": "Orly",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "CDG Disneyland transfer",
+          "pickup": "CDG",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Orly Disneyland transfer",
+          "pickup": "Orly",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Beauvais Paris transfer",
+          "pickup": "Beauvais",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "CDG Versailles taxi",
+          "pickup": "CDG",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "Paris Versailles taxi",
+          "pickup": "Paris",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "CDG Orly transfer",
+          "pickup": "CDG",
+          "dropoff": "Orly"
+        },
+        {
+          "label": "Disneyland to CDG",
+          "pickup": "Disneyland",
+          "dropoff": "CDG"
+        },
+        {
+          "label": "Disneyland to Orly",
+          "pickup": "Disneyland",
+          "dropoff": "Orly"
+        },
+        {
+          "label": "Beauvais to Disneyland",
+          "pickup": "Beauvais",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Train station to Paris",
+          "pickup": "Paris Train Station",
+          "dropoff": "Paris"
+        }
+      ]
+    },
+    "destinations": {
+      "eyebrow": "DESTINATIONS",
+      "title": "We take you anywhere.",
+      "sub": "Airports, train stations, landmarks — every key Paris destination.",
+      "items": [
+        {
+          "label": "Charles de Gaulle Airport",
+          "pickup": "CDG"
+        },
+        {
+          "label": "Orly Airport",
+          "pickup": "Orly"
+        },
+        {
+          "label": "Beauvais Airport",
+          "pickup": "Beauvais"
+        },
+        {
+          "label": "Disneyland Paris",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Château de Versailles",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "Paris hotels",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Paris train stations",
+          "dropoff": "Paris Train Station"
+        },
+        {
+          "label": "Eiffel Tower & city center",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Family chauffeur Paris",
+          "routeKey": "childSeats"
+        }
+      ]
+    }
+  },
   "footer": {
     "tagline": "Private chauffeur in Paris",
     "rights": "All rights reserved",
@@ -319,6 +486,10 @@
     "brand": {
       "tagline": "Your private driver in Paris since 2012.",
       "rating": "5.0 — Google Reviews"
+    },
+    "tripadvisor": {
+      "eyebrow": "RECOMMENDED",
+      "cta": "on TripAdvisor"
     },
     "columns": {
       "links": "LINKS",
@@ -349,17 +520,33 @@
         "eyebrow": "OUR FLEET",
         "heading": "Two cars. Every kind of trip.",
         "sub": "We're not trying to have the biggest fleet — we're trying to have the right cars, well-kept, always ready.",
-        "stats": ["2 vehicles", "1 to 8 passengers · more on request", "100% non-smoking"]
+        "stats": [
+          "2 vehicles",
+          "1 to 8 passengers · more on request",
+          "100% non-smoking"
+        ]
       },
       "car": {
         "eyebrow": "SEDAN",
         "title": "Tesla Model Y",
         "oneLiner": "Electric comfort, complete silence, zero emissions.",
         "specs": [
-          { "icon": "users", "label": "1–3 passengers" },
-          { "icon": "briefcase", "label": "3 large bags" },
-          { "icon": "zap", "label": "100% electric" },
-          { "icon": "wifi", "label": "Wi-Fi on board" }
+          {
+            "icon": "users",
+            "label": "1–3 passengers"
+          },
+          {
+            "icon": "briefcase",
+            "label": "3 large bags"
+          },
+          {
+            "icon": "zap",
+            "label": "100% electric"
+          },
+          {
+            "icon": "wifi",
+            "label": "Wi-Fi on board"
+          }
         ],
         "features": [
           "Climate-controlled cabin",
@@ -383,10 +570,22 @@
         "title": "Mercedes Vito · Renault Trafic",
         "oneLiner": "The space families, groups and luggage-heavy travelers actually need.",
         "specs": [
-          { "icon": "users", "label": "4–8 passengers" },
-          { "icon": "briefcase", "label": "Up to 8 bags" },
-          { "icon": "shield", "label": "Individual seats" },
-          { "icon": "wind", "label": "Rear climate control" }
+          {
+            "icon": "users",
+            "label": "4–8 passengers"
+          },
+          {
+            "icon": "briefcase",
+            "label": "Up to 8 bags"
+          },
+          {
+            "icon": "shield",
+            "label": "Individual seats"
+          },
+          {
+            "icon": "wind",
+            "label": "Rear climate control"
+          }
         ],
         "features": [
           "Separate front/rear A/C",
@@ -410,9 +609,26 @@
         "heading": "More than 8 people? We adapt.",
         "sub": "No need to juggle several taxis. We combine our vehicles at the same flat per-vehicle price.",
         "combos": [
-          { "pax": "11", "label": "passengers", "combo": "2 vans", "price": "€120" },
-          { "pax": "16", "label": "passengers", "combo": "2 vans", "price": "€140" },
-          { "pax": "20", "label": "passengers", "combo": "3 vans", "price": "€190" }
+          {
+            "pax": "12",
+            "label": "passengers",
+            "combo": "1 van + 1 sedan"
+          },
+          {
+            "pax": "16",
+            "label": "passengers",
+            "combo": "2 vans"
+          },
+          {
+            "pax": "20",
+            "label": "passengers",
+            "combo": "2 vans + 1 sedan"
+          },
+          {
+            "pax": "24",
+            "label": "passengers",
+            "combo": "3 vans"
+          }
         ],
         "footer": "Calculated automatically in the booking form, based on your passenger count."
       },
@@ -420,10 +636,26 @@
         "eyebrow": "ALWAYS INCLUDED",
         "heading": "No extras, no surprises.",
         "items": [
-          { "icon": "lock", "title": "Fixed price guaranteed", "body": "The price we quote is the price you pay. Tolls, taxes, bags — all inside." },
-          { "icon": "baby", "title": "Free child seats", "body": "Infant carrier, child seat, booster — just ask at booking." },
-          { "icon": "clock", "title": "Free waiting time", "body": "60 min free for flights, 30 min free for trains." },
-          { "icon": "droplet", "title": "Bottled water", "body": "On board for every passenger, in every vehicle." }
+          {
+            "icon": "lock",
+            "title": "Fixed price guaranteed",
+            "body": "The price we quote is the price you pay. Tolls, taxes, bags — all inside."
+          },
+          {
+            "icon": "baby",
+            "title": "Free child seats",
+            "body": "Infant carrier, child seat, booster — just ask at booking."
+          },
+          {
+            "icon": "clock",
+            "title": "Free waiting time",
+            "body": "60 min free for flights, 30 min free for trains."
+          },
+          {
+            "icon": "droplet",
+            "title": "Bottled water",
+            "body": "On board for every passenger, in every vehicle."
+          }
         ]
       },
       "finalCta": {
@@ -439,7 +671,12 @@
         "eyebrow": "OUR RATES",
         "heading": "Every price. No bad surprises.",
         "sub": "Flat rates per vehicle, per route. Tolls included, taxes included, luggage included. What you see is what you pay.",
-        "trustRow": ["Flat rates", "Tolls included", "Free child seats", "Pay on arrival"]
+        "trustRow": [
+          "Flat rates",
+          "Tolls included",
+          "Free child seats",
+          "Pay on arrival"
+        ]
       },
       "calculator": {
         "eyebrow": "WORK OUT YOUR PRICE",
@@ -491,21 +728,57 @@
         "heading": "The price is the price.",
         "sub": "What's already counted into every trip — you won't pay a cent more.",
         "items": [
-          { "icon": "check-circle", "label": "Tolls", "sub": "Every toll along your route" },
-          { "icon": "check-circle", "label": "Taxes", "sub": "VAT and business taxes included" },
-          { "icon": "check-circle", "label": "Luggage", "sub": "Cases and bags, within reason" },
-          { "icon": "check-circle", "label": "Child seats", "sub": "Carrier, seat, booster on request" },
-          { "icon": "check-circle", "label": "Waiting", "sub": "60 min for flights, 30 min for trains" },
-          { "icon": "check-circle", "label": "Personal meet & greet", "sub": "Sign with your name at the airport" }
+          {
+            "icon": "check-circle",
+            "label": "Tolls",
+            "sub": "Every toll along your route"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Taxes",
+            "sub": "VAT and business taxes included"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Luggage",
+            "sub": "Cases and bags, within reason"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Child seats",
+            "sub": "Carrier, seat, booster on request"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Waiting",
+            "sub": "60 min for flights, 30 min for trains"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Personal meet & greet",
+            "sub": "Sign with your name at the airport"
+          }
         ]
       },
       "payment": {
         "eyebrow": "PAYMENT",
         "heading": "Pay however you like.",
         "options": [
-          { "icon": "banknote", "label": "Cash on arrival", "body": "Our favourite. No fees, no middlemen." },
-          { "icon": "credit-card", "label": "Card on arrival", "body": "Visa, Mastercard, American Express. Terminal in every vehicle." },
-          { "icon": "percent", "label": "Online deposit — optional", "body": "A small online deposit is possible to lock in the round-trip discount." }
+          {
+            "icon": "banknote",
+            "label": "Cash on arrival",
+            "body": "Our favourite. No fees, no middlemen."
+          },
+          {
+            "icon": "credit-card",
+            "label": "Card on arrival",
+            "body": "Visa, Mastercard, American Express. Terminal in every vehicle."
+          },
+          {
+            "icon": "percent",
+            "label": "Online deposit — optional",
+            "body": "A small online deposit is possible to lock in the round-trip discount."
+          }
         ]
       },
       "finalCta": {
@@ -554,10 +827,26 @@
         "eyebrow": "PRACTICAL INFO",
         "heading": "What you need to know.",
         "rows": [
-          { "icon": "clock", "label": "Hours", "value": "24/7, every day" },
-          { "icon": "calendar", "label": "Lead time", "value": "Ideally 24h in advance, last-minute requests subject to availability" },
-          { "icon": "globe", "label": "Languages", "value": "French, English, Spanish, Italian" },
-          { "icon": "credit-card", "label": "Payment methods", "value": "Cash or card on arrival · Online deposit to lock in round-trip discount" }
+          {
+            "icon": "clock",
+            "label": "Hours",
+            "value": "24/7, every day"
+          },
+          {
+            "icon": "calendar",
+            "label": "Lead time",
+            "value": "Ideally 24h in advance, last-minute requests subject to availability"
+          },
+          {
+            "icon": "globe",
+            "label": "Languages",
+            "value": "French, English, Spanish, Italian"
+          },
+          {
+            "icon": "credit-card",
+            "label": "Payment methods",
+            "value": "Cash or card on arrival · Online deposit to lock in round-trip discount"
+          }
         ]
       },
       "faq": {
@@ -567,46 +856,106 @@
           {
             "title": "Before your trip",
             "items": [
-              { "q": "How far in advance should I book?", "a": "Ideally 24 hours. Last-minute requests accepted based on availability — WhatsApp for an instant reply." },
-              { "q": "Can I change or cancel my booking?", "a": "Yes, free up to 24h before. WhatsApp or email — we adjust right away." },
-              { "q": "How do I pay?", "a": "Cash or card to the driver on arrival. No deposit required by default." },
-              { "q": "Is there a deposit?", "a": "Not by default. Optional deposit to lock in the round-trip discount." },
-              { "q": "Can I pay by card?", "a": "Yes. Visa, Mastercard, Amex — terminal in every vehicle." }
+              {
+                "q": "How far in advance should I book?",
+                "a": "Ideally 24 hours. Last-minute requests accepted based on availability — WhatsApp for an instant reply."
+              },
+              {
+                "q": "Can I change or cancel my booking?",
+                "a": "Yes, free up to 24h before. WhatsApp or email — we adjust right away."
+              },
+              {
+                "q": "How do I pay?",
+                "a": "Cash or card to the driver on arrival. No deposit required by default."
+              },
+              {
+                "q": "Is there a deposit?",
+                "a": "Not by default. Optional deposit to lock in the round-trip discount."
+              },
+              {
+                "q": "Can I pay by card?",
+                "a": "Yes. Visa, Mastercard, Amex — terminal in every vehicle."
+              }
             ]
           },
           {
             "title": "At the airport",
             "items": [
-              { "q": "Where does my driver meet me?", "a": "In the arrivals hall, past customs, with a sign bearing your name. Photo and WhatsApp number sent 24h before." },
-              { "q": "What if my flight is delayed?", "a": "We track your flight. Free waiting up to 60 minutes after landing." },
-              { "q": "What if I can't find my driver?", "a": "Call or WhatsApp +33 6 28 65 81 27. We'll find you right away." },
-              { "q": "What if I have more luggage than expected?", "a": "Switched to the van at no extra cost if you'd been offered the sedan." }
+              {
+                "q": "Where does my driver meet me?",
+                "a": "In the arrivals hall, past customs, with a sign bearing your name. Photo and WhatsApp number sent 24h before."
+              },
+              {
+                "q": "What if my flight is delayed?",
+                "a": "We track your flight. Free waiting up to 60 minutes after landing."
+              },
+              {
+                "q": "What if I can't find my driver?",
+                "a": "Call or WhatsApp +33 6 28 65 81 27. We'll find you right away."
+              },
+              {
+                "q": "What if I have more luggage than expected?",
+                "a": "For the Tesla: 3 large suitcases or 2 large + 2 small maximum. If you have more luggage, ask for a van directly."
+              }
             ]
           },
           {
             "title": "During the trip",
             "items": [
-              { "q": "Can we make a stop along the way?", "a": "Yes. Price confirmed on WhatsApp depending on the detour. Short stops often free." },
-              { "q": "Can I change destination mid-trip?", "a": "Yes, within reason. The driver adjusts the rate with you." },
-              { "q": "Is there Wi-Fi and charging?", "a": "USB chargers in every vehicle. Wi-Fi available on request in the Tesla." },
-              { "q": "Can we smoke in the car?", "a": "No. 100% non-smoking vehicles, including vapes." }
+              {
+                "q": "Can we make a stop along the way?",
+                "a": "Yes. Price confirmed on WhatsApp depending on the detour. Short stops often free."
+              },
+              {
+                "q": "Can I change destination mid-trip?",
+                "a": "Yes, within reason. The driver adjusts the rate with you."
+              },
+              {
+                "q": "Is there Wi-Fi and charging?",
+                "a": "USB chargers in every vehicle. Wi-Fi available on request in the Tesla."
+              },
+              {
+                "q": "Can we smoke in the car?",
+                "a": "No. 100% non-smoking vehicles, including vapes."
+              }
             ]
           },
           {
             "title": "Special requests",
             "items": [
-              { "q": "Do you have child seats?", "a": "Yes, free. Infant carrier (0–1 yr), child seat (1–3 yr), booster (3–10 yr). Tell us the ages." },
-              { "q": "Can we travel with a pet?", "a": "Small dogs in a carrier or travel bag, yes. WhatsApp for larger animals." },
-              { "q": "Do you offer accessible transfers?", "a": "Yes. WhatsApp with your needs — we adapt vehicle and assistance." },
-              { "q": "Can I book for someone else?", "a": "Yes. Provide the passenger's name and WhatsApp at booking." }
+              {
+                "q": "Do you have child seats?",
+                "a": "Yes, free. Infant carrier (0–1 yr), child seat (1–3 yr), booster (3–10 yr). Tell us the ages."
+              },
+              {
+                "q": "Can we travel with a pet?",
+                "a": "Small dogs in a carrier or travel bag, yes. WhatsApp for larger animals."
+              },
+              {
+                "q": "Do you offer accessible transfers?",
+                "a": "Yes. WhatsApp with your needs — we adapt vehicle and assistance."
+              },
+              {
+                "q": "Can I book for someone else?",
+                "a": "Yes. Provide the passenger's name and WhatsApp at booking."
+              }
             ]
           },
           {
             "title": "Pricing and extras",
             "items": [
-              { "q": "Are there night or weekend surcharges?", "a": "No. Flat pricing 24/7, every day of the week." },
-              { "q": "Are tolls included?", "a": "Yes, everything included. Nothing to add on arrival." },
-              { "q": "And tipping?", "a": "Never expected. Always appreciated if the service pleased you." }
+              {
+                "q": "Are there night or weekend surcharges?",
+                "a": "No. Flat pricing 24/7, every day of the week."
+              },
+              {
+                "q": "Are tolls included?",
+                "a": "Yes, everything included. Nothing to add on arrival."
+              },
+              {
+                "q": "And tipping?",
+                "a": "Never expected. Always appreciated if the service pleased you."
+              }
             ]
           }
         ]
@@ -642,5 +991,130 @@
         "cta": "Write on WhatsApp"
       }
     }
+  },
+  "siegesBebe": {
+    "hero": {
+      "eyebrow": "FOR FAMILIES",
+      "title": "Travel as a family. With peace of mind.",
+      "sub": "Certified child seats included free. Multilingual driver. Help with strollers and luggage included.",
+      "trustPills": [
+        "★ 5.0 Google",
+        "3 seat types",
+        "Stroller & luggage help",
+        "EN/FR driver"
+      ],
+      "primaryCta": "Book now",
+      "secondaryCta": "WhatsApp"
+    },
+    "commitment": {
+      "eyebrow": "FAMILY COMMITMENT",
+      "title": "Traveling with a child should never be a source of stress.",
+      "lead": "All our vehicles are equipped with child seats compliant with European ECE R44/R129 standards. Our driver installs the seat adapted to your child's age before pickup — you have nothing to carry, nothing to set up.",
+      "items": [
+        {
+          "icon": "baby",
+          "title": "Certified seats, free of charge.",
+          "body": "Infant carrier, toddler seat or booster — matched to your child's age and weight. Included in every trip."
+        },
+        {
+          "icon": "briefcase",
+          "title": "Hands free, from the moment you land.",
+          "body": "The driver greets you at the airport or station and helps with strollers and luggage. No surcharge."
+        },
+        {
+          "icon": "globe",
+          "title": "English and French spoken.",
+          "body": "Easy communication for international travelers. The driver can also adapt their driving style (smooth, no jerks) for your child's comfort."
+        },
+        {
+          "icon": "calendar-check",
+          "title": "Book ahead, seat ready.",
+          "body": "Tell us your child's age at booking. The right seat will be installed before you arrive."
+        }
+      ]
+    },
+    "seats": {
+      "eyebrow": "THREE SEAT TYPES",
+      "title": "The right seat for every age.",
+      "sub": "Tell us your child's age at booking. The matching seat is installed free of charge.",
+      "cards": [
+        {
+          "image": "/cosybebe.jpg",
+          "alt": "Infant carrier for newborns",
+          "title": "Infant carrier",
+          "ageRange": "0 to 13 months · 0–13 kg / 0–28 lbs",
+          "body": "For newborns and infants. Rear-facing installation, Isofix or seatbelt mounting."
+        },
+        {
+          "image": "/siegebebe.jpg",
+          "alt": "Toddler seat for young children",
+          "title": "Toddler seat",
+          "ageRange": "9 months to 4 years · 9–18 kg / 20–40 lbs",
+          "body": "For young children. 5-point harness, forward-facing position, reinforced side support."
+        },
+        {
+          "image": "/rehausseur.jpg",
+          "alt": "Booster seat for older children",
+          "title": "Booster seat",
+          "ageRange": "4 to 10 years · 15–36 kg / 33–80 lbs",
+          "body": "For older children. High-back booster with the vehicle’s three-point seatbelt."
+        }
+      ]
+    },
+    "trips": {
+      "eyebrow": "FAMILY TRIPS",
+      "title": "Built for your family trips.",
+      "items": [
+        {
+          "icon": "heart",
+          "title": "Maternity hospital pickup",
+          "body": "Bringing your newborn home deserves a calm, safe ride. Infant carrier installed in advance, smooth driving guaranteed."
+        },
+        {
+          "icon": "plane",
+          "title": "Airport or train station with kids",
+          "body": "Greeted with a name sign at arrivals. Help with strollers, luggage, and seat installation. All you have to do is get in."
+        },
+        {
+          "icon": "sparkles",
+          "title": "Disneyland with the family",
+          "body": "Direct ride from your hotel or the airport — no RER transfers, no public-transport stress. Child seats already in place."
+        },
+        {
+          "icon": "map-pin",
+          "title": "Paris sightseeing with children",
+          "body": "Eiffel Tower, Louvre, Versailles. The driver adapts to the kids’ pace. Breaks on demand."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Travel as a family, with full peace of mind.",
+      "sub": "Child seats included. Attentive driver. Book in 10 seconds.",
+      "primary": "Book now",
+      "whatsapp": "WhatsApp",
+      "trustLine": "Available 24/7 · Reply within 1 hour · Fixed price guaranteed"
+    },
+    "seo": {
+      "title": "Family chauffeur Paris with child seats — Driver Services",
+      "description": "Private chauffeur for families in Paris: free certified child seats (infant, toddler, booster). English-speaking driver, airport pickup at CDG, Orly, Beauvais."
+    }
+  },
+  "contactHero": {
+    "eyebrow": "LET'S TALK",
+    "title": "Have a question? Let's talk directly.",
+    "sub": "Reply within 1h via WhatsApp or email. Available 24/7 for your bookings.",
+    "channels": {
+      "whatsapp": {
+        "title": "WhatsApp",
+        "time": "Reply within 1h",
+        "preMessage": "Hello, I would like to book a chauffeur."
+      },
+      "email": {
+        "title": "Email",
+        "time": "Reply within 24h",
+        "preSubject": "Booking request"
+      }
+    },
+    "availability": "Available 24/7"
   }
 }

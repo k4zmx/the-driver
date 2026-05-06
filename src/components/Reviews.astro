@@ -55,13 +55,19 @@ const reviewCountText = (s.reviewCount ?? '{n}').replace('{n}', String(REVIEW_TO
 const averageText = REVIEW_AVERAGE.toFixed(1).replace('.', locale === 'en' ? '.' : ',');
 const reviews: Review[] = REVIEWS as Review[];
 
-// Split the localized "{n} avis" template so we can wrap the number in a
-// count-up span while keeping the surrounding label static.
-const countTemplate = s.reviewCount ?? '{n}';
-const countParts = countTemplate.split('{n}');
-const countPrefix = countParts[0] ?? '';
-const countSuffix = countParts[1] ?? '';
+// Aggregate badge uses its own template ("+{n} avis" / "{n}+ reviews")
+// so per-author meta lines (e.g. "24 reviews · 22 photos") stay clean
+// without the "+" prefix bleeding into them.
+const aggregateTemplate = s.aggregateCount ?? s.reviewCount ?? '{n}';
+const aggregateParts = aggregateTemplate.split('{n}');
+const countPrefix = aggregateParts[0] ?? '';
+const countSuffix = aggregateParts[1] ?? '';
 void reviewCountText;
+
+// Same Google Reviews URL used by the hero trust badge — keeps the
+// click target consistent across the page.
+const GOOGLE_REVIEWS_URL = 'https://www.google.com/search?kgmid=/g/11m6bcrmc3&q=Driver+Services';
+const aggregateAria = `${s.badges?.google ?? 'Google Reviews'} — ${averageText}/5 — ${aggregateTemplate.replace('{n}', String(REVIEW_TOTAL_COUNT))}`;
 
 // Compose an author meta line like "Local Guide · 24 reviews · 22 photos"
 // out of the per-locale templates. Parts are only included when > 0.
@@ -86,8 +92,19 @@ function authorMetaLine(r: Review): string {
       {s.subheading && <p class="body-lg mt-3">{s.subheading}</p>}
     </header>
 
-    {/* Aggregate badge — Google logo + score + stars + review count */}
-    <div class="rv-agg" data-reveal data-reveal-delay="1">
+    {/* Aggregate badge — Google logo + score + stars + review count.
+        Whole badge is a clickable link to the Google Reviews listing
+        (matches the hero trust badge target so the click affordance is
+        consistent across the page). */}
+    <a
+      class="rv-agg"
+      href={GOOGLE_REVIEWS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={aggregateAria}
+      data-reveal
+      data-reveal-delay="1"
+    >
       <svg class="rv-agg-logo" viewBox="0 0 48 48" aria-hidden="true">
         <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
         <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
@@ -124,7 +141,7 @@ function authorMetaLine(r: Review): string {
           >{REVIEW_TOTAL_COUNT}</span>{countSuffix}
         </p>
       </div>
-    </div>
+    </a>
 
     {/* Scroller with arrow buttons — identical pattern on mobile + desktop */}
     <div class="rv-scroller mt-10 md:mt-12" data-reveal data-reveal-delay="2">
@@ -237,7 +254,9 @@ function authorMetaLine(r: Review): string {
 
   .rv-head { max-width: 640px; }
 
-  /* Aggregate badge — Google-style trust anchor */
+  /* Aggregate badge — Google-style trust anchor. The whole element is
+     now an <a> linking to the public Google Reviews listing, so it
+     gets a hover lift + focus ring like the hero trust badges. */
   .rv-agg {
     margin-top: 28px;
     display: inline-flex;
@@ -247,6 +266,21 @@ function authorMetaLine(r: Review): string {
     background: var(--color-cream);
     border: 1px solid var(--color-smoke);
     border-radius: var(--radius-card);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms var(--ease-out),
+      border-color 220ms var(--ease-out);
+  }
+  .rv-agg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: var(--color-graphite);
+  }
+  .rv-agg:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 55%, transparent);
+    outline-offset: 3px;
   }
   .rv-agg-logo { width: 28px; height: 28px; flex-shrink: 0; }
   .rv-agg-score { display: flex; flex-direction: column; gap: 4px; }

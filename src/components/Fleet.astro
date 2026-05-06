@@ -498,8 +498,13 @@ const vehicles = [
     grid-template-columns: 1fr;
     gap: 12px;
   }
+  /* 1 → 2 → 4 column ladder so 4 entries lay out evenly without an
+     awkward orphan card at the bottom of a 3-col grid. */
   @media (min-width: 640px) {
-    .fleet-combo-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .fleet-combo-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  }
+  @media (min-width: 1024px) {
+    .fleet-combo-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
   }
   .fleet-combo-row {
     display: flex;

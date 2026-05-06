@@ -1,5 +1,6 @@
 ---
 import { t } from '../i18n';
+import { PRICES } from '../data/routes.js';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -9,13 +10,27 @@ interface Props {
 const { locale } = Astro.props;
 const s = t(locale).pages.fleet.groups;
 
+// Sample prices for the 4 fixed-tier combo cards — pulled from the
+// canonical route matrix so the cards stay in sync if the client tweaks
+// numbers in routes.js. Using CDG → Paris as the headline reference
+// route: it's the most-booked airport-to-city pair, so the price the
+// reader sees here will match what they'll see in the booking form.
+const refRoute = PRICES['CDG']['Paris'];
+const samplePrices: Record<string, string> = {
+  '12': `€${refRoute.p12}`,
+  '16': `€${refRoute.p16}`,
+  '20': `€${refRoute.p20}`,
+  '24': `€${refRoute.p24}`,
+};
+
 // Parse combo text to decide silhouette icons (bus for van, car for sedan).
-// Works across all 4 locales — matches the substring markers used in translations.
+// Works across all 4 locales — matches the substring markers used in
+// translations. `sed[aá]n` covers EN "sedan" + ES "sedán" (with accent).
 const iconsForCombo = (comboText: string): string[] => {
   const lc = comboText.toLowerCase();
   const result: string[] = [];
   const vans = (lc.match(/\bvan[io]?s?|furgon|furgone/g) ?? []).length;
-  const cars = (lc.match(/berlin|sedan/g) ?? []).length;
+  const cars = (lc.match(/berlin|sed[aá]n/g) ?? []).length;
   for (let i = 0; i < vans; i++) result.push('bus-silhouette');
   for (let i = 0; i < cars; i++) result.push('car-silhouette');
   return result;
@@ -41,8 +56,9 @@ const iconsForCombo = (comboText: string): string[] => {
     </header>
 
     <ul class="gc-grid mt-10 md:mt-12">
-      {s.combos.map((combo: { pax: string; label: string; combo: string; price: string }, i: number) => {
+      {s.combos.map((combo: { pax: string; label: string; combo: string }, i: number) => {
         const icons = iconsForCombo(combo.combo);
+        const price = samplePrices[combo.pax] ?? '';
         return (
           <li
             class="gc-card"
@@ -58,7 +74,7 @@ const iconsForCombo = (comboText: string): string[] => {
               ))}
             </div>
             <p class="gc-card-combo">{combo.combo}</p>
-            <p class="gc-card-price tabular-nums">{combo.price}</p>
+            {price && <p class="gc-card-price tabular-nums">{price}</p>}
           </li>
         );
       })}
@@ -180,8 +196,14 @@ const iconsForCombo = (comboText: string): string[] => {
     grid-template-columns: 1fr;
     gap: 14px;
   }
+  /* 1 → 2 → 4 column ladder: 4 cards (12/16/20/24) lay out evenly on
+     wide desktops and as 2×2 on tablet, instead of an awkward 3+1 with
+     an orphan card on a 3-column grid. */
   @media (min-width: 640px) {
-    .gc-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .gc-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  }
+  @media (min-width: 1024px) {
+    .gc-grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
   }
 
   .gc-card {

@@ -1,12 +1,24 @@
 ---
 import { t } from '../i18n';
+import HeroTrustBadges from './HeroTrustBadges.astro';
+import Icon from './Icon.astro';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
 }
 
 const { locale } = Astro.props;
-const s = t(locale).pages.faqContact.hero;
+const c = t(locale).contactHero;
+
+// Channel constants. Phone number is shared across the site; the WhatsApp
+// pre-message + email subject are localized so the recipient sees a
+// localized intro from the customer.
+const PHONE_DISPLAY = '+33 6 28 65 81 27';
+const PHONE_E164 = '33628658127';
+const EMAIL = 'the.driver@hotmail.com';
+
+const waHref = `https://wa.me/${PHONE_E164}?text=${encodeURIComponent(c.channels.whatsapp.preMessage)}`;
+const mailHref = `mailto:${EMAIL}?subject=${encodeURIComponent(c.channels.email.preSubject)}`;
 ---
 
 <section class="ch has-grain" aria-labelledby="ch-heading">
@@ -14,10 +26,66 @@ const s = t(locale).pages.faqContact.hero;
     <div class="ch-glow"></div>
   </div>
 
-  <div class="ch-inner page-x mx-auto max-w-[720px] text-center">
-    <p class="ch-eyebrow" data-reveal>{s.eyebrow}</p>
-    <h1 id="ch-heading" class="ch-heading text-balance" data-reveal data-reveal-delay="1">{s.heading}</h1>
-    <p class="ch-sub" data-reveal data-reveal-delay="2">{s.sub}</p>
+  <div class="ch-inner page-x mx-auto max-w-[820px]">
+    <HeroTrustBadges locale={locale} />
+
+    <p class="ch-eyebrow" data-reveal data-reveal-delay="1">{c.eyebrow}</p>
+    <h1 id="ch-heading" class="ch-heading text-balance" data-reveal data-reveal-delay="2">{c.title}</h1>
+    <p class="ch-sub" data-reveal data-reveal-delay="3">{c.sub}</p>
+
+    {/* Two contact channel cards — WhatsApp + Email. Same shape, different
+        accent. Each card is a single <a> so the entire surface is the
+        click target. */}
+    <div class="contact-channels" data-reveal data-reveal-delay="4">
+      <a
+        href={waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="contact-channel contact-channel--whatsapp"
+        aria-label={`${c.channels.whatsapp.title} — ${PHONE_DISPLAY}`}
+      >
+        <span class="contact-channel-icon" aria-hidden="true">
+          {/* WhatsApp glyph — same path used in the footer/nav. */}
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+        </span>
+        <span class="contact-channel-content">
+          <span class="contact-channel-title">{c.channels.whatsapp.title}</span>
+          <span class="contact-channel-value tabular-nums">{PHONE_DISPLAY}</span>
+          <span class="contact-channel-time">{c.channels.whatsapp.time}</span>
+        </span>
+        <span class="contact-channel-arrow" aria-hidden="true">
+          <Icon name="arrow-right" size={18} strokeWidth={1.8} />
+        </span>
+      </a>
+
+      <a
+        href={mailHref}
+        class="contact-channel contact-channel--email"
+        aria-label={`${c.channels.email.title} — ${EMAIL}`}
+      >
+        <span class="contact-channel-icon" aria-hidden="true">
+          <Icon name="mail" size={20} strokeWidth={1.8} />
+        </span>
+        <span class="contact-channel-content">
+          <span class="contact-channel-title">{c.channels.email.title}</span>
+          <span class="contact-channel-value">{EMAIL}</span>
+          <span class="contact-channel-time">{c.channels.email.time}</span>
+        </span>
+        <span class="contact-channel-arrow" aria-hidden="true">
+          <Icon name="arrow-right" size={18} strokeWidth={1.8} />
+        </span>
+      </a>
+    </div>
+
+    {/* Availability strip — pulsing green dot + plain text, indicates
+        the business is reachable now. Pulse is pure CSS, reduced-motion
+        aware. */}
+    <p class="contact-availability" data-reveal data-reveal-delay="5">
+      <span class="contact-availability-dot" aria-hidden="true"></span>
+      <span>{c.availability}</span>
+    </p>
   </div>
 </section>
 
@@ -52,7 +120,14 @@ const s = t(locale).pages.faqContact.hero;
     opacity: 0.6;
   }
 
-  .ch-inner { position: relative; z-index: 1; }
+  .ch-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 
   .ch-eyebrow {
     font-family: var(--font-sans);
@@ -67,28 +142,176 @@ const s = t(locale).pages.faqContact.hero;
     margin: 0;
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: 38px;
+    font-size: 36px;
     line-height: 1.05;
     letter-spacing: -0.02em;
     color: var(--color-ink);
     max-width: 18ch;
-    margin-left: auto;
-    margin-right: auto;
   }
   @media (min-width: 768px) {
-    .ch-heading { font-size: 52px; }
+    .ch-heading { font-size: 48px; }
   }
   @media (min-width: 1024px) {
-    .ch-heading { font-size: 60px; }
+    .ch-heading { font-size: 56px; }
   }
   .ch-sub {
-    margin: 22px auto 0;
-    max-width: 52ch;
+    margin: 22px 0 0;
+    max-width: 56ch;
     font-size: 16px;
     line-height: 1.6;
     color: var(--color-graphite);
   }
   @media (min-width: 768px) {
     .ch-sub { font-size: 17px; }
+  }
+
+  /* ---------------------------------------------------------------
+     Two contact channel cards — full-width container max 640px,
+     stacks at < 640px, side-by-side above.
+     --------------------------------------------------------------- */
+  .contact-channels {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  @media (min-width: 640px) {
+    .contact-channels { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 768px) {
+    .contact-channels { margin-top: 40px; }
+  }
+
+  .contact-channel {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 12px;
+    text-align: left;
+    text-decoration: none;
+    color: var(--color-ink);
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (min-width: 768px) {
+    .contact-channel { padding: 20px 24px; }
+  }
+  .contact-channel:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-accent) 50%, var(--color-smoke));
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  }
+  .contact-channel:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 55%, transparent);
+    outline-offset: 3px;
+  }
+
+  .contact-channel-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .contact-channel-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .contact-channel--whatsapp .contact-channel-icon { background: #25D366; }
+  .contact-channel--email .contact-channel-icon    { background: var(--color-accent); }
+
+  .contact-channel-content {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+  .contact-channel-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-ink);
+    line-height: 1.2;
+  }
+  .contact-channel-value {
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    color: var(--color-graphite);
+    word-break: break-word;
+    line-height: 1.3;
+  }
+  .contact-channel-time {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--color-graphite);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+
+  .contact-channel-arrow {
+    flex-shrink: 0;
+    color: var(--color-graphite);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .contact-channel:hover .contact-channel-arrow {
+    transform: translateX(4px);
+    color: var(--color-accent);
+  }
+
+  /* ---------------------------------------------------------------
+     Availability strip — pill below the channel cards, pulsing dot
+     to convey "we're online".
+     --------------------------------------------------------------- */
+  .contact-availability {
+    margin: 24px 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--color-graphite);
+  }
+  .contact-availability-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #34D399;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+  }
+  .contact-availability-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    background: #34D399;
+    opacity: 0.45;
+    animation: contact-availability-pulse 2s var(--ease-in-out) infinite;
+  }
+  @keyframes contact-availability-pulse {
+    0%, 100% { transform: scale(0.7); opacity: 0.45; }
+    50%      { transform: scale(1.4); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .contact-availability-dot::after { animation: none; }
   }
 </style>

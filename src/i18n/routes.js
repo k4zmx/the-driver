@@ -4,6 +4,7 @@ export const ROUTES = {
   home:       { fr: '/',           en: '/en/',           es: '/es/',           it: '/it/' },
   fleet:      { fr: '/flotte',     en: '/en/fleet',      es: '/es/flota',      it: '/it/flotta' },
   rates:      { fr: '/tarifs',     en: '/en/rates',      es: '/es/tarifas',    it: '/it/tariffe' },
+  childSeats: { fr: '/sieges-bebe', en: '/en/child-seats', es: '/es/asientos-bebe', it: '/it/seggiolini-bambini' },
   faqContact: { fr: '/faq-contact', en: '/en/faq-contact', es: '/es/faq-contacto', it: '/it/faq-contatti' },
 };
 

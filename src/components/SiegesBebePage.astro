@@ -1,0 +1,497 @@
+---
+import { t, pathForRoute } from '../i18n';
+import Icon from './Icon.astro';
+import PageCloseCTA from './PageCloseCTA.astro';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const s = t(locale).siegesBebe;
+
+// Hero CTA → home with #booking-form so the modal auto-opens on arrival.
+// Same pattern Fleet/Tarifs/FAQ use for cross-page booking entry.
+const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
+const waHref = 'https://wa.me/33628658127';
+---
+
+{/* ───────────────────── Section 1 — Hero ───────────────────── */}
+<section class="sb-hero" aria-labelledby="sb-hero-h">
+  <div class="sb-hero-photo" aria-hidden="true">
+    <img src="/babycarseat.jpg" alt="" width="1600" height="900" fetchpriority="high" decoding="async" />
+    <div class="sb-hero-veil"></div>
+  </div>
+
+  <div class="sb-hero-inner page-x mx-auto max-w-[920px] text-center">
+    <p class="sb-hero-eyebrow" data-reveal>{s.hero.eyebrow}</p>
+    <h1 id="sb-hero-h" class="sb-hero-title text-balance" data-reveal data-reveal-delay="1">
+      {s.hero.title}
+    </h1>
+    <p class="sb-hero-sub" data-reveal data-reveal-delay="2">{s.hero.sub}</p>
+
+    <ul class="sb-hero-pills" data-reveal data-reveal-delay="3">
+      {s.hero.trustPills.map((pill: string) => (
+        <li class="sb-hero-pill">{pill}</li>
+      ))}
+    </ul>
+
+    <div class="sb-hero-actions" data-reveal data-reveal-delay="4">
+      <a href={homeBooking} class="sb-hero-primary" data-press>
+        <span>{s.hero.primaryCta}</span>
+        <Icon name="arrow-right" size={16} strokeWidth={2} />
+      </a>
+      <a href={waHref} target="_blank" rel="noopener noreferrer" class="sb-hero-secondary" data-press>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="sb-hero-secondary-icon">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>{s.hero.secondaryCta}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* ────────── Section 2 — Family commitment (4 items, 2×2) ────────── */}
+<section class="sb-commit section-y has-grain" aria-labelledby="sb-commit-h">
+  <div class="page-x mx-auto max-w-[1100px]">
+    <div class="sb-commit-head">
+      <p class="meta-label mb-3" data-reveal>{s.commitment.eyebrow}</p>
+      <h2 id="sb-commit-h" class="h2 text-balance" data-reveal data-reveal-delay="1">
+        {s.commitment.title}
+      </h2>
+      <p class="sb-commit-lead body-lg mt-4" data-reveal data-reveal-delay="2">
+        {s.commitment.lead}
+      </p>
+    </div>
+
+    <ul class="sb-commit-grid" data-reveal data-reveal-delay="3">
+      {s.commitment.items.map((item: any) => (
+        <li class="sb-commit-card">
+          <span class="sb-commit-icon" aria-hidden="true">
+            <Icon name={item.icon} size={22} strokeWidth={1.6} />
+          </span>
+          <h3 class="sb-commit-title">{item.title}</h3>
+          <p class="sb-commit-body">{item.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+{/* ───── Section 3 — Three seat types (3 cards with photos) ───── */}
+<section class="sb-seats section-y" aria-labelledby="sb-seats-h">
+  <div class="page-x mx-auto max-w-[1200px]">
+    <div class="sb-seats-head">
+      <p class="meta-label mb-3" data-reveal>{s.seats.eyebrow}</p>
+      <h2 id="sb-seats-h" class="h2 text-balance" data-reveal data-reveal-delay="1">{s.seats.title}</h2>
+      <p class="body-lg mt-3" data-reveal data-reveal-delay="2">{s.seats.sub}</p>
+    </div>
+
+    <ul class="sb-seats-grid" data-reveal data-reveal-delay="3">
+      {s.seats.cards.map((card: any) => (
+        <li class="sb-seat-card">
+          <div class="sb-seat-media">
+            <img
+              src={card.image}
+              alt={card.alt}
+              width="600"
+              height="450"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="sb-seat-body">
+            <h3 class="sb-seat-title">{card.title}</h3>
+            <p class="sb-seat-age">{card.ageRange}</p>
+            <hr class="sb-seat-divider" />
+            <p class="sb-seat-desc">{card.body}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+{/* ─────── Section 4 — Family trip types (4 items, 2×2) ─────── */}
+<section class="sb-trips section-y has-grain" aria-labelledby="sb-trips-h">
+  <div class="page-x mx-auto max-w-[1100px]">
+    <div class="sb-trips-head">
+      <p class="meta-label mb-3" data-reveal>{s.trips.eyebrow}</p>
+      <h2 id="sb-trips-h" class="h2 text-balance" data-reveal data-reveal-delay="1">{s.trips.title}</h2>
+    </div>
+
+    <ul class="sb-trips-grid" data-reveal data-reveal-delay="2">
+      {s.trips.items.map((item: any) => (
+        <li class="sb-trip-card">
+          <span class="sb-trip-icon" aria-hidden="true">
+            <Icon name={item.icon} size={22} strokeWidth={1.6} />
+          </span>
+          <h3 class="sb-trip-title">{item.title}</h3>
+          <p class="sb-trip-body">{item.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+{/* ──────────────── Section 5 — Final CTA ──────────────── */}
+<PageCloseCTA
+  heading={s.finalCta.title}
+  sub={s.finalCta.sub}
+  primaryLabel={s.finalCta.primary}
+  primaryFallbackHref={homeBooking}
+  secondaryLabel={s.finalCta.whatsapp}
+  secondaryHref={waHref}
+  footnote={s.finalCta.trustLine}
+/>
+
+<style>
+  /* ================== Section 1 — HERO ================== */
+  .sb-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    padding-top: 64px;
+    padding-bottom: 72px;
+  }
+  @media (min-width: 768px) {
+    .sb-hero { padding-top: 96px; padding-bottom: 104px; }
+  }
+  .sb-hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .sb-hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+    filter: saturate(0.88);
+  }
+  .sb-hero-veil {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(255, 250, 242, 0.20) 0%, rgba(255, 250, 242, 0.78) 65%, var(--color-cream) 100%),
+      linear-gradient(to bottom, rgba(255, 250, 242, 0.30), rgba(255, 250, 242, 0.92));
+  }
+  .sb-hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+  .sb-hero-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 16px;
+  }
+  .sb-hero-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @media (min-width: 768px) {
+    .sb-hero-title { font-size: 56px; }
+  }
+  @media (min-width: 1024px) {
+    .sb-hero-title { font-size: 64px; }
+  }
+  .sb-hero-sub {
+    margin: 20px auto 0;
+    max-width: 56ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: color-mix(in oklab, var(--color-ink) 78%, transparent);
+  }
+  @media (min-width: 768px) {
+    .sb-hero-sub { font-size: 17px; margin-top: 24px; }
+  }
+
+  .sb-hero-pills {
+    list-style: none;
+    padding: 0;
+    margin: 28px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .sb-hero-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-paper) 80%, transparent);
+    border: 1px solid var(--color-smoke);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-ink);
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(4px);
+  }
+
+  .sb-hero-actions {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (min-width: 640px) {
+    .sb-hero-actions { flex-direction: row; gap: 14px; }
+  }
+  .sb-hero-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 28px;
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow:
+      0 18px 40px -12px color-mix(in oklab, var(--color-accent) 55%, transparent),
+      0 0 0 1px color-mix(in oklab, white 10%, transparent) inset;
+    transition: background-color 220ms var(--ease-out), box-shadow 260ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  @media (min-width: 640px) { .sb-hero-primary { width: auto; min-width: 220px; } }
+  .sb-hero-primary:hover { background: var(--color-accent-ink); }
+  .sb-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 24px;
+    width: 100%;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+    border: 1.5px solid color-mix(in oklab, var(--color-ink) 28%, transparent);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 220ms var(--ease-out), color 220ms var(--ease-out), border-color 220ms var(--ease-out);
+  }
+  @media (min-width: 640px) { .sb-hero-secondary { width: auto; } }
+  .sb-hero-secondary:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border-color: var(--color-ink);
+  }
+  .sb-hero-secondary-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* ================== Section 2 — COMMITMENT ================== */
+  .sb-commit { background: var(--color-cream); }
+  .sb-commit-head { max-width: 720px; }
+  .sb-commit-lead {
+    color: color-mix(in oklab, var(--color-ink) 78%, transparent);
+    max-width: 60ch;
+  }
+  .sb-commit-grid {
+    list-style: none;
+    padding: 0;
+    margin: 40px 0 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .sb-commit-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 48px;
+    }
+  }
+  .sb-commit-card {
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 14px;
+    padding: 24px;
+    transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+  }
+  .sb-commit-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    box-shadow: 0 14px 30px -18px rgba(20, 20, 20, 0.18);
+  }
+  .sb-commit-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    margin-bottom: 16px;
+  }
+  .sb-commit-title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  .sb-commit-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-ink) 75%, transparent);
+  }
+
+  /* ================== Section 3 — SEAT TYPES ================== */
+  .sb-seats { background: var(--color-paper); }
+  .sb-seats-head { max-width: 640px; }
+  .sb-seats-grid {
+    list-style: none;
+    padding: 0;
+    margin: 40px 0 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .sb-seats-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+  }
+  .sb-seat-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+  }
+  .sb-seat-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    box-shadow: 0 14px 30px -18px rgba(20, 20, 20, 0.18);
+  }
+  .sb-seat-media {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-cream);
+  }
+  .sb-seat-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 600ms var(--ease-out);
+  }
+  .sb-seat-card:hover .sb-seat-media img { transform: scale(1.03); }
+  .sb-seat-body { padding: 20px 22px 22px; }
+  .sb-seat-title {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--color-ink);
+  }
+  .sb-seat-age {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-graphite);
+    font-variant-numeric: tabular-nums;
+  }
+  .sb-seat-divider {
+    border: 0;
+    height: 1px;
+    background: var(--color-smoke);
+    margin: 14px 0;
+  }
+  .sb-seat-desc {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-ink) 75%, transparent);
+  }
+
+  /* ================== Section 4 — TRIPS ================== */
+  .sb-trips { background: var(--color-cream); }
+  .sb-trips-head { max-width: 640px; }
+  .sb-trips-grid {
+    list-style: none;
+    padding: 0;
+    margin: 36px 0 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 768px) {
+    .sb-trips-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 44px;
+    }
+  }
+  .sb-trip-card {
+    background: var(--color-paper);
+    border: 1px solid var(--color-smoke);
+    border-radius: 14px;
+    padding: 22px;
+    transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+  }
+  .sb-trip-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--color-accent) 30%, var(--color-smoke));
+    box-shadow: 0 14px 30px -18px rgba(20, 20, 20, 0.18);
+  }
+  .sb-trip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    margin-bottom: 14px;
+  }
+  .sb-trip-title {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  .sb-trip-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-ink) 75%, transparent);
+  }
+</style>

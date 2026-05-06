@@ -1,7 +1,6 @@
 {
   "pricing": {
     "pax": {
-      "1_3": "1–3 persone",
       "4": "4 persone",
       "5": "5 persone",
       "6": "6 persone",
@@ -10,7 +9,8 @@
       "12": "12 persone",
       "16": "16 persone",
       "20": "20 persone",
-      "24": "24 persone"
+      "24": "24 persone",
+      "1_3": "1–3 persone"
     }
   },
   "locale": "it",
@@ -22,7 +22,8 @@
     "routes": "Tratte e tariffe",
     "about": "Chi siamo",
     "contact": "Contatti",
-    "book": "Prenota"
+    "book": "Prenota",
+    "childSeats": "Seggiolini bambini"
   },
   "cta": {
     "bookNow": "Prenota ora",
@@ -53,7 +54,19 @@
       "empty": "Scegli il tuo percorso",
       "unavailable": "Scrivici per questo percorso"
     },
-    "cta": "Prenota ora"
+    "cta": "Prenota ora",
+    "trustBadges": {
+      "google": "Google Reviews · +45 recensioni",
+      "googleAriaLabel": "Vedi le nostre recensioni Google (5,0 stelle, +45 recensioni)",
+      "tripadvisor": "TripAdvisor",
+      "tripadvisorAriaLabel": "Vedi le nostre recensioni TripAdvisor (5 stelle)"
+    },
+    "trustLine": [
+      "Disponibile 24/7",
+      "Licenza VTC",
+      "Seggiolini gratuiti",
+      "Pagamento all'arrivo"
+    ]
   },
   "form": {
     "eyebrow": "PRENOTAZIONE",
@@ -165,10 +178,22 @@
     "eyebrow": "COME FUNZIONA",
     "heading": "Prenoti in 2 minuti. Viaggi sereno.",
     "steps": [
-      { "title": "Scegli il percorso.", "body": "Seleziona partenza e arrivo. Il prezzo compare all'istante." },
-      { "title": "Inserisci i dettagli.", "body": "Data, ora, numero passeggeri, numero di volo. Tutto qui." },
-      { "title": "Ricevi la conferma.", "body": "Entro 1 ora via email e WhatsApp, con i dati del tuo autista." },
-      { "title": "Sali e rilassati.", "body": "Cartello col tuo nome in aeroporto. Pagamento in contanti o carta all'arrivo." }
+      {
+        "title": "Scegli il percorso.",
+        "body": "Seleziona partenza e arrivo. Il prezzo compare all'istante."
+      },
+      {
+        "title": "Inserisci i dettagli.",
+        "body": "Data, ora, numero passeggeri, numero di volo. Tutto qui."
+      },
+      {
+        "title": "Ricevi la conferma.",
+        "body": "Entro 1 ora via email e WhatsApp, con i dati del tuo autista."
+      },
+      {
+        "title": "Sali e rilassati.",
+        "body": "Cartello col tuo nome in aeroporto. Pagamento in contanti o carta all'arrivo."
+      }
     ]
   },
   "destinations": {
@@ -234,9 +259,22 @@
     "combine": {
       "heading": "Più di 8 passeggeri? Combiniamo.",
       "examples": [
-        { "pax": "11 persone", "combo": "2 furgoni" },
-        { "pax": "16 persone", "combo": "2 furgoni" },
-        { "pax": "20 persone", "combo": "3 furgoni" }
+        {
+          "pax": "12 persone",
+          "combo": "1 furgone + 1 berlina"
+        },
+        {
+          "pax": "16 persone",
+          "combo": "2 furgoni"
+        },
+        {
+          "pax": "20 persone",
+          "combo": "2 furgoni + 1 berlina"
+        },
+        {
+          "pax": "24 persone",
+          "combo": "3 furgoni"
+        }
       ],
       "footer": "Stesso prezzo per veicolo. Nessuna sorpresa."
     }
@@ -287,7 +325,8 @@
       "google": "Google Reviews",
       "googleScore": "5,0",
       "tripadvisor": "TripAdvisor"
-    }
+    },
+    "aggregateCount": "+{n} recensioni"
   },
   "faq": {
     "eyebrow": "DOMANDE FREQUENTI",
@@ -295,10 +334,22 @@
     "subPrefix": "Una domanda che non trovi qui?",
     "subCta": "Scrivici su WhatsApp",
     "items": [
-      { "q": "E se il mio volo è in ritardo?", "a": "Monitoriamo il tuo volo in tempo reale. Il tuo autista ti aspetta fino a 60 minuti dopo l'atterraggio, senza costi aggiuntivi." },
-      { "q": "Dove trovo l'autista in aeroporto?", "a": "Nella sala arrivi, con un cartello col tuo nome. Ti inviamo la sua foto e il numero WhatsApp 24h prima del viaggio." },
-      { "q": "Come si paga?", "a": "In contanti o con carta, direttamente all'autista all'arrivo. Nessun acconto richiesto. È possibile lasciare un acconto per bloccare lo sconto andata-ritorno." },
-      { "q": "E se siamo più di 8 persone?", "a": "Nessun problema. Combiniamo più veicoli. 11 passeggeri = 2 furgoni. Prezzo per veicolo, senza sorprese." }
+      {
+        "q": "E se il mio volo è in ritardo?",
+        "a": "Monitoriamo il tuo volo in tempo reale. Il tuo autista ti aspetta fino a 60 minuti dopo l'atterraggio, senza costi aggiuntivi."
+      },
+      {
+        "q": "Dove trovo l'autista in aeroporto?",
+        "a": "Nella sala arrivi, con un cartello col tuo nome. Ti inviamo la sua foto e il numero WhatsApp 24h prima del viaggio."
+      },
+      {
+        "q": "Come si paga?",
+        "a": "In contanti o con carta, direttamente all'autista all'arrivo. Nessun acconto richiesto. È possibile lasciare un acconto per bloccare lo sconto andata-ritorno."
+      },
+      {
+        "q": "E se siamo più di 8 persone?",
+        "a": "Nessun problema. Combiniamo più veicoli. 11 passeggeri = 2 furgoni. Prezzo per veicolo, senza sorprese."
+      }
     ],
     "seeAll": "Tutte le domande"
   },
@@ -310,6 +361,122 @@
     "secondary": "WhatsApp",
     "footnote": "Disponibile 24/7 · Risposta entro 1 ora · Prezzo fisso garantito"
   },
+  "seoFooter": {
+    "routes": {
+      "eyebrow": "TRAGITTI POPOLARI",
+      "title": "Prenota il tuo trasferimento direttamente.",
+      "sub": "Clicca per precompilare la tua prenotazione.",
+      "items": [
+        {
+          "label": "Autista famiglie Parigi",
+          "routeKey": "childSeats"
+        },
+        {
+          "label": "Taxi CDG verso Parigi",
+          "pickup": "CDG",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Taxi Orly verso Parigi",
+          "pickup": "Orly",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Trasferimento CDG Disneyland",
+          "pickup": "CDG",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Trasferimento Orly Disneyland",
+          "pickup": "Orly",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Trasferimento Beauvais Parigi",
+          "pickup": "Beauvais",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Taxi CDG Versailles",
+          "pickup": "CDG",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "Taxi Parigi Versailles",
+          "pickup": "Paris",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "Trasferimento CDG Orly",
+          "pickup": "CDG",
+          "dropoff": "Orly"
+        },
+        {
+          "label": "Disneyland a CDG",
+          "pickup": "Disneyland",
+          "dropoff": "CDG"
+        },
+        {
+          "label": "Disneyland a Orly",
+          "pickup": "Disneyland",
+          "dropoff": "Orly"
+        },
+        {
+          "label": "Beauvais a Disneyland",
+          "pickup": "Beauvais",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Stazione a Parigi",
+          "pickup": "Paris Train Station",
+          "dropoff": "Paris"
+        }
+      ]
+    },
+    "destinations": {
+      "eyebrow": "DESTINAZIONI",
+      "title": "Ti portiamo ovunque.",
+      "sub": "Aeroporti, stazioni, monumenti — tutti i punti chiave di Parigi.",
+      "items": [
+        {
+          "label": "Aeroporto Charles de Gaulle",
+          "pickup": "CDG"
+        },
+        {
+          "label": "Aeroporto Orly",
+          "pickup": "Orly"
+        },
+        {
+          "label": "Aeroporto Beauvais",
+          "pickup": "Beauvais"
+        },
+        {
+          "label": "Disneyland Parigi",
+          "dropoff": "Disneyland"
+        },
+        {
+          "label": "Reggia di Versailles",
+          "dropoff": "Versailles"
+        },
+        {
+          "label": "Hotel di Parigi",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Stazioni di Parigi",
+          "dropoff": "Paris Train Station"
+        },
+        {
+          "label": "Torre Eiffel e centro",
+          "dropoff": "Paris"
+        },
+        {
+          "label": "Autista famiglie Parigi",
+          "routeKey": "childSeats"
+        }
+      ]
+    }
+  },
   "footer": {
     "tagline": "Autista privato a Parigi",
     "rights": "Tutti i diritti riservati",
@@ -319,6 +486,10 @@
     "brand": {
       "tagline": "Il tuo autista privato a Parigi dal 2012.",
       "rating": "5,0 — Google Reviews"
+    },
+    "tripadvisor": {
+      "eyebrow": "CONSIGLIATO",
+      "cta": "su TripAdvisor"
     },
     "columns": {
       "links": "LINK",
@@ -349,17 +520,33 @@
         "eyebrow": "LA NOSTRA FLOTTA",
         "heading": "Due auto. Ogni tipo di viaggio coperto.",
         "sub": "Non puntiamo alla flotta più grande — puntiamo alle auto giuste, curate, sempre disponibili.",
-        "stats": ["2 veicoli", "1–8 passeggeri · oltre su richiesta", "100 % non fumatori"]
+        "stats": [
+          "2 veicoli",
+          "1–8 passeggeri · oltre su richiesta",
+          "100 % non fumatori"
+        ]
       },
       "car": {
         "eyebrow": "BERLINA",
         "title": "Tesla Model Y",
         "oneLiner": "Comfort elettrico, silenzio assoluto, zero emissioni.",
         "specs": [
-          { "icon": "users", "label": "1–3 passeggeri" },
-          { "icon": "briefcase", "label": "3 valigie grandi" },
-          { "icon": "zap", "label": "100 % elettrica" },
-          { "icon": "wifi", "label": "Wi-Fi a bordo" }
+          {
+            "icon": "users",
+            "label": "1–3 passeggeri"
+          },
+          {
+            "icon": "briefcase",
+            "label": "3 valigie grandi"
+          },
+          {
+            "icon": "zap",
+            "label": "100 % elettrica"
+          },
+          {
+            "icon": "wifi",
+            "label": "Wi-Fi a bordo"
+          }
         ],
         "features": [
           "Climatizzazione regolata",
@@ -383,10 +570,22 @@
         "title": "Mercedes Vito · Renault Trafic",
         "oneLiner": "Lo spazio giusto per famiglie, gruppi e tutti i vostri bagagli.",
         "specs": [
-          { "icon": "users", "label": "4–8 passeggeri" },
-          { "icon": "briefcase", "label": "Fino a 8 valigie" },
-          { "icon": "shield", "label": "Sedili individuali" },
-          { "icon": "wind", "label": "Climatizzazione posteriore" }
+          {
+            "icon": "users",
+            "label": "4–8 passeggeri"
+          },
+          {
+            "icon": "briefcase",
+            "label": "Fino a 8 valigie"
+          },
+          {
+            "icon": "shield",
+            "label": "Sedili individuali"
+          },
+          {
+            "icon": "wind",
+            "label": "Climatizzazione posteriore"
+          }
         ],
         "features": [
           "Climatizzazione separata avanti/dietro",
@@ -410,9 +609,26 @@
         "heading": "Più di 8 persone? Ci adattiamo.",
         "sub": "Niente bisogno di chiamare più taxi. Combiniamo i nostri veicoli allo stesso prezzo fisso per veicolo.",
         "combos": [
-          { "pax": "11", "label": "passeggeri", "combo": "2 furgoni", "price": "120 €" },
-          { "pax": "16", "label": "passeggeri", "combo": "2 furgoni", "price": "140 €" },
-          { "pax": "20", "label": "passeggeri", "combo": "3 furgoni", "price": "190 €" }
+          {
+            "pax": "12",
+            "label": "passeggeri",
+            "combo": "1 furgone + 1 berlina"
+          },
+          {
+            "pax": "16",
+            "label": "passeggeri",
+            "combo": "2 furgoni"
+          },
+          {
+            "pax": "20",
+            "label": "passeggeri",
+            "combo": "2 furgoni + 1 berlina"
+          },
+          {
+            "pax": "24",
+            "label": "passeggeri",
+            "combo": "3 furgoni"
+          }
         ],
         "footer": "Calcolato automaticamente nel modulo di prenotazione in base al numero di passeggeri."
       },
@@ -420,10 +636,26 @@
         "eyebrow": "SEMPRE INCLUSO",
         "heading": "Nessun supplemento, nessuna brutta sorpresa.",
         "items": [
-          { "icon": "lock", "title": "Prezzo fisso garantito", "body": "La tariffa indicata è la tariffa finale. Pedaggi, tasse, bagagli — tutto dentro." },
-          { "icon": "baby", "title": "Seggiolini bimbi gratuiti", "body": "Ovetto, seggiolino o rialzo — su semplice richiesta." },
-          { "icon": "clock", "title": "Attesa offerta", "body": "60 minuti di attesa gratuita per i voli, 30 minuti per i treni." },
-          { "icon": "droplet", "title": "Acqua in bottiglia", "body": "A bordo per ogni passeggero, in ogni veicolo." }
+          {
+            "icon": "lock",
+            "title": "Prezzo fisso garantito",
+            "body": "La tariffa indicata è la tariffa finale. Pedaggi, tasse, bagagli — tutto dentro."
+          },
+          {
+            "icon": "baby",
+            "title": "Seggiolini bimbi gratuiti",
+            "body": "Ovetto, seggiolino o rialzo — su semplice richiesta."
+          },
+          {
+            "icon": "clock",
+            "title": "Attesa offerta",
+            "body": "60 minuti di attesa gratuita per i voli, 30 minuti per i treni."
+          },
+          {
+            "icon": "droplet",
+            "title": "Acqua in bottiglia",
+            "body": "A bordo per ogni passeggero, in ogni veicolo."
+          }
         ]
       },
       "finalCta": {
@@ -439,7 +671,12 @@
         "eyebrow": "LE NOSTRE TARIFFE",
         "heading": "Tutti i prezzi. Nessuna brutta sorpresa.",
         "sub": "Tariffe fisse per veicolo, per tratta. Pedaggi inclusi, tasse incluse, bagagli inclusi. Quello che vedi è quello che paghi.",
-        "trustRow": ["Tariffe fisse", "Pedaggi inclusi", "Seggiolini bimbi gratuiti", "Pagamento all'arrivo"]
+        "trustRow": [
+          "Tariffe fisse",
+          "Pedaggi inclusi",
+          "Seggiolini bimbi gratuiti",
+          "Pagamento all'arrivo"
+        ]
       },
       "calculator": {
         "eyebrow": "CALCOLA IL TUO PREZZO",
@@ -491,21 +728,57 @@
         "heading": "Il prezzo è il prezzo.",
         "sub": "Cosa è già compreso in ogni viaggio — non pagherai un centesimo in più.",
         "items": [
-          { "icon": "check-circle", "label": "Pedaggi", "sub": "Tutti i pedaggi del tuo itinerario" },
-          { "icon": "check-circle", "label": "Tasse", "sub": "IVA e tasse professionali incluse" },
-          { "icon": "check-circle", "label": "Bagagli", "sub": "Valigie e borse senza limiti ragionevoli" },
-          { "icon": "check-circle", "label": "Seggiolini bimbi", "sub": "Ovetto, seggiolino, rialzo su richiesta" },
-          { "icon": "check-circle", "label": "Attesa", "sub": "60 min per i voli, 30 min per i treni" },
-          { "icon": "check-circle", "label": "Accoglienza personalizzata", "sub": "Cartello col tuo nome in aeroporto" }
+          {
+            "icon": "check-circle",
+            "label": "Pedaggi",
+            "sub": "Tutti i pedaggi del tuo itinerario"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Tasse",
+            "sub": "IVA e tasse professionali incluse"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Bagagli",
+            "sub": "Valigie e borse senza limiti ragionevoli"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Seggiolini bimbi",
+            "sub": "Ovetto, seggiolino, rialzo su richiesta"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Attesa",
+            "sub": "60 min per i voli, 30 min per i treni"
+          },
+          {
+            "icon": "check-circle",
+            "label": "Accoglienza personalizzata",
+            "sub": "Cartello col tuo nome in aeroporto"
+          }
         ]
       },
       "payment": {
         "eyebrow": "PAGAMENTO",
         "heading": "Paghi come preferisci.",
         "options": [
-          { "icon": "banknote", "label": "Contanti all'arrivo", "body": "Il nostro preferito. Nessuna commissione, nessun intermediario." },
-          { "icon": "credit-card", "label": "Carta all'arrivo", "body": "Visa, Mastercard, American Express. POS in ogni veicolo." },
-          { "icon": "percent", "label": "Acconto online — opzionale", "body": "Per bloccare lo sconto andata-ritorno è possibile versare un acconto online." }
+          {
+            "icon": "banknote",
+            "label": "Contanti all'arrivo",
+            "body": "Il nostro preferito. Nessuna commissione, nessun intermediario."
+          },
+          {
+            "icon": "credit-card",
+            "label": "Carta all'arrivo",
+            "body": "Visa, Mastercard, American Express. POS in ogni veicolo."
+          },
+          {
+            "icon": "percent",
+            "label": "Acconto online — opzionale",
+            "body": "Per bloccare lo sconto andata-ritorno è possibile versare un acconto online."
+          }
         ]
       },
       "finalCta": {
@@ -554,10 +827,26 @@
         "eyebrow": "INFO PRATICHE",
         "heading": "Quello che serve sapere.",
         "rows": [
-          { "icon": "clock", "label": "Orari", "value": "24/7, tutti i giorni" },
-          { "icon": "calendar", "label": "Preavviso", "value": "Idealmente 24h, richieste urgenti in base a disponibilità" },
-          { "icon": "globe", "label": "Lingue parlate", "value": "Francese, inglese, spagnolo, italiano" },
-          { "icon": "credit-card", "label": "Metodi di pagamento", "value": "Contanti o carta all'arrivo · Acconto online per sconto andata-ritorno" }
+          {
+            "icon": "clock",
+            "label": "Orari",
+            "value": "24/7, tutti i giorni"
+          },
+          {
+            "icon": "calendar",
+            "label": "Preavviso",
+            "value": "Idealmente 24h, richieste urgenti in base a disponibilità"
+          },
+          {
+            "icon": "globe",
+            "label": "Lingue parlate",
+            "value": "Francese, inglese, spagnolo, italiano"
+          },
+          {
+            "icon": "credit-card",
+            "label": "Metodi di pagamento",
+            "value": "Contanti o carta all'arrivo · Acconto online per sconto andata-ritorno"
+          }
         ]
       },
       "faq": {
@@ -567,46 +856,106 @@
           {
             "title": "Prima del viaggio",
             "items": [
-              { "q": "Con quanto anticipo devo prenotare?", "a": "Idealmente 24 ore. Richieste urgenti accettate in base alla disponibilità — WhatsApp per risposta immediata." },
-              { "q": "Posso modificare o annullare la prenotazione?", "a": "Sì, gratis fino a 24 h prima. WhatsApp o email — sistemiamo subito." },
-              { "q": "Come si paga?", "a": "Contanti o carta all'autista all'arrivo. Nessun acconto richiesto di default." },
-              { "q": "C'è un acconto?", "a": "No di default. Acconto opzionale per bloccare lo sconto andata-ritorno." },
-              { "q": "Posso pagare con carta?", "a": "Sì. Visa, Mastercard, Amex — POS in ogni veicolo." }
+              {
+                "q": "Con quanto anticipo devo prenotare?",
+                "a": "Idealmente 24 ore. Richieste urgenti accettate in base alla disponibilità — WhatsApp per risposta immediata."
+              },
+              {
+                "q": "Posso modificare o annullare la prenotazione?",
+                "a": "Sì, gratis fino a 24 h prima. WhatsApp o email — sistemiamo subito."
+              },
+              {
+                "q": "Come si paga?",
+                "a": "Contanti o carta all'autista all'arrivo. Nessun acconto richiesto di default."
+              },
+              {
+                "q": "C'è un acconto?",
+                "a": "No di default. Acconto opzionale per bloccare lo sconto andata-ritorno."
+              },
+              {
+                "q": "Posso pagare con carta?",
+                "a": "Sì. Visa, Mastercard, Amex — POS in ogni veicolo."
+              }
             ]
           },
           {
             "title": "All'aeroporto",
             "items": [
-              { "q": "Dove mi aspetta l'autista?", "a": "In sala arrivi, dopo la dogana, con un cartello col tuo nome. Foto e numero WhatsApp inviati 24 h prima." },
-              { "q": "Cosa succede se il mio volo è in ritardo?", "a": "Monitoriamo il tuo volo. Attesa gratuita fino a 60 minuti dall'atterraggio effettivo." },
-              { "q": "E se non trovo l'autista?", "a": "Chiamata o WhatsApp al +33 6 28 65 81 27. Ti localizziamo subito." },
-              { "q": "E se ho più bagagli del previsto?", "a": "Passaggio al furgone senza costi se ti avevamo proposto la berlina." }
+              {
+                "q": "Dove mi aspetta l'autista?",
+                "a": "In sala arrivi, dopo la dogana, con un cartello col tuo nome. Foto e numero WhatsApp inviati 24 h prima."
+              },
+              {
+                "q": "Cosa succede se il mio volo è in ritardo?",
+                "a": "Monitoriamo il tuo volo. Attesa gratuita fino a 60 minuti dall'atterraggio effettivo."
+              },
+              {
+                "q": "E se non trovo l'autista?",
+                "a": "Chiamata o WhatsApp al +33 6 28 65 81 27. Ti localizziamo subito."
+              },
+              {
+                "q": "E se ho più bagagli del previsto?",
+                "a": "Per la Tesla: 3 valigie grandi oppure 2 grandi + 2 piccole massimo. Se hai più bagagli, richiedi un van direttamente."
+              }
             ]
           },
           {
             "title": "Durante il viaggio",
             "items": [
-              { "q": "Si può fare una sosta lungo la strada?", "a": "Sì. Prezzo confermato via WhatsApp in base al detour. Soste brevi spesso gratuite." },
-              { "q": "Posso cambiare destinazione durante il tragitto?", "a": "Sì se ragionevole. L'autista aggiusta la tariffa con te." },
-              { "q": "C'è Wi-Fi e ci sono caricatori?", "a": "Caricatori USB in tutti i veicoli. Wi-Fi disponibile su richiesta nella Tesla." },
-              { "q": "Si può fumare in auto?", "a": "No, veicoli 100 % non fumatori, sigarette elettroniche incluse." }
+              {
+                "q": "Si può fare una sosta lungo la strada?",
+                "a": "Sì. Prezzo confermato via WhatsApp in base al detour. Soste brevi spesso gratuite."
+              },
+              {
+                "q": "Posso cambiare destinazione durante il tragitto?",
+                "a": "Sì se ragionevole. L'autista aggiusta la tariffa con te."
+              },
+              {
+                "q": "C'è Wi-Fi e ci sono caricatori?",
+                "a": "Caricatori USB in tutti i veicoli. Wi-Fi disponibile su richiesta nella Tesla."
+              },
+              {
+                "q": "Si può fumare in auto?",
+                "a": "No, veicoli 100 % non fumatori, sigarette elettroniche incluse."
+              }
             ]
           },
           {
             "title": "Richieste speciali",
             "items": [
-              { "q": "Avete seggiolini per bambini?", "a": "Sì, gratis. Ovetto (0–1 anno), seggiolino (1–3 anni), rialzo (3–10 anni). Indicaci le età." },
-              { "q": "Si può viaggiare con un animale?", "a": "Cani piccoli in trasportino o borsa sì. WhatsApp per animali più grandi." },
-              { "q": "Offrite transfer per persone a mobilità ridotta?", "a": "Sì. WhatsApp con le tue necessità — adattiamo veicolo e assistenza." },
-              { "q": "Posso prenotare per qualcun altro?", "a": "Sì. Indica nome e WhatsApp del passeggero al momento della prenotazione." }
+              {
+                "q": "Avete seggiolini per bambini?",
+                "a": "Sì, gratis. Ovetto (0–1 anno), seggiolino (1–3 anni), rialzo (3–10 anni). Indicaci le età."
+              },
+              {
+                "q": "Si può viaggiare con un animale?",
+                "a": "Cani piccoli in trasportino o borsa sì. WhatsApp per animali più grandi."
+              },
+              {
+                "q": "Offrite transfer per persone a mobilità ridotta?",
+                "a": "Sì. WhatsApp con le tue necessità — adattiamo veicolo e assistenza."
+              },
+              {
+                "q": "Posso prenotare per qualcun altro?",
+                "a": "Sì. Indica nome e WhatsApp del passeggero al momento della prenotazione."
+              }
             ]
           },
           {
             "title": "Prezzi ed extra",
             "items": [
-              { "q": "Ci sono supplementi notte o weekend?", "a": "No. Tariffe fisse 24/7, tutti i giorni." },
-              { "q": "I pedaggi sono inclusi?", "a": "Sì, tutto incluso. Niente da aggiungere all'arrivo." },
-              { "q": "E per la mancia?", "a": "Mai attesa. Sempre apprezzata se il servizio ti è piaciuto." }
+              {
+                "q": "Ci sono supplementi notte o weekend?",
+                "a": "No. Tariffe fisse 24/7, tutti i giorni."
+              },
+              {
+                "q": "I pedaggi sono inclusi?",
+                "a": "Sì, tutto incluso. Niente da aggiungere all'arrivo."
+              },
+              {
+                "q": "E per la mancia?",
+                "a": "Mai attesa. Sempre apprezzata se il servizio ti è piaciuto."
+              }
             ]
           }
         ]
@@ -642,5 +991,130 @@
         "cta": "Scrivi su WhatsApp"
       }
     }
+  },
+  "siegesBebe": {
+    "hero": {
+      "eyebrow": "PER LE FAMIGLIE",
+      "title": "Viaggia in famiglia. Tranquillamente.",
+      "sub": "Seggiolini per bambini omologati gratuiti. Autista multilingue. Aiuto con passeggini e bagagli incluso.",
+      "trustPills": [
+        "★ 5,0 Google",
+        "3 tipi di seggiolini",
+        "Aiuto passeggini e bagagli",
+        "Autista EN/FR"
+      ],
+      "primaryCta": "Prenota ora",
+      "secondaryCta": "WhatsApp"
+    },
+    "commitment": {
+      "eyebrow": "IMPEGNO FAMIGLIA",
+      "title": "Viaggiare con un bambino non dovrebbe mai essere fonte di stress.",
+      "lead": "Tutti i nostri veicoli sono dotati di seggiolini conformi alle norme europee ECE R44/R129. Il nostro autista installa il seggiolino adatto all'età del bambino prima del ritiro — non devi portare nulla, non devi sistemare nulla.",
+      "items": [
+        {
+          "icon": "baby",
+          "title": "Seggiolini omologati, gratuiti.",
+          "body": "Ovetto, seggiolino o rialzo — adatti all'età e al peso del bambino. Inclusi in tutte le nostre corse."
+        },
+        {
+          "icon": "briefcase",
+          "title": "Mani libere, dal momento dell'arrivo.",
+          "body": "L'autista vi accoglie all'aeroporto o in stazione e vi aiuta con passeggini e valigie. Nessun supplemento."
+        },
+        {
+          "icon": "globe",
+          "title": "Inglese e francese parlati.",
+          "body": "Comunicazione facile per i viaggiatori internazionali. L'autista può anche adattare il suo stile di guida (morbido, senza scossoni) per il comfort del bambino."
+        },
+        {
+          "icon": "calendar-check",
+          "title": "Prenota in anticipo, seggiolino pronto.",
+          "body": "Indica l'età del bambino alla prenotazione. Il seggiolino adatto sarà installato prima del vostro arrivo."
+        }
+      ]
+    },
+    "seats": {
+      "eyebrow": "TRE TIPI DI SEGGIOLINI",
+      "title": "Il seggiolino giusto per ogni età.",
+      "sub": "Indica l'età del bambino alla prenotazione. Il seggiolino adatto è installato senza costi aggiuntivi.",
+      "cards": [
+        {
+          "image": "/cosybebe.jpg",
+          "alt": "Ovetto per neonati",
+          "title": "Ovetto neonato",
+          "ageRange": "0 a 13 mesi · 0–13 kg",
+          "body": "Per neonati e lattanti. Installazione contromarcia, fissaggio Isofix o cintura."
+        },
+        {
+          "image": "/siegebebe.jpg",
+          "alt": "Seggiolino per bambini piccoli",
+          "title": "Seggiolino bambino",
+          "ageRange": "9 mesi a 4 anni · 9–18 kg",
+          "body": "Per i bambini più piccoli. Imbracatura a 5 punti, posizione fronte marcia, sostegno laterale rinforzato."
+        },
+        {
+          "image": "/rehausseur.jpg",
+          "alt": "Rialzo per bambini più grandi",
+          "title": "Rialzo",
+          "ageRange": "4 a 10 anni · 15–36 kg",
+          "body": "Per i bambini più grandi. Rialzo classico con schienale, cintura a tre punti del veicolo."
+        }
+      ]
+    },
+    "trips": {
+      "eyebrow": "VIAGGI IN FAMIGLIA",
+      "title": "Pensato per i vostri spostamenti in famiglia.",
+      "items": [
+        {
+          "icon": "heart",
+          "title": "Dimissione maternità",
+          "body": "Il ritorno a casa con il vostro neonato merita un viaggio calmo e sicuro. Ovetto installato in anticipo, guida morbida garantita."
+        },
+        {
+          "icon": "plane",
+          "title": "Aeroporto o stazione con bambini",
+          "body": "Accoglienza con cartello in zona arrivi. Aiuto con passeggini, valigie e installazione dei seggiolini. Dovete solo salire."
+        },
+        {
+          "icon": "sparkles",
+          "title": "Disneyland in famiglia",
+          "body": "Viaggio diretto dal vostro hotel o dall’aeroporto, senza coincidenze RER né stress dei trasporti pubblici. Seggiolini già installati."
+        },
+        {
+          "icon": "map-pin",
+          "title": "Visitare Parigi con bambini",
+          "body": "Torre Eiffel, Louvre, Versailles. L'autista si adatta al ritmo dei più piccoli. Pause su richiesta."
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Viaggia in famiglia, con piena tranquillità.",
+      "sub": "Seggiolini per bambini inclusi. Autista attento. Prenota in 10 secondi.",
+      "primary": "Prenota ora",
+      "whatsapp": "WhatsApp",
+      "trustLine": "Disponibile 24/7 · Risposta entro 1 ora · Prezzo fisso garantito"
+    },
+    "seo": {
+      "title": "Autista privato famiglie Parigi con seggiolini — Driver Services",
+      "description": "Servizio NCC per famiglie a Parigi: seggiolini omologati gratuiti. Autista multilingue, ritiro aeroporti CDG, Orly, Beauvais."
+    }
+  },
+  "contactHero": {
+    "eyebrow": "PARLIAMONE",
+    "title": "Una domanda? Parliamone direttamente.",
+    "sub": "Risposta entro 1h via WhatsApp o email. Disponibile 24/7 per le tue prenotazioni.",
+    "channels": {
+      "whatsapp": {
+        "title": "WhatsApp",
+        "time": "Risposta entro 1h",
+        "preMessage": "Buongiorno, vorrei prenotare un autista."
+      },
+      "email": {
+        "title": "Email",
+        "time": "Risposta entro 24h",
+        "preSubject": "Richiesta di prenotazione"
+      }
+    },
+    "availability": "Disponibile 24h/24 · 7 giorni su 7"
   }
 }

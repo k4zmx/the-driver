@@ -5,7 +5,7 @@
 // Source of truth: Google Reviews (profile of the driver). Do not edit texts
 // here to "smooth" grammar — stay true to the reviewer's original voice.
 
-export const REVIEW_TOTAL_COUNT = 17;
+export const REVIEW_TOTAL_COUNT = 45;
 export const REVIEW_AVERAGE = 5.0;
 
 /**

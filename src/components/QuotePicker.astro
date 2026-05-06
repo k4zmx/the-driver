@@ -25,13 +25,14 @@ const hero = strings.hero;
 // has picked both endpoints. Anchors price expectations on first glance.
 const teaserMin = minCarStarting() ?? 45;
 
-// Conversion microcopy beneath the CTA. Locale-aware reassurance pulled
-// from existing form strings where applicable.
+// Conversion microcopy beneath the CTA. Email-confirmation phrasing —
+// matches what customers actually receive (driver replies via email,
+// not WhatsApp, by default).
 const reassureLabel =
-  locale === 'en' ? 'No deposit · WhatsApp confirmation in 1h'
-  : locale === 'es' ? 'Sin depósito · Confirmación por WhatsApp en 1h'
-  : locale === 'it' ? 'Nessun acconto · Conferma WhatsApp entro 1h'
-  : 'Aucun acompte · Confirmation WhatsApp en 1h';
+  locale === 'en' ? 'No deposit · Email confirmation within 1h'
+  : locale === 'es' ? 'Sin depósito · Confirmación por email en 1h'
+  : locale === 'it' ? 'Nessun acconto · Conferma email entro 1h'
+  : 'Aucun acompte · Confirmation Email en 1h';
 
 const teaserLabel =
   locale === 'en' ? 'Trips from'

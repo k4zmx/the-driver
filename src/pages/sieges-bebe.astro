@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiegesBebePage from '../components/SiegesBebePage.astro';
+import { t } from '../i18n';
+
+const locale = 'fr' as const;
+const seo = t(locale).siegesBebe.seo;
+
+// Service schema specifically for the family-with-child-seats offer.
+// Stacks on top of the LocalBusiness/TaxiService schema that BaseLayout
+// always emits, so search engines can associate this Service with the
+// existing business entity.
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Family chauffeur with child seats',
+  provider: { '@type': 'TaxiService', name: 'Driver Services' },
+  areaServed: 'Paris, Île-de-France',
+  serviceType: 'Family private transport with certified child car seats',
+  description:
+    'Premium chauffeur service for families with infants and children. Includes free certified child seats (infant carrier, toddler seat, booster), multilingual driver, and airport assistance with strollers and luggage.',
+};
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="childSeats"
+  title={seo.title}
+  description={seo.description}
+  structuredData={serviceSchema}
+>
+  <SiegesBebePage locale={locale} />
+</BaseLayout>

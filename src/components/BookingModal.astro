@@ -432,24 +432,61 @@ const dragHandleLabel =
       source?: string;
       pickup?: string;
       dropoff?: string;
+      pax?: number;
     };
+
+    // Whitelist of locations a deep-link is allowed to pre-select. Mirrors
+    // the option set of the booking-form selects — anything outside this
+    // list (typo, malicious link) is ignored so we never autoopen with a
+    // garbage pickup that the form would silently drop on submit.
+    const VALID_LOCATIONS = [
+      'CDG',
+      'Orly',
+      'Beauvais',
+      'Disneyland',
+      'Versailles',
+      'Paris',
+      'Paris Train Station',
+    ] as const;
+
+    function isValidLocation(v: string | null | undefined): v is string {
+      return typeof v === 'string' && (VALID_LOCATIONS as readonly string[]).includes(v);
+    }
+
+    // Same-pair routes are nonsensical EXCEPT Paris→Paris (intra-Paris
+    // transfer is a real product). Used by the URL autoopen guard.
+    function isValidPair(p: string, d: string): boolean {
+      if (p !== d) return true;
+      return p === 'Paris';
+    }
+
+    // Clamp pax to the form's accepted range. Anything non-numeric, ≤0,
+    // or NaN falls back to 1 — never block the autoopen on a bad pax,
+    // just normalize it.
+    function clampPax(raw: string | null | undefined): number {
+      const n = parseInt(String(raw ?? ''), 10);
+      if (!Number.isFinite(n) || n < 1) return 1;
+      if (n > 24) return 24;
+      return n;
+    }
 
     // Resolve the prefill behavior based on WHERE the open came from.
     // Returns `undefined` on fields we shouldn't touch, empty-string on fields
     // we should clear, otherwise the value to apply.
-    function resolvePrefill(d?: OpenDetail): { pickup: string; dropoff: string } {
+    function resolvePrefill(d?: OpenDetail): { pickup: string; dropoff: string; pax?: number } {
       const src = d?.source ?? 'generic';
+      const pax = typeof d?.pax === 'number' ? d.pax : undefined;
       if (src === 'hero-picker' && d?.pickup && d?.dropoff) {
-        return { pickup: d.pickup, dropoff: d.dropoff };
+        return { pickup: d.pickup, dropoff: d.dropoff, pax };
       }
       if (src === 'destination-card' && d?.dropoff) {
-        return { pickup: '', dropoff: d.dropoff };
+        return { pickup: '', dropoff: d.dropoff, pax };
       }
       if (src === 'url' && (d?.pickup || d?.dropoff)) {
         // URL arrival — honor whatever was actually present
-        return { pickup: d.pickup ?? '', dropoff: d.dropoff ?? '' };
+        return { pickup: d.pickup ?? '', dropoff: d.dropoff ?? '', pax };
       }
-      return { pickup: '', dropoff: '' };
+      return { pickup: '', dropoff: '', pax };
     }
 
     function dispatchPrefill(d?: OpenDetail) {
@@ -459,16 +496,17 @@ const dragHandleLabel =
       );
     }
 
-    // Strip pickup/dropoff query params + #booking-form hash from the URL
-    // once they've been consumed. Without this, refreshing the page would
-    // re-trigger the modal auto-open AND re-prefill the hero picker with
-    // stale data from the previous session.
+    // Strip pickup/dropoff/pax/autoopen query params + #booking-form hash
+    // from the URL once they've been consumed. Without this, refreshing
+    // the page would re-trigger the modal auto-open AND re-prefill the
+    // hero picker with stale data from the previous session.
     function cleanUrlState() {
       try {
         const url = new URL(location.href);
         let dirty = false;
-        if (url.searchParams.has('pickup')) { url.searchParams.delete('pickup'); dirty = true; }
-        if (url.searchParams.has('dropoff')) { url.searchParams.delete('dropoff'); dirty = true; }
+        for (const k of ['pickup', 'dropoff', 'pax', 'autoopen']) {
+          if (url.searchParams.has(k)) { url.searchParams.delete(k); dirty = true; }
+        }
         if (url.hash === '#booking-form') { dirty = true; }
         if (!dirty) return;
         const cleanHash = url.hash === '#booking-form' ? '' : url.hash;
@@ -606,21 +644,52 @@ const dragHandleLabel =
       open();
     });
 
-    // Auto-open on arrival if the URL signals a booking intent.
-    // We REQUIRE the explicit `#booking-form` hash — lone `?pickup=`/
-    // `?dropoff=` query params don't force the modal open. This way, a
-    // share/refresh of `/?pickup=CDG&dropoff=Paris` simply pre-fills the
-    // hero picker (via QuotePicker's own URL-read) without springing the
-    // modal open every time the page loads.
-    if (location.hash === '#booking-form') {
+    // Auto-open on arrival if the URL signals a booking intent. Two
+    // independent triggers:
+    //   1. Hash `#booking-form` — the legacy in-page CTA pattern. Any
+    //      pickup/dropoff query params come along for the ride untouched.
+    //   2. Query `?autoopen=1` — used by the Tarifs card deep-links
+    //      (Tarifs page sends `?pickup=CDG&dropoff=Paris&pax=4&autoopen=1#hero`).
+    //      We refuse to autoopen unless BOTH pickup AND dropoff are valid
+    //      whitelist entries AND the pair is sensible (no Versailles→Versailles).
+    //      A bad URL (typo, malicious share, scraping bot) silently falls
+    //      through to "just pre-fill the hero picker" via QuotePicker.
+    //
+    // A bare `/?pickup=CDG&dropoff=Paris` (no hash, no autoopen) still
+    // just pre-fills the hero picker — the modal stays closed until the
+    // user explicitly hits a CTA.
+    {
       const params = new URLSearchParams(location.search);
-      const detail: OpenDetail = { source: 'url' };
-      const p = params.get('pickup');
-      const d = params.get('dropoff');
-      if (p) detail.pickup = p;
-      if (d) detail.dropoff = d;
-      // Small delay so the page layout settles + reveals run before we interrupt
-      setTimeout(() => open(detail), 300);
+      const hashTrigger = location.hash === '#booking-form';
+      const autoopenTrigger = params.get('autoopen') === '1';
+
+      if (hashTrigger || autoopenTrigger) {
+        const p = params.get('pickup');
+        const d = params.get('dropoff');
+        const detail: OpenDetail = { source: 'url' };
+        if (p) detail.pickup = p;
+        if (d) detail.dropoff = d;
+        if (params.has('pax')) detail.pax = clampPax(params.get('pax'));
+
+        // For the autoopen path specifically, validate before firing.
+        // The hash path stays permissive for backward compatibility with
+        // any existing in-page links that just want to open the modal.
+        let allowOpen = true;
+        if (autoopenTrigger && !hashTrigger) {
+          const pickupOk = isValidLocation(p);
+          const dropoffOk = isValidLocation(d);
+          allowOpen = pickupOk && dropoffOk && isValidPair(p as string, d as string);
+        }
+
+        if (allowOpen) {
+          // Small delay so the page layout settles + reveals run before we interrupt
+          setTimeout(() => open(detail), 300);
+        }
+        // If validation failed we deliberately do NOT clean the URL —
+        // QuotePicker still gets a shot at reading pickup/dropoff for
+        // the hero pre-fill, and a refresh with the same bad URL just
+        // re-fails the same way (no UI noise).
+      }
     }
 
     // ---- Mobile drag-down-to-close -----------------------------------

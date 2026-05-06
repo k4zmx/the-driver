@@ -1,0 +1,162 @@
+---
+import { t } from '../i18n';
+
+interface Props {
+  locale: 'fr' | 'en' | 'es' | 'it';
+}
+
+const { locale } = Astro.props;
+const hero = t(locale).hero;
+
+// Trust-anchor URLs — cleaned of all session/tracking params; only the
+// ones Google actually needs to resolve the business survive (kgmid + q).
+const GOOGLE_REVIEWS_URL = 'https://www.google.com/search?kgmid=/g/11m6bcrmc3&q=Driver+Services';
+const TRIPADVISOR_URL = 'https://www.tripadvisor.fr/Attraction_Review-g187147-d33014038-Reviews-The_Driver-Paris_Ile_de_France.html';
+const ratingScore = locale === 'en' ? '5.0' : '5,0';
+---
+
+<div class="hero-trust-bar" data-reveal>
+  <a
+    href={GOOGLE_REVIEWS_URL}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="trust-badge trust-badge--google"
+    aria-label={hero.trustBadges?.googleAriaLabel ?? 'Google Reviews'}
+  >
+    <img src="/google-g.svg" alt="Google" class="trust-badge-logo" width="28" height="28" loading="eager" decoding="async" />
+    <span class="trust-badge-content">
+      <span class="trust-badge-rating">
+        <span class="rating-number">{ratingScore}</span>
+        <span class="rating-stars" aria-hidden="true">★★★★★</span>
+      </span>
+      <span class="trust-badge-label">{hero.trustBadges?.google ?? 'Google Reviews'}</span>
+    </span>
+  </a>
+  <a
+    href={TRIPADVISOR_URL}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="trust-badge trust-badge--tripadvisor"
+    aria-label={hero.trustBadges?.tripadvisorAriaLabel ?? 'TripAdvisor'}
+  >
+    <img src="/tripadvisor.png" alt="TripAdvisor" class="trust-badge-logo" width="28" height="28" loading="lazy" decoding="async" />
+    <span class="trust-badge-content">
+      <span class="trust-badge-rating">
+        <span class="rating-number">{ratingScore}</span>
+        <span class="rating-stars" aria-hidden="true">★★★★★</span>
+      </span>
+      <span class="trust-badge-label">{hero.trustBadges?.tripadvisor ?? 'TripAdvisor'}</span>
+    </span>
+  </a>
+</div>
+
+<style>
+  /* ---------------------------------------------------------------
+     Trust badge bar — two clickable cards (Google + TripAdvisor)
+     with logo, score, stars and label. backdrop-filter blur lifts
+     them off whatever surface they're rendered on (cream hero, photo
+     veil, etc.). Same spec on every page that mounts this.
+     --------------------------------------------------------------- */
+  .hero-trust-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 768px) {
+    .hero-trust-bar { gap: 12px; margin-bottom: 28px; }
+  }
+  /* On phones (≤480px), keep both badges on a single row by shrinking
+     padding, logo, and type so each fits ~50% of the viewport. Stacking
+     them vertically wasted too much above-the-fold real estate. */
+  @media (max-width: 480px) {
+    .hero-trust-bar {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .trust-badge {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+    .trust-badge-logo { width: 22px; height: 22px; }
+    .rating-number    { font-size: 15px; }
+    .rating-stars     { font-size: 11px; letter-spacing: 0.5px; }
+    .trust-badge-label { font-size: 10px; line-height: 1.2; }
+  }
+
+  .trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: color-mix(in oklab, var(--color-paper) 92%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-smoke) 90%, transparent);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--color-ink);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (min-width: 768px) {
+    .trust-badge { padding: 12px 18px; }
+  }
+  .trust-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: color-mix(in oklab, var(--color-graphite) 50%, var(--color-smoke));
+  }
+  .trust-badge:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 55%, transparent);
+    outline-offset: 3px;
+  }
+  .trust-badge-logo {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: block;
+  }
+  /* Square owl — clip the corners so it tucks into the badge nicely. */
+  .trust-badge--tripadvisor .trust-badge-logo { border-radius: 6px; }
+
+  .trust-badge-content {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .trust-badge-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rating-number {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-ink);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .rating-stars {
+    color: #FFC107;
+    font-size: 13px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .trust-badge-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--color-graphite);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+</style>

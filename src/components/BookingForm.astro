@@ -1023,9 +1023,19 @@ function isoToFlag(iso: string): string {
     }
     const params = new URLSearchParams(window.location.search);
     applySelection(params.get('pickup') ?? undefined, params.get('dropoff') ?? undefined);
+    // Honor `?pax=N` from Tarifs card deep-links — setPax already clamps
+    // to [1, 24] and ignores NaN, so no extra guard is needed here.
+    const paxParam = params.get('pax');
+    if (paxParam !== null) {
+      const n = parseInt(paxParam, 10);
+      if (Number.isFinite(n) && n > 0) setPax(n);
+    }
     window.addEventListener('thedriver:quote-selected', (e: Event) => {
-      const { pickup: p, dropoff: d } = (e as CustomEvent).detail ?? {};
+      const { pickup: p, dropoff: d, pax: paxFromEvent } = (e as CustomEvent).detail ?? {};
       applySelection(p, d);
+      if (typeof paxFromEvent === 'number' && Number.isFinite(paxFromEvent) && paxFromEvent > 0) {
+        setPax(paxFromEvent);
+      }
       // Focus first empty required field
       const firstEmpty = form.querySelector<HTMLInputElement>(
         'input[required]:placeholder-shown, input[required]:not([value]), input[required][value=""]',

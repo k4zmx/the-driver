@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiegesBebePage from '../../components/SiegesBebePage.astro';
+import { t } from '../../i18n';
+
+const locale = 'en' as const;
+const seo = t(locale).siegesBebe.seo;
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Family chauffeur with child seats',
+  provider: { '@type': 'TaxiService', name: 'Driver Services' },
+  areaServed: 'Paris, Île-de-France',
+  serviceType: 'Family private transport with certified child car seats',
+  description:
+    'Premium chauffeur service for families with infants and children. Includes free certified child seats (infant carrier, toddler seat, booster), multilingual driver, and airport assistance with strollers and luggage.',
+};
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey="childSeats"
+  title={seo.title}
+  description={seo.description}
+  structuredData={serviceSchema}
+>
+  <SiegesBebePage locale={locale} />
+</BaseLayout>

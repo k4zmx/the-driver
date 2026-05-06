@@ -3,27 +3,55 @@ import { t, LOCALES, pathForRoute } from '../i18n';
 
 interface Props {
   locale: 'fr' | 'en' | 'es' | 'it';
-  routeKey?: 'home' | 'fleet' | 'rates' | 'faqContact';
+  routeKey?: 'home' | 'fleet' | 'rates' | 'childSeats' | 'faqContact';
 }
 
 const { locale, routeKey = 'home' } = Astro.props;
 const strings = t(locale);
 const f = strings.footer;
+const seo = strings.seoFooter;
 const year = new Date().getFullYear();
 
 const WA_NUMBER = '33628658127';
 const WA_DISPLAY = '+33 6 28 65 81 27';
 const EMAIL = 'the.driver@hotmail.com';
 
-const homeHref = pathForRoute('home', locale);
+const homePath = pathForRoute('home', locale);
+
+// Single TripAdvisor profile for all locales (per spec).
+const TRIPADVISOR_URL =
+  'https://www.tripadvisor.fr/Attraction_Review-g187147-d33014038-Reviews-The_Driver-Paris_Ile_de_France.html';
+
+// Build the deep-link URL for a SEO route/destination item. Hero picker
+// reads ?pickup=&dropoff= from window.location.search on page load
+// (QuotePicker.astro:588) and BookingModal does NOT auto-open unless the
+// hash is exactly #booking-form — we use #hero, so users land on home
+// with the picker pre-filled but no modal popping up.
+//
+// Items with a `routeKey` instead point to a dedicated locale-aware page
+// (e.g. /sieges-bebe). This is the SEO-internal-linking path for niche
+// landing pages (the child-seats page, future thematic pages, etc.).
+type SeoItem = { label: string; pickup?: string; dropoff?: string; routeKey?: string };
+function hrefFor(item: SeoItem): string {
+  if (item.routeKey) {
+    return pathForRoute(item.routeKey, locale);
+  }
+  const params: string[] = [];
+  if (item.pickup) params.push(`pickup=${encodeURIComponent(item.pickup)}`);
+  if (item.dropoff) params.push(`dropoff=${encodeURIComponent(item.dropoff)}`);
+  return `${homePath}${params.length ? `?${params.join('&')}` : ''}#hero`;
+}
+
+const routeItems: SeoItem[] = seo.routes.items;
+const destItems: SeoItem[] = seo.destinations.items;
 ---
 
 <footer class="ft">
-  <div class="page-x mx-auto max-w-[1200px] pt-16 md:pt-20 pb-8">
+  <div class="page-x mx-auto max-w-[1200px] pt-14 md:pt-20 pb-8">
     <div class="ft-grid">
 
-      {/* Brand */}
-      <div class="ft-brand">
+      {/* ─── ZONE 1: Brand + contact + languages ──────────────────── */}
+      <div class="ft-zone ft-zone-brand">
         <p class="ft-logo">
           Driver Services<span class="ft-logo-dot">.</span>
         </p>
@@ -34,23 +62,7 @@ const homeHref = pathForRoute('home', locale);
           </svg>
           <span>{f.brand.rating}</span>
         </p>
-      </div>
 
-      {/* Links */}
-      <nav class="ft-col" aria-label={f.columns.links}>
-        <p class="ft-col-head">{f.columns.links}</p>
-        <ul class="ft-links">
-          <li><a class="ft-link" href={homeHref}>{f.links.home}</a></li>
-          <li><a class="ft-link" href={pathForRoute('fleet', locale)}>{f.links.fleet}</a></li>
-          <li><a class="ft-link" href={pathForRoute('rates', locale)}>{f.links.routes}</a></li>
-          <li><a class="ft-link" href={`${homeHref}#hourly`}>{f.links.hourly}</a></li>
-          <li><a class="ft-link" href={pathForRoute('faqContact', locale)}>{f.links.faq}</a></li>
-        </ul>
-      </nav>
-
-      {/* Contact */}
-      <div class="ft-col">
-        <p class="ft-col-head">{f.columns.contact}</p>
         <ul class="ft-contact">
           <li>
             <a
@@ -83,8 +95,44 @@ const homeHref = pathForRoute('home', locale);
         </ul>
       </div>
 
-      {/* Languages */}
-      <nav class="ft-col" aria-label={f.columns.languages}>
+      {/* ─── ZONE 3 (TripAdvisor) — DOM order #2 so mobile stacks
+          brand → trip → langs → seo per spec. Desktop grid-template-
+          areas puts it back in the visually-right column.
+          Compact treatment: the button IS the logo (rounded-corner
+          image, no green wrapper), with stars + label rendered below
+          on a separate line. Same styling on mobile and desktop. */}
+      <div class="ft-zone ft-zone-trip">
+        <p class="ft-col-head">{f.tripadvisor.eyebrow}</p>
+        <a
+          href={TRIPADVISOR_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ft-trip-button"
+          aria-label={f.tripadvisor.cta}
+        >
+          <img
+            src="/tripadvisor.png"
+            alt="TripAdvisor"
+            class="ft-trip-logo"
+            width="140"
+            height="140"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+        <p class="ft-trip-rating">
+          {/* Plain Unicode stars — bulletproof across browsers. Gold
+              reads well on the dark footer background. */}
+          <span class="ft-trip-stars" aria-hidden="true">★★★★★</span>
+          <span class="ft-trip-label">{f.tripadvisor.cta}</span>
+        </p>
+      </div>
+
+      {/* ─── Languages zone — pulled out of the brand block so mobile
+          source order matches the spec (brand → trip → langs → seo).
+          On desktop it tucks under the brand block via grid-template-
+          areas (visual position unchanged). */}
+      <nav class="ft-zone ft-zone-langs" aria-label={f.columns.languages}>
         <p class="ft-col-head">{f.columns.languages}</p>
         <ul class="ft-langs">
           {LOCALES.map((l) => {
@@ -107,9 +155,35 @@ const homeHref = pathForRoute('home', locale);
         </ul>
       </nav>
 
+      {/* ─── ZONE 2 (SEO links) — DOM order #4 so it stacks last on mobile. */}
+      <div class="ft-zone ft-zone-seo">
+        <section class="ft-seo-block" aria-labelledby="ft-seo-routes-h">
+          <p class="ft-col-head">{seo.routes.eyebrow}</p>
+          <h2 id="ft-seo-routes-h" class="ft-seo-title">{seo.routes.title}</h2>
+          <p class="ft-seo-sub">{seo.routes.sub}</p>
+          <ul class="ft-seo-list ft-seo-list--routes">
+            {routeItems.map((item) => (
+              <li><a class="ft-seo-link" href={hrefFor(item)}>{item.label}</a></li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="ft-seo-block" aria-labelledby="ft-seo-dest-h">
+          <p class="ft-col-head">{seo.destinations.eyebrow}</p>
+          <h2 id="ft-seo-dest-h" class="ft-seo-title">{seo.destinations.title}</h2>
+          <p class="ft-seo-sub">{seo.destinations.sub}</p>
+          <ul class="ft-seo-list ft-seo-list--dest">
+            {destItems.map((item) => (
+              <li><a class="ft-seo-link" href={hrefFor(item)}>{item.label}</a></li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
     </div>
 
-    {/* Legal bar */}
+    {/* Legal bar — unchanged from previous footer, lives at the very
+        bottom of every page below all three zones. */}
     <div class="ft-legal mt-12 pt-6">
       <p class="ft-legal-line">
         © {year} Driver Services
@@ -134,19 +208,42 @@ const homeHref = pathForRoute('home', locale);
     border-top: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
   }
 
+  /* ─── Main grid — DOM source order: brand → trip → langs → seo.
+     Mobile (<1024px): single column, zones stack in DOM order so the
+     spec's mobile sequence (Brand → Contact → TripAdvisor → Languages →
+     Routes → Destinations) is preserved.
+
+     Desktop (≥1024px): 3 visual columns × 2 rows via grid-template-areas.
+     Brand sits top-left with Languages directly under it (left column);
+     SEO links span both rows in the middle; TripAdvisor spans both rows
+     on the right. Visually identical to the previous "TripAdvisor in the
+     right column, Languages under brand" layout — the DOM was just
+     reordered to make mobile stack correctly. */
   .ft-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  @media (min-width: 640px) {
-    .ft-grid { grid-template-columns: 1fr 1fr; gap: 40px 32px; }
+    gap: 48px;
   }
   @media (min-width: 1024px) {
-    .ft-grid { grid-template-columns: 1.4fr 1fr 1.2fr 1fr; gap: 40px; }
+    .ft-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-areas:
+        "brand seo trip"
+        "langs seo trip";
+      gap: 32px 64px;
+    }
+    .ft-zone-brand { grid-area: brand; }
+    .ft-zone-trip  { grid-area: trip; }
+    .ft-zone-langs { grid-area: langs; }
+    .ft-zone-seo   { grid-area: seo; }
   }
 
-  /* Brand */
+  /* ─── Brand zone (Zone 1) ─────────────────────────────────────── */
+  .ft-zone-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
   .ft-logo {
     font-family: var(--font-display);
     font-weight: 500;
@@ -156,55 +253,33 @@ const homeHref = pathForRoute('home', locale);
   }
   .ft-logo-dot { color: var(--color-accent); }
   .ft-tagline {
-    margin: 14px 0 0;
+    margin: -16px 0 0; /* tighten to logo since we use parent gap */
     font-size: 14px;
     line-height: 1.55;
     color: color-mix(in oklab, var(--color-cream) 72%, transparent);
     max-width: 30ch;
   }
   .ft-rating {
-    margin: 14px 0 0;
+    margin: -16px 0 0;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 13px;
     color: color-mix(in oklab, var(--color-cream) 80%, transparent);
   }
-  .ft-rating svg {
-    width: 14px; height: 14px;
-    color: var(--color-accent);
-  }
+  .ft-rating svg { width: 14px; height: 14px; color: var(--color-accent); }
 
-  /* Column heads */
+  /* Section eyebrow heads — reused across Zones 2 + 3 + Languages */
   .ft-col-head {
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: color-mix(in oklab, var(--color-cream) 55%, transparent);
-    margin: 0 0 16px;
+    margin: 0 0 12px;
   }
 
-  /* Links */
-  .ft-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-  .ft-link {
-    display: inline-block;
-    font-size: 14px;
-    color: color-mix(in oklab, var(--color-cream) 82%, transparent);
-    padding: 2px 0;
-    background-image: linear-gradient(currentColor, currentColor);
-    background-size: 0% 1px;
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    transition: color 200ms var(--ease-out), background-size 250ms var(--ease-out);
-    text-decoration: none;
-  }
-  .ft-link:hover {
-    color: var(--color-cream);
-    background-size: 100% 1px;
-  }
-
-  /* Contact column — WhatsApp + email get real actionable treatment */
+  /* Contact rows */
   .ft-contact { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
   .ft-contact-link {
     display: inline-flex;
@@ -242,25 +317,32 @@ const homeHref = pathForRoute('home', locale);
     padding-left: 42px; /* aligns with label text above */
   }
 
-  /* Languages — pill row, same rhythm as the nav's lang pill */
+  /* Languages — pill row of 4 locales. Lives in its own zone now (used
+     to be nested under the brand block); grid-template-areas tucks it
+     under brand on desktop, mobile DOM order puts it after TripAdvisor. */
+  .ft-zone-langs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   .ft-langs {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 8px;
   }
   .ft-lang {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+    gap: 6px;
+    padding: 6px 12px;
     border-radius: 999px;
     background: color-mix(in oklab, var(--color-cream) 6%, transparent);
     border: 1px solid color-mix(in oklab, var(--color-cream) 14%, transparent);
     color: color-mix(in oklab, var(--color-cream) 80%, transparent);
-    font-size: 13px;
+    font-size: 12px;
     transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out);
     text-decoration: none;
   }
@@ -274,9 +356,130 @@ const homeHref = pathForRoute('home', locale);
     background: color-mix(in oklab, var(--color-accent) 16%, transparent);
   }
 
-  /* ---------------------------------------------------------------
-     Legal bar — dignified, not cluttered
-     --------------------------------------------------------------- */
+  /* ─── SEO zone (Zone 2) ──────────────────────────────────────────
+     Two contained sub-blocks, side-by-side on desktop, stacked on
+     mobile. Each block is a vanilla flow container (block layout) so
+     children render in source order — eyebrow → title → sub → list —
+     without any chance of grid/flex reordering. */
+  .ft-zone-seo {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  @media (min-width: 768px) {
+    .ft-zone-seo { grid-template-columns: 1fr 1fr; gap: 40px; }
+  }
+  .ft-seo-block {
+    display: block;       /* explicit — defensive against parent grid */
+    min-width: 0;         /* allow children to shrink below intrinsic width */
+  }
+  .ft-seo-block .ft-col-head { margin: 0 0 14px; }
+  .ft-seo-title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--color-cream);
+  }
+  .ft-seo-sub {
+    margin: 0 0 20px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: color-mix(in oklab, var(--color-cream) 60%, transparent);
+    max-width: 36ch;
+  }
+  .ft-seo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px 24px;
+  }
+  /* Routes (12 items): 2 inner columns at md+ for a compact 6×2 grid.
+     Single column on mobile so labels don't truncate. */
+  @media (min-width: 768px) {
+    .ft-seo-list--routes { grid-template-columns: 1fr 1fr; }
+  }
+  /* Destinations (8 items): single column at every breakpoint —
+     denser per-link, the labels are longer ("Tour Eiffel et centre-
+     ville") and would wrap awkwardly in a 2-col grid. */
+
+  .ft-seo-link {
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1.4;
+    color: color-mix(in oklab, var(--color-cream) 72%, transparent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  }
+  .ft-seo-link:hover {
+    color: var(--color-accent);
+    border-bottom-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
+  }
+  .ft-seo-link:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* ─── TripAdvisor zone (Zone 3) ───────────────────────────────────
+     Compact treatment — the button IS the logo (rounded-corner image,
+     no surrounding background or padding). Stars + caption render on
+     a single line below in gold + cream. Same styling at all widths. */
+  .ft-zone-trip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .ft-trip-button {
+    display: inline-block;
+    border-radius: 8px;
+    overflow: hidden;
+    line-height: 0; /* kill the inline-baseline gap under the <img> */
+    cursor: pointer;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ft-trip-button:hover {
+    transform: translateY(-2px);
+  }
+  .ft-trip-button:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 3px;
+  }
+  .ft-trip-logo {
+    display: block;
+    width: 120px;
+    height: auto;       /* preserve the asset's natural aspect ratio */
+    border-radius: 8px; /* in case the PNG itself isn't pre-rounded */
+  }
+  .ft-trip-rating {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 70%, transparent);
+  }
+  .ft-trip-stars {
+    /* Gold stars — high contrast on the dark footer, universal rating
+       convention. Letter-spacing gives breathing room. */
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: #FFC107;
+  }
+  .ft-trip-label {
+    font-size: 13px;
+    color: color-mix(in oklab, var(--color-cream) 70%, transparent);
+  }
+
+  /* ─── Legal bar — unchanged ─────────────────────────────────────── */
   .ft-legal {
     border-top: 1px solid color-mix(in oklab, var(--color-cream) 8%, transparent);
     display: flex;
