@@ -137,6 +137,18 @@ const LABELS = {
 
 const LOCALE_BCP47 = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', it: 'it-IT' };
 
+// Absolute URL for the brand logo shown in the email header. Email clients
+// can't load relative paths, so the source must be a real public URL.
+// TODO: update LOGO_URL when the site moves to its final production domain
+// (Cloudflare Pages or otherwise) — for now the Vercel preview hosts it.
+const LOGO_URL = 'https://the-driver.vercel.app/newlogo.png';
+// Logo intrinsic ratio is ~1.75:1 (1688×964 in source). Sized down to 96×55
+// for the email — small enough not to dominate, big enough to read on phones.
+const LOGO_WIDTH = 96;
+const LOGO_HEIGHT = 55;
+// Right column reserves logo width + 16px breathing room from the text.
+const LOGO_COL_WIDTH = LOGO_WIDTH + 16;
+
 // ── HTML escape for user-supplied text (XSS-safe). UTF-8 in the body +
 // <meta charset="UTF-8"> makes accented chars render correctly in modern
 // clients including all current Outlook versions; we don't entity-encode
@@ -368,11 +380,24 @@ export function buildBookingEmailHtml(data, locale = 'fr') {
 
     <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; border-collapse:collapse; background-color:${COLOR_PAPER};">
 
-      <!-- HEADER BAND (terracotta) -->
-      <tr><td style="background-color:${COLOR_ACCENT}; padding-top:28px; padding-right:32px; padding-bottom:28px; padding-left:32px;">
-        <p style="margin-top:0; margin-right:0; margin-bottom:8px; margin-left:0; color:${COLOR_CREAM}; font-family:${FONT_BODY}; font-size:11px; font-weight:bold; line-height:14px; mso-line-height-rule:exactly;">${L.eyebrow}</p>
-        <h1 style="margin-top:0; margin-right:0; margin-bottom:0; margin-left:0; color:${COLOR_PAPER}; font-family:${FONT_DISPLAY}; font-size:26px; font-weight:bold; line-height:32px; mso-line-height-rule:exactly;">${pickupLabel} &rarr; ${dropoffLabel}</h1>
-        ${dateLong || data.time ? `<p style="margin-top:8px; margin-right:0; margin-bottom:0; margin-left:0; color:${COLOR_CREAM}; font-family:${FONT_BODY}; font-size:14px; line-height:18px; mso-line-height-rule:exactly;">${esc(dateLong)}${data.time ? ' &middot; ' + esc(data.time) : ''}</p>` : ''}
+      <!-- HEADER BAND (terracotta) — 2-column nested table:
+           text left, logo right. Email-safe table layout, longhand CSS,
+           bgcolor + style background-color belt-and-braces for Outlook. -->
+      <tr><td bgcolor="${COLOR_ACCENT}" style="background-color:${COLOR_ACCENT}; padding-top:24px; padding-right:32px; padding-bottom:24px; padding-left:32px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <!-- Left column: existing eyebrow + headline + date stack -->
+            <td valign="top" style="padding-top:0; padding-right:16px; padding-bottom:0; padding-left:0;">
+              <p style="margin-top:0; margin-right:0; margin-bottom:8px; margin-left:0; color:${COLOR_CREAM}; font-family:${FONT_BODY}; font-size:11px; font-weight:bold; line-height:14px; mso-line-height-rule:exactly;">${L.eyebrow}</p>
+              <h1 style="margin-top:0; margin-right:0; margin-bottom:0; margin-left:0; color:${COLOR_PAPER}; font-family:${FONT_DISPLAY}; font-size:26px; font-weight:bold; line-height:32px; mso-line-height-rule:exactly;">${pickupLabel} &rarr; ${dropoffLabel}</h1>
+              ${dateLong || data.time ? `<p style="margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0; color:${COLOR_CREAM}; font-family:${FONT_BODY}; font-size:14px; line-height:20px; mso-line-height-rule:exactly;">${esc(dateLong)}${data.time ? ' &middot; ' + esc(data.time) : ''}</p>` : ''}
+            </td>
+            <!-- Right column: brand logo, fixed width, top-aligned. -->
+            <td valign="top" align="right" width="${LOGO_COL_WIDTH}" style="width:${LOGO_COL_WIDTH}px; padding-top:0; padding-right:0; padding-bottom:0; padding-left:0;">
+              <img src="${LOGO_URL}" alt="Driver Services" width="${LOGO_WIDTH}" height="${LOGO_HEIGHT}" border="0" style="display:block; width:${LOGO_WIDTH}px; height:${LOGO_HEIGHT}px; max-width:${LOGO_WIDTH}px; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic;" />
+            </td>
+          </tr>
+        </table>
       </td></tr>
 
       <!-- TOTAL BAND (ink) -->
