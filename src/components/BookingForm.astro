@@ -179,14 +179,12 @@ function isoToFlag(iso: string): string {
     >
       <script is:inline type="application/json" data-form-config={uid} set:html={JSON.stringify(configBlob)} />
 
-      {/* Web3Forms required fields (hidden) */}
+      {/* The submit handler builds a fresh FormData payload manually
+          (with French emoji-prefixed keys) rather than serialising the
+          form, so the only hidden inputs that need to live in markup are
+          the ones the JS reads OUT of (vehicle/total are written by the
+          pricing summary code) and the honeypot. */}
       <input type="hidden" name="access_key" value={configBlob.accessKey} />
-      <input type="hidden" name="subject" data-role="subject" value="Nouvelle réservation" />
-      <input type="hidden" name="from_name" data-role="from-name" value="Driver Services" />
-      {/* `replyto` is set on submit to the customer's email — that way
-          when the driver hits "Reply" it goes to the customer, not Web3Forms. */}
-      <input type="hidden" name="replyto" data-role="replyto" value="" />
-      <input type="hidden" name="language" value={locale} />
       <input type="hidden" name="vehicle_summary" data-role="vehicle-summary" value="" />
       <input type="hidden" name="total_price" data-role="total-price" value="" />
       {/* Honeypot */}
@@ -659,7 +657,11 @@ function isoToFlag(iso: string): string {
 </section>
 
 <script>
-  import { buildBookingEmailHtml, buildSubject } from '../utils/emailTemplate.js';
+  import {
+    buildSubject,
+    formatDateLong,
+    getCustomerLanguageLabel,
+  } from '../utils/emailTemplate.js';
 
   type PriceCell = {
     p1to3?: number; p4?: number; p5?: number; p6?: number; p7?: number;
@@ -1058,7 +1060,13 @@ function isoToFlag(iso: string): string {
         return;
       }
 
-      // ── Pull current values so we can build subject + HTML email ──
+      if (!cfg.accessKey) {
+        errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      // ── Pull current values ──
       const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
       const last = (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim();
       const dateVal = (form.querySelector<HTMLInputElement>('[name="date"]')!).value;
@@ -1066,76 +1074,133 @@ function isoToFlag(iso: string): string {
       const emailVal = (form.querySelector<HTMLInputElement>('[name="email"]')!).value.trim();
       const phoneVal = (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value.trim();
       const countryCodeVal = (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value;
-
       const puStationVal = pickupStation?.value || '';
       const drStationVal = dropoffStation?.value || '';
-
-      // ASCII-only subject (no →, no accents, ≤60 chars). Locale-aware
-      // prefix from `buildSubject` so EN inbox shows "Booking: ..." etc.
-      // The station name doesn't appear in the subject — keeping it short
-      // for inbox-list previews. The full station goes in the email body.
-      (form.querySelector<HTMLInputElement>('[data-role="subject"]')!).value = buildSubject({
-        pickup: pickup.value,
-        dropoff: dropoff.value,
-        date: dateVal,
-        time: timeVal,
-      }, cfg.locale as 'fr' | 'en' | 'es' | 'it');
-
-      // from_name stays "Driver Services" (set in markup default). The
-      // customer's full name is rendered prominently INSIDE the HTML body.
-      (form.querySelector<HTMLInputElement>('[data-role="from-name"]')!).value = 'Driver Services';
-      // Reply-to so "Reply" in the inbox routes to the customer, not Web3Forms.
-      (form.querySelector<HTMLInputElement>('[data-role="replyto"]')!).value = emailVal;
-
-      if (!cfg.accessKey) {
-        errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-
-      // ── Build the branded HTML email body ──
       const totalPriceVal = (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value;
       const vehicleSummaryVal = (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value;
       const tripTypeVal = form.querySelector<HTMLInputElement>('[name="trip_type"]:checked')?.value || 'one-way';
-      const emailHtml = buildBookingEmailHtml({
+      const returnDateVal = form.querySelector<HTMLInputElement>('[name="return_date"]')?.value || '';
+      const returnTimeVal = form.querySelector<HTMLInputElement>('[name="return_time"]')?.value || '';
+      const flightNum = form.querySelector<HTMLInputElement>('[name="flight_number"]')?.value.trim() || '';
+      const trainNum = form.querySelector<HTMLInputElement>('[name="train_number"]')?.value.trim() || '';
+      const pickupAddr = form.querySelector<HTMLInputElement>('[name="pickup_address"]')?.value.trim() || '';
+      const dropoffAddr = form.querySelector<HTMLInputElement>('[name="dropoff_address"]')?.value.trim() || '';
+      const cosyN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_cosy"]')?.value || '0', 10) || 0;
+      const babyN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_baby"]')?.value || '0', 10) || 0;
+      const boosterN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_booster"]')?.value || '0', 10) || 0;
+      const extraStopChecked = !!form.querySelector<HTMLInputElement>('[name="extra_stop"]')?.checked;
+      const extraStopDetails = form.querySelector<HTMLInputElement>('[name="extra_stop_details"]')?.value.trim() || '';
+      const botcheckChecked = !!form.querySelector<HTMLInputElement>('[name="botcheck"]')?.checked;
+
+      // ── Build clean structured FormData ──
+      // Custom HTML email bodies need the Web3Forms Pro tier. On the free
+      // tier, Web3Forms renders each FormData entry as a "Label: Value"
+      // line in the email body — so the KEY of each entry IS the label.
+      // We use French emoji-prefixed keys so the chauffeur (French)
+      // gets a scannable, always-French summary regardless of which
+      // language the customer used on the site.
+      //
+      // Trailing-whitespace dividers: each unique-key divider lets us
+      // visually separate sections without clobbering Web3Forms's entry
+      // ordering.
+      const body = new FormData();
+      let dividerN = 0;
+      const addDivider = () => {
+        body.append('━━━━━━━━━━━━━━' + ' '.repeat(++dividerN), ' ');
+      };
+
+      // Web3Forms required + reply routing
+      body.append('access_key', cfg.accessKey);
+      body.append('subject', buildSubject({
         pickup: pickup.value,
         dropoff: dropoff.value,
-        pickupStation: puStationVal,
-        dropoffStation: drStationVal,
         date: dateVal,
         time: timeVal,
-        passengers: paxInput.value,
-        tripType: tripTypeVal,
-        returnDate: form.querySelector<HTMLInputElement>('[name="return_date"]')?.value || '',
-        returnTime: form.querySelector<HTMLInputElement>('[name="return_time"]')?.value || '',
-        totalPrice: totalPriceVal,
-        vehicleSummary: vehicleSummaryVal,
-        firstName: first,
-        lastName: last,
-        countryCode: countryCodeVal,
-        phone: phoneVal,
-        email: emailVal,
-        flightNumber: form.querySelector<HTMLInputElement>('[name="flight_number"]')?.value || '',
-        trainNumber: form.querySelector<HTMLInputElement>('[name="train_number"]')?.value || '',
-        pickupAddress: form.querySelector<HTMLInputElement>('[name="pickup_address"]')?.value || '',
-        dropoffAddress: form.querySelector<HTMLInputElement>('[name="dropoff_address"]')?.value || '',
-        seatCosy: form.querySelector<HTMLInputElement>('[name="seat_cosy"]')?.value || '0',
-        seatBaby: form.querySelector<HTMLInputElement>('[name="seat_baby"]')?.value || '0',
-        seatBooster: form.querySelector<HTMLInputElement>('[name="seat_booster"]')?.value || '0',
-        extraStop: !!form.querySelector<HTMLInputElement>('[name="extra_stop"]')?.checked,
-        extraStopDetails: form.querySelector<HTMLInputElement>('[name="extra_stop_details"]')?.value || '',
-      }, cfg.locale as 'fr' | 'en' | 'es' | 'it');
+      }));
+      body.append('from_name', 'Driver Services');
+      body.append('replyto', emailVal);
+      // Honeypot — pass through; Web3Forms uses it to filter bots.
+      if (botcheckChecked) body.append('botcheck', '1');
+
+      // ── Booking summary block ──
+      const pickupLabel = puStationVal && cfg.stationPickups.includes(pickup.value)
+        ? `${pickup.value} (${puStationVal})`
+        : pickup.value;
+      const dropoffLabel = drStationVal && cfg.stationPickups.includes(dropoff.value)
+        ? `${dropoff.value} (${drStationVal})`
+        : dropoff.value;
+      const tripTypeFr = tripTypeVal === 'round-trip' ? 'Aller-retour' : 'Aller simple';
+      const dateLong = formatDateLong(dateVal);
+
+      body.append('🚗 TRAJET', `${pickupLabel} → ${dropoffLabel}`);
+      body.append('📅 DATE & HEURE', `${dateLong}${timeVal ? ' · ' + timeVal : ''}`);
+      body.append('👥 PASSAGERS', `${paxInput.value} (${tripTypeFr})`);
+      if (vehicleSummaryVal) body.append('🚙 VÉHICULE', vehicleSummaryVal);
+      if (totalPriceVal) body.append('💰 PRIX TOTAL', `${totalPriceVal} €`);
+
+      // ── Client info block ──
+      addDivider();
+      body.append('👤 CLIENT', `${first} ${last}`.trim());
+      body.append('📞 TÉLÉPHONE', `${countryCodeVal} ${phoneVal}`.trim());
+      body.append('✉️ EMAIL', emailVal);
+
+      // ── Conditional: flight info ──
+      if (flightNum) {
+        addDivider();
+        body.append('✈️ NUMÉRO DE VOL', flightNum);
+      }
+
+      // ── Conditional: train station ──
+      if (puStationVal || drStationVal || trainNum) {
+        addDivider();
+        const stationName = puStationVal || drStationVal;
+        if (stationName) body.append('🚂 GARE', stationName);
+        if (trainNum) body.append('🚂 NUMÉRO DE TRAIN', trainNum);
+      }
+
+      // ── Conditional: addresses ──
+      if (pickupAddr || dropoffAddr) {
+        addDivider();
+        if (pickupAddr) body.append('📍 ADRESSE DE DÉPART', pickupAddr);
+        if (dropoffAddr) body.append("📍 ADRESSE D'ARRIVÉE", dropoffAddr);
+      }
+
+      // ── Conditional: child seats ──
+      if (cosyN > 0 || babyN > 0 || boosterN > 0) {
+        addDivider();
+        const seats: string[] = [];
+        if (cosyN > 0) seats.push(`${cosyN}× Cosy bébé`);
+        if (babyN > 0) seats.push(`${babyN}× Siège bébé`);
+        if (boosterN > 0) seats.push(`${boosterN}× Réhausseur`);
+        body.append('🪑 SIÈGES ENFANTS', seats.join(', '));
+      }
+
+      // ── Conditional: extra stop ──
+      if (extraStopChecked) {
+        addDivider();
+        body.append('🛑 ARRÊT SUPPLÉMENTAIRE', extraStopDetails || 'Non précisé');
+      }
+
+      // ── Conditional: return trip ──
+      if (tripTypeVal === 'round-trip' && (returnDateVal || returnTimeVal)) {
+        addDivider();
+        const returnLong = formatDateLong(returnDateVal);
+        const composed = [returnLong, returnTimeVal].filter(Boolean).join(' · ');
+        if (composed) body.append('🔁 RETOUR', composed);
+      }
+
+      // ── Customer notes (no notes input on form yet — kept for future) ──
+      // Reserved: append('📝 NOTES DU CLIENT', notes) when a notes field exists.
+
+      // ── Customer's locale (helps the chauffeur reply in the right language) ──
+      addDivider();
+      body.append('🌐 LANGUE DU CLIENT', getCustomerLanguageLabel(cfg.locale));
 
       submitBtn.disabled = true;
       submitLabel.textContent = submitBtn.dataset.loadingText || submitLabel.textContent!;
       submitSpinner.classList.remove('hidden');
 
       try {
-        const body = new FormData(form);
-        // Web3Forms renders the value of the `template` field as the email
-        // body (text/html). With this, the driver sees a branded summary
-        // instead of the default field-by-field table layout.
-        body.append('template', emailHtml);
         const res = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           body,
