@@ -71,7 +71,7 @@
   "form": {
     "eyebrow": "BOOKING",
     "heading": "Just a few more details.",
-    "subheading": "Confirmation within 1h by email and WhatsApp.",
+    "subheading": "Your order is confirmed.",
     "groups": {
       "trip": "YOUR TRIP",
       "whenWho": "WHEN & WHO",
@@ -109,6 +109,8 @@
     },
     "options": {
       "heading": "Additional options",
+      "pillSeats": "Child seats",
+      "pillStop": "Extra stop",
       "childSeats": "Child seats",
       "childSeatsHelp": "Free. Set the quantity for each type.",
       "seatCosy": "Infant carrier",
@@ -136,15 +138,15 @@
       "passengers": "Passengers",
       "type": "Type",
       "seats": "Child seats",
-      "total": "TOTAL"
+      "total": "TOTAL",
+      "vehicleOrSimilar": "or similar"
     },
     "submit": {
-      "cta": "Confirm my booking",
-      "reassurance": "No deposit. Confirmation within the hour."
+      "cta": "Confirm my booking"
     },
     "success": {
       "title": "Booking sent.",
-      "body": "Check your inbox (and spam) within the hour. We'll also reach out on WhatsApp at {phone}."
+      "body": "Booking successfully submitted! Check your email (and spam folder). You can also text us on WhatsApp: +33 6 34 30 12 92"
     },
     "whatsapp": {
       "prompt": "Prefer WhatsApp?",
@@ -800,7 +802,7 @@
           "meta": "RECOMMENDED",
           "title": "WhatsApp",
           "body": "The fastest way to get an answer. Quotes, changes, last-minute questions.",
-          "detail": "+33 6 28 65 81 27",
+          "detail": "+33 6 34 30 12 92",
           "availability": "Reply within 1 hour · 24/7",
           "cta": "Open WhatsApp",
           "whatsappMessage": "Hi, I have a question about your chauffeur service."
@@ -891,7 +893,7 @@
               },
               {
                 "q": "What if I can't find my driver?",
-                "a": "Call or WhatsApp +33 6 28 65 81 27. We'll find you right away."
+                "a": "Call or WhatsApp +33 6 34 30 12 92. We'll find you right away."
               },
               {
                 "q": "What if I have more luggage than expected?",
@@ -984,7 +986,7 @@
           "body": "We'll reply within the hour."
         },
         "error": "Sending failed. Message us directly:",
-        "waFallback": "WhatsApp +33 6 28 65 81 27"
+        "waFallback": "WhatsApp +33 6 34 30 12 92"
       },
       "nudge": {
         "body": "Rather chat right now?",

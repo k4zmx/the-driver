@@ -71,7 +71,7 @@
   "form": {
     "eyebrow": "RÉSERVATION",
     "heading": "Encore quelques détails.",
-    "subheading": "Réponse confirmée sous 1h par email et WhatsApp.",
+    "subheading": "Votre commande est bien confirmée.",
     "groups": {
       "trip": "VOTRE TRAJET",
       "whenWho": "QUAND & QUI",
@@ -109,6 +109,8 @@
     },
     "options": {
       "heading": "Options supplémentaires",
+      "pillSeats": "Sièges enfants",
+      "pillStop": "Arrêt",
       "childSeats": "Sièges enfants",
       "childSeatsHelp": "Offerts. Précisez le nombre pour chaque type.",
       "seatCosy": "Cosy bébé",
@@ -136,15 +138,15 @@
       "passengers": "Passagers",
       "type": "Type",
       "seats": "Sièges",
-      "total": "TOTAL"
+      "total": "TOTAL",
+      "vehicleOrSimilar": "ou similaire"
     },
     "submit": {
-      "cta": "Confirmer ma réservation",
-      "reassurance": "Aucun acompte. Confirmation sous 1h."
+      "cta": "Confirmer ma réservation"
     },
     "success": {
       "title": "Réservation envoyée.",
-      "body": "Vérifiez votre email (et vos spams) dans l'heure qui vient. Nous vous recontactons aussi par WhatsApp au {phone}."
+      "body": "Réservation envoyée avec succès ! Vérifiez votre boîte mail (et le dossier spam). Vous pouvez aussi nous écrire sur WhatsApp : +33 6 34 30 12 92"
     },
     "whatsapp": {
       "prompt": "Préférez WhatsApp ?",
@@ -800,7 +802,7 @@
           "meta": "RECOMMANDÉ",
           "title": "WhatsApp",
           "body": "La façon la plus rapide d'avoir une réponse. Devis, modifications, questions de dernière minute.",
-          "detail": "+33 6 28 65 81 27",
+          "detail": "+33 6 34 30 12 92",
           "availability": "Réponse sous 1 heure · 24h/24",
           "cta": "Ouvrir WhatsApp",
           "whatsappMessage": "Bonjour, j'aurais une question concernant vos services de chauffeur."
@@ -891,7 +893,7 @@
               },
               {
                 "q": "Que faire si je ne trouve pas mon chauffeur ?",
-                "a": "Appel ou WhatsApp au +33 6 28 65 81 27. On vous localise immédiatement."
+                "a": "Appel ou WhatsApp au +33 6 34 30 12 92. On vous localise immédiatement."
               },
               {
                 "q": "Et si j'ai plus de bagages que prévu ?",
@@ -984,7 +986,7 @@
           "body": "On vous répond sous 1 heure."
         },
         "error": "Problème d'envoi. Écrivez-nous directement :",
-        "waFallback": "WhatsApp +33 6 28 65 81 27"
+        "waFallback": "WhatsApp +33 6 34 30 12 92"
       },
       "nudge": {
         "body": "Vous préférez parler tout de suite ?",

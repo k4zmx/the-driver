@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://thedriver.pages.dev',
+  site: 'https://driverparis.pro',
 
   i18n: {
     defaultLocale: 'fr',

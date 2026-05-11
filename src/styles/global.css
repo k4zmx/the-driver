@@ -257,6 +257,9 @@
       "Twemoji Mozilla", var(--font-sans), system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0;
+    padding-left: 12px;
+    padding-right: 32px;
+    background-position: right 10px center;
   }
 
   /* Round-trip discount pill — sits inline next to the "Aller-retour"
@@ -342,6 +345,18 @@
     z-index: -1;
     mix-blend-mode: multiply;
     opacity: 0.6;
+  }
+  /* iPad / tablet defensive fix: `.has-grain` is applied to every
+     section, and `mix-blend-mode: multiply` forces iPad Safari to
+     re-composite each section every frame. Drop the blend (and lower
+     opacity to compensate visually — straight overlay reads slightly
+     darker than multiplied one). Single biggest paint-cost reduction
+     on real iPad. */
+  @media (min-width: 768px) and (max-width: 1180px) {
+    .has-grain::before {
+      mix-blend-mode: normal;
+      opacity: 0.18;
+    }
   }
 
   /* ---------------------------------------------------------------

@@ -503,6 +503,15 @@ const availableLabel =
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
+  /* iPad / tablet: drop the backdrop blur for the same compositing
+     reasons as the trust badges above. */
+  @media (min-width: 768px) and (max-width: 1180px) {
+    .hero-trust-pill {
+      background: color-mix(in oklab, var(--color-paper) 96%, transparent);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
   .hero-trust-pill svg {
     width: 14px;
     height: 14px;

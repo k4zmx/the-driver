@@ -77,7 +77,13 @@
     z-index: 9999;
     pointer-events: none;
     overflow: hidden;
-    contain: strict;
+    /* `contain: strict` is too aggressive on iPad Safari — the browser
+       skips repaints of regions it shouldn't and we get white/black
+       flicker. `layout style` still isolates the overlay's layout +
+       style work without making promises about paint isolation that
+       iPad Safari mishandles. (The intro is now also skipped on iPad
+       entirely via BaseLayout, so this is belt-and-braces.) */
+    contain: layout style;
   }
   /* Skip path — set by the inline head script in BaseLayout for: session-
      already-shown, reduced-motion, or landscape mobile. */

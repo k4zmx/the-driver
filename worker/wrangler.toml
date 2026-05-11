@@ -1,0 +1,9 @@
+name = "driver-services-form"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers free tier: 100k requests/day — plenty for this form.
+# RESEND_API_KEY is set as a secret via:
+#   npx wrangler secret put RESEND_API_KEY
+# The secret is server-side only — never bundled into the public Worker code.

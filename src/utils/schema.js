@@ -36,7 +36,7 @@ export function buildRatesServiceSchema({ locale, siteUrl }) {
     provider: {
       '@type': 'TaxiService',
       name: 'Driver Services',
-      telephone: '+33628658127',
+      telephone: '+33634301292',
       areaServed: 'Paris, Île-de-France',
     },
     areaServed: ['Paris', 'Charles de Gaulle Airport', 'Orly Airport', 'Beauvais Airport', 'Disneyland Paris', 'Versailles'],

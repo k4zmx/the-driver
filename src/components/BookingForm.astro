@@ -39,11 +39,16 @@ const configBlob = {
     tripRoundTrip: f.trip.roundTrip,
     unavailable: strings.hero.price.unavailable,
     empty: strings.hero.price.empty,
+    vehicleOrSimilar: f.summary.vehicleOrSimilar,
   },
   locale,
-  // Web3Forms public access key — filled at runtime from `.env` via import.meta.env
-  accessKey: import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '',
-  whatsapp: '33628658127',
+  // Cloudflare Worker URL — receives the booking JSON, sends two emails
+  // via Resend (chauffeur notification + customer auto-confirmation).
+  // The actual URL is set via PUBLIC_WORKER_URL in `.env` after the Worker
+  // is deployed (see worker/README.md). The placeholder lets the form
+  // surface a clear error if it's submitted before deploy.
+  workerUrl: import.meta.env.PUBLIC_WORKER_URL ?? '',
+  whatsapp: '33634301292',
 };
 
 // Country codes — France default, then EU, then UK/US/CA, then Gulf/NA,
@@ -172,19 +177,16 @@ function isoToFlag(iso: string): string {
     <form
       data-booking-form
       data-form-id={uid}
-      action="https://api.web3forms.com/submit"
       method="POST"
       class="md:bg-[color:var(--color-paper)] md:border md:border-[color:var(--color-smoke)] md:rounded-[var(--radius-card)] md:shadow-[var(--shadow-card)] md:p-10 space-y-10"
       novalidate
     >
       <script is:inline type="application/json" data-form-config={uid} set:html={JSON.stringify(configBlob)} />
 
-      {/* The submit handler builds a fresh FormData payload manually
-          (with French emoji-prefixed keys) rather than serialising the
-          form, so the only hidden inputs that need to live in markup are
-          the ones the JS reads OUT of (vehicle/total are written by the
-          pricing summary code) and the honeypot. */}
-      <input type="hidden" name="access_key" value={configBlob.accessKey} />
+      {/* The submit handler POSTs JSON to the Cloudflare Worker rather
+          than serialising the form, so the hidden inputs we still need
+          are only those the JS reads OUT of: vehicle/total are written
+          by the pricing summary code, the honeypot is a bot trap. */}
       <input type="hidden" name="vehicle_summary" data-role="vehicle-summary" value="" />
       <input type="hidden" name="total_price" data-role="total-price" value="" />
       {/* Honeypot */}
@@ -418,9 +420,13 @@ function isoToFlag(iso: string): string {
       {/* ---- Group 3: Options (collapsible) ---- */}
       <fieldset>
         <details class="group" data-role="options">
-          <summary class="list-none cursor-pointer flex items-center justify-between py-2 meta-label">
-            <span>{f.options.heading}</span>
-            <svg class="h-4 w-4 transition-transform group-open:rotate-180 text-[color:var(--color-graphite)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <summary class="bf-options-summary list-none cursor-pointer flex items-center justify-between gap-3 py-2 meta-label">
+            <span class="bf-options-titlerow flex items-center flex-wrap gap-y-1">
+              <span>{f.options.heading}</span>
+              <span class="round-trip-badge">{f.options.pillSeats}</span>
+              <span class="round-trip-badge">{f.options.pillStop}</span>
+            </span>
+            <svg class="h-4 w-4 flex-shrink-0 transition-transform group-open:rotate-180 text-[color:var(--color-graphite)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </summary>
@@ -538,7 +544,7 @@ function isoToFlag(iso: string): string {
           <div class="flex gap-2">
             <select
               name="country_code"
-              class="field field-select country-code-select !w-[128px] shrink-0"
+              class="field field-select country-code-select !w-[140px] shrink-0"
               autocomplete="tel-country-code"
               aria-label={f.you.countryCode}
             >
@@ -547,7 +553,7 @@ function isoToFlag(iso: string): string {
                   value={c.cc}
                   selected={c.cc === '+33' && c.iso === 'FR'}
                   aria-label={`${c.label} ${c.cc}`}
-                >{isoToFlag(c.iso)}  {c.cc}</option>
+                >{isoToFlag(c.iso)} {c.cc}</option>
               ))}
             </select>
             <input
@@ -631,7 +637,6 @@ function isoToFlag(iso: string): string {
             <path d="M21 12a9 9 0 1 1-6.2-8.55" />
           </svg>
         </button>
-        <p class="text-center text-[13px] text-[color:var(--color-graphite)]">{f.submit.reassurance}</p>
         <p data-role="submit-error" class="hidden text-[14px] text-[color:var(--color-danger)] text-center" role="alert"></p>
       </div>
     </form>
@@ -657,12 +662,6 @@ function isoToFlag(iso: string): string {
 </section>
 
 <script>
-  import {
-    buildSubject,
-    formatDateLong,
-    getCustomerLanguageLabel,
-  } from '../utils/emailTemplate.js';
-
   type PriceCell = {
     p1to3?: number; p4?: number; p5?: number; p6?: number; p7?: number;
     p8?: number; p12?: number; p16?: number; p20?: number; p24?: number;
@@ -675,9 +674,9 @@ function isoToFlag(iso: string): string {
     stationPickups: string[];
     cityPickups: string[];
     cityDropoffs: string[];
-    labels: { tripOneWay: string; tripRoundTrip: string; unavailable: string; empty: string };
+    labels: { tripOneWay: string; tripRoundTrip: string; unavailable: string; empty: string; vehicleOrSimilar: string };
     locale: string;
-    accessKey: string;
+    workerUrl: string;
     whatsapp: string;
   };
 
@@ -727,10 +726,11 @@ function isoToFlag(iso: string): string {
     const extraStop = $<HTMLInputElement>('[data-role="extra-stop"]');
     const submitBtn = $<HTMLButtonElement>('[data-role="form-submit"]');
     const submitLabel = $('[data-role="submit-label"]');
+    // Capture once so we can restore it after submit / on modal-close reset.
+    const submitLabelDefault = submitLabel.textContent ?? '';
     const submitSpinner = $('[data-role="submit-spinner"]');
     const errorEl = $('[data-role="submit-error"]');
     const successCard = form.parentElement?.querySelector<HTMLElement>('[data-role="success"]') ?? null;
-    const successBody = successCard?.querySelector<HTMLElement>('[data-role="success-body"]') ?? null;
     const whatsappLink = form.parentElement?.querySelector<HTMLAnchorElement>('[data-role="whatsapp-link"]') ?? null;
 
     const sRoute = $('[data-role="summary-route"]');
@@ -911,7 +911,8 @@ function isoToFlag(iso: string): string {
       const total = tripType === 'round-trip'
         ? Math.round(oneWay * 2 * (1 - cfg.roundTripDiscount))
         : oneWay;
-      const veh = vehicleSummaryFor(pax);
+      const vehBase = vehicleSummaryFor(pax);
+      const veh = vehBase === '—' ? vehBase : `${vehBase} ${cfg.labels.vehicleOrSimilar}`;
       sVehicle.textContent = veh;
       sTotal.textContent = `€${total}`;
       (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value = veh;
@@ -1060,161 +1061,68 @@ function isoToFlag(iso: string): string {
         return;
       }
 
-      if (!cfg.accessKey) {
-        errorEl.textContent = 'Missing form config (WEB3FORMS_KEY).';
+      if (!cfg.workerUrl) {
+        errorEl.textContent = 'Missing form config (PUBLIC_WORKER_URL).';
         errorEl.classList.remove('hidden');
         return;
       }
 
-      // ── Pull current values ──
-      const first = (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim();
-      const last = (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim();
-      const dateVal = (form.querySelector<HTMLInputElement>('[name="date"]')!).value;
-      const timeVal = (form.querySelector<HTMLInputElement>('[name="time"]')!).value;
-      const emailVal = (form.querySelector<HTMLInputElement>('[name="email"]')!).value.trim();
-      const phoneVal = (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value.trim();
-      const countryCodeVal = (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value;
-      const puStationVal = pickupStation?.value || '';
-      const drStationVal = dropoffStation?.value || '';
-      const totalPriceVal = (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value;
-      const vehicleSummaryVal = (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value;
-      const tripTypeVal = form.querySelector<HTMLInputElement>('[name="trip_type"]:checked')?.value || 'one-way';
-      const returnDateVal = form.querySelector<HTMLInputElement>('[name="return_date"]')?.value || '';
-      const returnTimeVal = form.querySelector<HTMLInputElement>('[name="return_time"]')?.value || '';
-      const flightNum = form.querySelector<HTMLInputElement>('[name="flight_number"]')?.value.trim() || '';
-      const trainNum = form.querySelector<HTMLInputElement>('[name="train_number"]')?.value.trim() || '';
-      const pickupAddr = form.querySelector<HTMLInputElement>('[name="pickup_address"]')?.value.trim() || '';
-      const dropoffAddr = form.querySelector<HTMLInputElement>('[name="dropoff_address"]')?.value.trim() || '';
-      const cosyN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_cosy"]')?.value || '0', 10) || 0;
-      const babyN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_baby"]')?.value || '0', 10) || 0;
-      const boosterN = parseInt(form.querySelector<HTMLInputElement>('[name="seat_booster"]')?.value || '0', 10) || 0;
-      const extraStopChecked = !!form.querySelector<HTMLInputElement>('[name="extra_stop"]')?.checked;
-      const extraStopDetails = form.querySelector<HTMLInputElement>('[name="extra_stop_details"]')?.value.trim() || '';
-      const botcheckChecked = !!form.querySelector<HTMLInputElement>('[name="botcheck"]')?.checked;
-
-      // ── Build clean structured FormData ──
-      // Custom HTML email bodies need the Web3Forms Pro tier. On the free
-      // tier, Web3Forms renders each FormData entry as a "Label: Value"
-      // line in the email body — so the KEY of each entry IS the label.
-      // We use French emoji-prefixed keys so the chauffeur (French)
-      // gets a scannable, always-French summary regardless of which
-      // language the customer used on the site.
-      //
-      // Trailing-whitespace dividers: each unique-key divider lets us
-      // visually separate sections without clobbering Web3Forms's entry
-      // ordering.
-      const body = new FormData();
-      let dividerN = 0;
-      const addDivider = () => {
-        body.append('━━━━━━━━━━━━━━' + ' '.repeat(++dividerN), ' ');
-      };
-
-      // Web3Forms required + reply routing
-      body.append('access_key', cfg.accessKey);
-      body.append('subject', buildSubject({
+      // ── Collect form values into the JSON payload the Worker expects.
+      //    The Worker (worker/) builds both branded HTML emails server-
+      //    side from this payload and sends them via Resend. Submitting
+      //    JSON (not FormData) so accented strings, emoji, and nested
+      //    structures travel cleanly.
+      const payload = {
+        firstName: (form.querySelector<HTMLInputElement>('[name="first_name"]')!).value.trim(),
+        lastName: (form.querySelector<HTMLInputElement>('[name="last_name"]')!).value.trim(),
+        email: (form.querySelector<HTMLInputElement>('[name="email"]')!).value.trim(),
+        countryCode: (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value,
+        phone: (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value.trim(),
         pickup: pickup.value,
         dropoff: dropoff.value,
-        date: dateVal,
-        time: timeVal,
-      }));
-      body.append('from_name', 'Driver Services');
-      body.append('replyto', emailVal);
-      // Honeypot — pass through; Web3Forms uses it to filter bots.
-      if (botcheckChecked) body.append('botcheck', '1');
-
-      // ── Booking summary block ──
-      const pickupLabel = puStationVal && cfg.stationPickups.includes(pickup.value)
-        ? `${pickup.value} (${puStationVal})`
-        : pickup.value;
-      const dropoffLabel = drStationVal && cfg.stationPickups.includes(dropoff.value)
-        ? `${dropoff.value} (${drStationVal})`
-        : dropoff.value;
-      const tripTypeFr = tripTypeVal === 'round-trip' ? 'Aller-retour' : 'Aller simple';
-      const dateLong = formatDateLong(dateVal);
-
-      body.append('🚗 TRAJET', `${pickupLabel} → ${dropoffLabel}`);
-      body.append('📅 DATE & HEURE', `${dateLong}${timeVal ? ' · ' + timeVal : ''}`);
-      body.append('👥 PASSAGERS', `${paxInput.value} (${tripTypeFr})`);
-      if (vehicleSummaryVal) body.append('🚙 VÉHICULE', vehicleSummaryVal);
-      if (totalPriceVal) body.append('💰 PRIX TOTAL', `${totalPriceVal} €`);
-
-      // ── Client info block ──
-      addDivider();
-      body.append('👤 CLIENT', `${first} ${last}`.trim());
-      body.append('📞 TÉLÉPHONE', `${countryCodeVal} ${phoneVal}`.trim());
-      body.append('✉️ EMAIL', emailVal);
-
-      // ── Conditional: flight info ──
-      if (flightNum) {
-        addDivider();
-        body.append('✈️ NUMÉRO DE VOL', flightNum);
-      }
-
-      // ── Conditional: train station ──
-      if (puStationVal || drStationVal || trainNum) {
-        addDivider();
-        const stationName = puStationVal || drStationVal;
-        if (stationName) body.append('🚂 GARE', stationName);
-        if (trainNum) body.append('🚂 NUMÉRO DE TRAIN', trainNum);
-      }
-
-      // ── Conditional: addresses ──
-      if (pickupAddr || dropoffAddr) {
-        addDivider();
-        if (pickupAddr) body.append('📍 ADRESSE DE DÉPART', pickupAddr);
-        if (dropoffAddr) body.append("📍 ADRESSE D'ARRIVÉE", dropoffAddr);
-      }
-
-      // ── Conditional: child seats ──
-      if (cosyN > 0 || babyN > 0 || boosterN > 0) {
-        addDivider();
-        const seats: string[] = [];
-        if (cosyN > 0) seats.push(`${cosyN}× Cosy bébé`);
-        if (babyN > 0) seats.push(`${babyN}× Siège bébé`);
-        if (boosterN > 0) seats.push(`${boosterN}× Réhausseur`);
-        body.append('🪑 SIÈGES ENFANTS', seats.join(', '));
-      }
-
-      // ── Conditional: extra stop ──
-      if (extraStopChecked) {
-        addDivider();
-        body.append('🛑 ARRÊT SUPPLÉMENTAIRE', extraStopDetails || 'Non précisé');
-      }
-
-      // ── Conditional: return trip ──
-      if (tripTypeVal === 'round-trip' && (returnDateVal || returnTimeVal)) {
-        addDivider();
-        const returnLong = formatDateLong(returnDateVal);
-        const composed = [returnLong, returnTimeVal].filter(Boolean).join(' · ');
-        if (composed) body.append('🔁 RETOUR', composed);
-      }
-
-      // ── Customer notes (no notes input on form yet — kept for future) ──
-      // Reserved: append('📝 NOTES DU CLIENT', notes) when a notes field exists.
-
-      // ── Customer's locale (helps the chauffeur reply in the right language) ──
-      addDivider();
-      body.append('🌐 LANGUE DU CLIENT', getCustomerLanguageLabel(cfg.locale));
+        pickupStation: pickupStation?.value || '',
+        dropoffStation: dropoffStation?.value || '',
+        date: (form.querySelector<HTMLInputElement>('[name="date"]')!).value,
+        time: (form.querySelector<HTMLInputElement>('[name="time"]')!).value,
+        pax: paxInput.value,
+        tripType: form.querySelector<HTMLInputElement>('[name="trip_type"]:checked')?.value || 'one-way',
+        returnDate: form.querySelector<HTMLInputElement>('[name="return_date"]')?.value || '',
+        returnTime: form.querySelector<HTMLInputElement>('[name="return_time"]')?.value || '',
+        totalPrice: (form.querySelector<HTMLInputElement>('[data-role="total-price"]')!).value,
+        vehicleSummary: (form.querySelector<HTMLInputElement>('[data-role="vehicle-summary"]')!).value,
+        flightNumber: form.querySelector<HTMLInputElement>('[name="flight_number"]')?.value.trim() || '',
+        trainNumber: form.querySelector<HTMLInputElement>('[name="train_number"]')?.value.trim() || '',
+        pickupAddress: form.querySelector<HTMLInputElement>('[name="pickup_address"]')?.value.trim() || '',
+        dropoffAddress: form.querySelector<HTMLInputElement>('[name="dropoff_address"]')?.value.trim() || '',
+        cosyCount: parseInt(form.querySelector<HTMLInputElement>('[name="seat_cosy"]')?.value || '0', 10) || 0,
+        siegeCount: parseInt(form.querySelector<HTMLInputElement>('[name="seat_baby"]')?.value || '0', 10) || 0,
+        rehausseurCount: parseInt(form.querySelector<HTMLInputElement>('[name="seat_booster"]')?.value || '0', 10) || 0,
+        extraStop: !!form.querySelector<HTMLInputElement>('[name="extra_stop"]')?.checked,
+        extraStopDetails: form.querySelector<HTMLInputElement>('[name="extra_stop_details"]')?.value.trim() || '',
+        // Reserved for future: a notes/message field on the booking form.
+        notes: '',
+        locale: cfg.locale,
+        // Honeypot — Worker silently 200s and skips emails when this is true.
+        botcheck: !!form.querySelector<HTMLInputElement>('[name="botcheck"]')?.checked,
+      };
 
       submitBtn.disabled = true;
       submitLabel.textContent = submitBtn.dataset.loadingText || submitLabel.textContent!;
       submitSpinner.classList.remove('hidden');
 
       try {
-        const res = await fetch('https://api.web3forms.com/submit', {
+        const res = await fetch(cfg.workerUrl, {
           method: 'POST',
-          body,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
         });
         const out = await res.json().catch(() => ({} as any));
         if (!res.ok || out.success === false) {
-          throw new Error(out.message || 'submission failed');
+          throw new Error(out.error || 'submission failed');
         }
 
         // Success: replace the form with the success card
-        if (successCard && successBody) {
-          const phoneCode = (form.querySelector<HTMLSelectElement>('[name="country_code"]')!).value;
-          const phoneNum = (form.querySelector<HTMLInputElement>('[name="phone_number"]')!).value;
-          successBody.textContent = successBody.textContent!.replace('{phone}', `${phoneCode} ${phoneNum}`);
+        if (successCard) {
           form.hidden = true;
           successCard.classList.remove('hidden');
           successCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1227,6 +1135,32 @@ function isoToFlag(iso: string): string {
         submitSpinner.classList.add('hidden');
       }
     });
+
+    // ---- Modal-close reset --------------------------------------------
+    // When the booking modal fully finishes its close transition it
+    // dispatches `thedriver:booking-modal-closed`. We use that signal
+    // to undo any post-submit state (success card visible, form hidden,
+    // error banner) AND reset field values back to defaults — so the
+    // next open is a fresh form, not a stale success view.
+    // Pre-fill from quote-picker / Tarifs deep-links happens after this
+    // (on the open path), so it still overrides cleared values correctly.
+    function resetFormState() {
+      form.reset();
+      form.hidden = false;
+      successCard?.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+      submitBtn.disabled = false;
+      submitSpinner.classList.add('hidden');
+      submitLabel.textContent = submitLabelDefault;
+      // Bring derived UI (vehicle summary, total, conditionals, pax stepper)
+      // back in sync with the reset field values.
+      refreshConditionals();
+      setPax(parseInt(paxInput.value || '1', 10));
+      refreshSummary();
+      updateWhatsApp();
+    }
+    window.addEventListener('thedriver:booking-modal-closed', resetFormState);
 
     // initial render
     refreshConditionals();
@@ -1245,6 +1179,23 @@ function isoToFlag(iso: string): string {
 </script>
 
 <style>
+  /* Options accordion summary — title + two category pills + chevron.
+     The pills (reusing .round-trip-badge) sit inline with the title;
+     on narrow viewports they wrap to a second line while the chevron
+     stays right-aligned. */
+  .bf-options-titlerow {
+    min-width: 0;
+    column-gap: 8px;
+  }
+  .bf-options-titlerow > .round-trip-badge {
+    /* override the default left-margin so flex gap drives spacing,
+       and undo the parent meta-label's uppercase + tracking so the
+       pill label reads as casual sentence case. */
+    margin-left: 0;
+    text-transform: none;
+    letter-spacing: 0.01em;
+  }
+
   /* Booking summary "Véhicule" row — small Lucide-style vehicle icons
      before the text. Decorative; the text itself is the source of truth
      for screen readers (icons are aria-hidden). */

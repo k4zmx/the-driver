@@ -115,6 +115,12 @@ const dragHandleLabel =
     box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.18);
     transform: translateY(12px);
     opacity: 0;
+    /* GPU compositing hint — keeps the panel on its own layer so the
+       backdrop fade + panel slide compose smoothly on iPad Safari.
+       Without this, the panel sometimes triggers a full-page repaint
+       at the moment of `is-open` transition, causing a visible flash. */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
     transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms var(--ease-out);
     /* Flex column so the header pins to the top and the body fills the
        remaining height + handles its own internal scroll. */
@@ -579,12 +585,15 @@ const dragHandleLabel =
       modal.setAttribute('aria-hidden', 'true');
       unlockPageScroll();
 
-      // Wait for the closing transition, then fully hide. Guard against
-      // a re-open that happened during the transition.
+      // Wait for the closing transition, then fully hide + dispatch the
+      // reset event so the slotted booking form swaps the success card
+      // back to the form view (and clears field values). Doing this AFTER
+      // the transition avoids a visible mid-close flash of the form.
       closeTransitionTimer = setTimeout(() => {
         closeTransitionTimer = null;
         if (modal.getAttribute('aria-hidden') === 'true' && !modal.classList.contains('is-open')) {
           modal.hidden = true;
+          window.dispatchEvent(new CustomEvent('thedriver:booking-modal-closed'));
         }
       }, 340);
 

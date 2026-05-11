@@ -44,7 +44,7 @@ const localBusinessSchema = {
   '@type': 'TaxiService',
   name: 'Driver Services',
   url: siteUrl || undefined,
-  telephone: '+33628658127',
+  telephone: '+33634301292',
   email: 'the.driver@hotmail.com',
   image: ogImage,
   areaServed: ['Paris', 'Île-de-France'],
@@ -69,6 +69,25 @@ const extraSchemas = Array.isArray(structuredData)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
+
+    {/* Browser-locale redirect — runs SYNCHRONOUSLY on `/` (FR root) only.
+        Site is static (Cloudflare Pages, no Astro adapter), so we can't use
+        request-time middleware. Client-side redirect happens before paint so
+        users don't see the FR root flash before landing on /en/.
+        Respects a localStorage flag set when the user manually switches
+        language via the picker — they stay where they chose. */}
+    <script is:inline>
+      (function () {
+        if (window.location.pathname !== '/') return;
+        try {
+          if (localStorage.getItem('locale-manual') === '1') return;
+        } catch (e) { /* private mode — fall through */ }
+        var lang = (navigator.language || '').toLowerCase();
+        if (!lang.startsWith('fr')) {
+          window.location.replace('/en/');
+        }
+      })();
+    </script>
 
     {/* Intro overlay session check — runs SYNCHRONOUSLY before first paint.
         The intro is mounted ONLY on the home page (FR/EN/ES/IT), so on any
@@ -106,7 +125,16 @@ const extraSchemas = Array.isArray(structuredData)
           var shown = sessionStorage.getItem('driver-services-intro-shown') === '1';
           var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           var landscape = window.matchMedia('(max-width: 767px) and (orientation: landscape)').matches;
-          skip = shown || reduced || landscape;
+          // iPad / tablet skip: the welcome wave's heavy SVG animation +
+          // contain:strict combo causes white/black repaint flickers on
+          // real iPad Safari (not reproducible in DevTools). Belt-and-
+          // braces detection: viewport, classic iPad UA, iPadOS-as-Mac.
+          var ua = navigator.userAgent || '';
+          var isTabletViewport = window.matchMedia('(min-width: 768px) and (max-width: 1180px)').matches;
+          var isIPadUA = /iPad|Macintosh.*Mobile/.test(ua);
+          var isIPadOS = navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1;
+          var isTablet = isTabletViewport || isIPadUA || isIPadOS;
+          skip = shown || reduced || landscape || isTablet;
         } catch (e) {
           skip = true;
         }
@@ -146,11 +174,12 @@ const extraSchemas = Array.isArray(structuredData)
     <meta name="theme-color" content="#C94F3A" />
     <meta name="apple-mobile-web-app-title" content="Driver Services" />
 
-    {/* hreflang alternates */}
+    {/* hreflang alternates — x-default points to EN since the site auto-
+        redirects non-FR browsers there; FR browsers stay on the root URL. */}
     {LOCALES.map((l) => (
       <link rel="alternate" hreflang={l} href={`${siteUrl}${pathForRoute(routeKey, l)}`} />
     ))}
-    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${pathForRoute(routeKey, DEFAULT_LOCALE)}`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${pathForRoute(routeKey, 'en')}`} />
 
     {/* Fonts — Inter (body) + Fraunces (display). Preconnect + swap. */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />

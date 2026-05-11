@@ -8,7 +8,7 @@ interface Props {
 const { locale } = Astro.props;
 const s = t(locale).pages.rates;
 
-const WA_NUMBER = '33628658127';
+const WA_NUMBER = '33634301292';
 const cards = [
   { key: 'hourly',       data: s.hourly,       waHref: `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(s.hourly.whatsappMessage)}` },
   { key: 'longDistance', data: s.longDistance, waHref: `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(s.longDistance.whatsappMessage)}` },

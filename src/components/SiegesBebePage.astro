@@ -13,7 +13,7 @@ const s = t(locale).siegesBebe;
 // Hero CTA → home with #booking-form so the modal auto-opens on arrival.
 // Same pattern Fleet/Tarifs/FAQ use for cross-page booking entry.
 const homeBooking = `${pathForRoute('home', locale)}#booking-form`;
-const waHref = 'https://wa.me/33628658127';
+const waHref = 'https://wa.me/33634301292';
 ---
 
 {/* ───────────────────── Section 1 — Hero ───────────────────── */}
@@ -22,7 +22,7 @@ const waHref = 'https://wa.me/33628658127';
     <picture>
       <source srcset="/babycarseat.avif" type="image/avif" />
       <source srcset="/babycarseat.webp" type="image/webp" />
-      <img src="/babycarseat.jpg" alt="" width="1600" height="900" fetchpriority="high" decoding="async" />
+      <img src="/babycarseat.jpg" alt="" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" />
     </picture>
     <div class="sb-hero-veil"></div>
   </div>
@@ -257,6 +257,16 @@ const waHref = 'https://wa.me/33628658127';
     color: var(--color-ink);
     letter-spacing: 0.02em;
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  /* iPad / tablet: drop the backdrop blur — GPU-expensive on real iPad
+     Safari, causes repaint flicker on scroll. */
+  @media (min-width: 768px) and (max-width: 1180px) {
+    .sb-hero-pill {
+      background: color-mix(in oklab, var(--color-paper) 96%, transparent);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
   }
 
   .sb-hero-actions {
