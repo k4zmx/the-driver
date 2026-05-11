@@ -246,20 +246,42 @@
     padding-right: 40px;
   }
 
-  /* Country-code picker — flag emoji + dial code. The font stack puts
-     the platform's color-emoji font first so the regional-indicator
-     pair (e.g. 🇫🇷) renders as a flag on Apple, modern Windows, Android,
-     and Twemoji-equipped Firefox. Falls back to letter pairs (FR) on
-     systems without an emoji font, which is still readable. */
+  /* Country-code picker — flag emoji + dial code.
+     iOS Safari was rendering "+33" as tiny subscript-style digits on
+     real iPhones (not reproducible in DevTools). Root cause: the previous
+     emoji-first font stack made iOS compress the ASCII portion to the
+     emoji glyphs' vertical metric. Defensive fix:
+       - Pin to the platform UI font (`-apple-system`) for the ASCII
+         portion. The regional-indicator flag still renders via Apple
+         Color Emoji thanks to the implicit OS fallback — we don't need
+         to list it first in the stack.
+       - Lock font-size at 16px (also stops iOS auto-zoom on focus,
+         which fires for any <select> below 16px).
+       - Force consistent letter-spacing/feature-settings/text-size-adjust
+         so a stray inherited rule can't squash the digits again.
+     Falls back to letter pairs (FR) on platforms without an emoji font. */
   .country-code-select {
-    font-family:
-      "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
-      "Twemoji Mozilla", var(--font-sans), system-ui, sans-serif;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0;
+    font-family: -apple-system, BlinkMacSystemFont, system-ui,
+      "Segoe UI", var(--font-sans), Roboto, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    word-spacing: normal !important;
+    font-variant-numeric: tabular-nums !important;
+    font-feature-settings: normal !important;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    transform: none;
     padding-left: 12px;
     padding-right: 32px;
     background-position: right 10px center;
+  }
+  /* Inherit the same defenses to any nested option/span so a
+     wrapper-injection by the user agent doesn't reintroduce the bug. */
+  .country-code-select option,
+  .country-code-select * {
+    font-family: inherit !important;
+    letter-spacing: 0 !important;
   }
 
   /* Round-trip discount pill — sits inline next to the "Aller-retour"
