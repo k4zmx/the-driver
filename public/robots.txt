@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://driverparis.pro/sitemap-index.xml
+Sitemap: https://thedriver.fr/sitemap-index.xml

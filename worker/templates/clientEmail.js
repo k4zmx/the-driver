@@ -15,7 +15,7 @@
 //   - bgcolor + style background-color on color bands (Outlook desktop quirk)
 
 // ── Branded constants ────────────────────────────────────────────────────
-const LOGO_URL = 'https://driverparis.pro/newlogo.png';
+const LOGO_URL = 'https://thedriver.fr/newlogo.png';
 const LOGO_WIDTH = 96;
 const LOGO_HEIGHT = 55;
 const LOGO_COL_WIDTH = LOGO_WIDTH + 16;

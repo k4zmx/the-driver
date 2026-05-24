@@ -6,7 +6,7 @@
 // Self-contained — duplicates color and font constants from clientEmail.js
 // rather than importing, so each template is independently readable.
 
-const LOGO_URL = 'https://driverparis.pro/newlogo.png';
+const LOGO_URL = 'https://thedriver.fr/newlogo.png';
 const LOGO_WIDTH = 96;
 const LOGO_HEIGHT = 55;
 const LOGO_COL_WIDTH = LOGO_WIDTH + 16;
